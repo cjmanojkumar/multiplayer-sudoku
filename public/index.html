@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multiplayer Sudoku Arena</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div class="arena-container">
+    <header>
+      <h1>⚡ Multiplayer Sudoku Arena</h1>
+    </header>
+
+    <!-- Lobby Section -->
+    <div id="lobby-view" class="card">
+      <div class="input-group">
+        <label for="username">Your Nickname:</label>
+        <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="12" />
+      </div>
+
+      <div class="actions">
+        <button id="create-btn" class="btn primary">Create New Room</button>
+        <div class="divider">OR</div>
+        <div class="join-group">
+          <input type="text" id="room-code-input" placeholder="Room Code" maxlength="5" />
+          <button id="join-btn" class="btn secondary">Join Room</button>
+        </div>
+      </div>
+
+      <div id="room-status" class="status-msg"></div>
+    </div>
+
+    <!-- Match Arena Section -->
+    <div id="game-view" class="card hidden">
+      <div class="hud">
+        <div class="room-tag">Room: <span id="current-room"></span></div>
+        <div class="scoreboard">
+          <div class="player-card" id="p1-card">
+            <span class="player-name" id="p1-name">Player 1</span>
+            <div class="progress-bar"><div class="progress-fill" id="p1-bar"></div></div>
+            <span class="score-text" id="p1-score">0</span>
+          </div>
+          <div class="vs">VS</div>
+          <div class="player-card" id="p2-card">
+            <span class="player-name" id="p2-name">Player 2</span>
+            <div class="progress-bar"><div class="progress-fill" id="p2-bar"></div></div>
+            <span class="score-text" id="p2-score">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sudoku Board -->
+      <div class="board-wrapper">
+        <div id="sudoku-grid" class="sudoku-grid"></div>
+      </div>
+
+      <div id="winner-modal" class="modal hidden">
+        <div class="modal-content">
+          <h2 id="winner-message">Game Over</h2>
+          <button class="btn primary" onclick="location.reload()">Back to Lobby</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="client.js"></script>
+</body>
+</html>
