@@ -11,14 +11,19 @@
   <div class="arena-container">
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
-      <div class="theme-picker">
-        <label for="theme-select">🎨 Theme:</label>
-        <select id="theme-select">
+      <div class="palette-bar">
+        <!-- Preset Theme Selector -->
+        <select id="theme-select" title="Preset Themes">
           <option value="dark">Midnight Dark</option>
           <option value="neon">Cyberpunk Neon</option>
           <option value="emerald">Emerald Forest</option>
+          <option value="sunset">Sunset Orange</option>
+          <option value="dracula">Dracula Purple</option>
+          <option value="amber">Retro Amber</option>
           <option value="paper">Paper Light</option>
         </select>
+        <!-- Custom Accent Color Picker -->
+        <input type="color" id="custom-color-picker" value="#38bdf8" title="Pick Custom Accent Color" />
       </div>
     </div>
 
@@ -48,13 +53,10 @@
           </select>
         </div>
 
+        <!-- Custom Duration in Minutes -->
         <div class="setting-col">
-          <label for="duration">Timer:</label>
-          <select id="duration">
-            <option value="5">5 Mins</option>
-            <option value="10" selected>10 Mins</option>
-            <option value="15">15 Mins</option>
-          </select>
+          <label for="custom-duration">Time (Mins):</label>
+          <input type="number" id="custom-duration" min="1" max="60" value="10" />
         </div>
       </div>
 
@@ -78,6 +80,8 @@
           <div class="room-tag">Room: <span id="current-room"></span></div>
           <div class="my-lives" id="my-lives">Lives: ❤️❤️❤️</div>
           <div class="timer-box">⏳ <span id="timer-display">10:00</span></div>
+          <!-- Quit / Forfeit Button -->
+          <button id="quit-btn" class="btn danger-small" title="Quit match">Resign 🏳️</button>
         </div>
         <div class="scoreboard" id="scoreboard"></div>
       </div>
@@ -86,12 +90,11 @@
         <div id="sudoku-grid" class="sudoku-grid"></div>
       </div>
 
-      <!-- Elimination Banner (shown only to knocked-out players) -->
       <div id="eliminated-banner" class="banner hidden">
-        ❌ You were eliminated (3 mistakes)! Spectating rest of match...
+        ❌ You were eliminated! Spectating the rest of the match...
       </div>
 
-      <!-- End of Match Leaderboard Modal -->
+      <!-- Leaderboard Modal -->
       <div id="winner-modal" class="modal hidden">
         <div class="modal-content">
           <h2 id="winner-title">🏆 Match Finished</h2>

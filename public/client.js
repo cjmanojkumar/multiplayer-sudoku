@@ -6,15 +6,17 @@ let isEliminated = false;
 
 // UI Elements
 const themeSelect = document.getElementById('theme-select');
+const customColorPicker = document.getElementById('custom-color-picker');
 const lobbyView = document.getElementById('lobby-view');
 const gameView = document.getElementById('game-view');
 const usernameInput = document.getElementById('username');
 const difficultySelect = document.getElementById('difficulty');
 const maxPlayersSelect = document.getElementById('max-players');
-const durationSelect = document.getElementById('duration');
+const customDurationInput = document.getElementById('custom-duration');
 const roomCodeInput = document.getElementById('room-code-input');
 const createBtn = document.getElementById('create-btn');
 const joinBtn = document.getElementById('join-btn');
+const quitBtn = document.getElementById('quit-btn');
 const roomStatus = document.getElementById('room-status');
 const lobbyRoster = document.getElementById('lobby-roster');
 const currentRoomSpan = document.getElementById('current-room');
@@ -27,20 +29,29 @@ const winnerModal = document.getElementById('winner-modal');
 const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 
+// 1. Theme and Custom Color Handling
 themeSelect.addEventListener('change', (e) => {
   document.documentElement.setAttribute('data-theme', e.target.value);
+  // Reset inline accent style to let theme default take over
+  document.documentElement.style.removeProperty('--accent');
+});
+
+customColorPicker.addEventListener('input', (e) => {
+  const chosenColor = e.target.value;
+  // Apply live to CSS custom property
+  document.documentElement.style.setProperty('--accent', chosenColor);
 });
 
 socket.on('connect', () => {
   myId = socket.id;
 });
 
-// Setup actions
+// 2. Room Setup Actions
 createBtn.addEventListener('click', () => {
   const username = usernameInput.value.trim() || 'Player 1';
   const difficulty = difficultySelect.value;
   const maxPlayers = maxPlayersSelect.value;
-  const durationMinutes = durationSelect.value;
+  const durationMinutes = parseInt(customDurationInput.value, 10) || 10;
 
   socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes });
 });
@@ -55,9 +66,21 @@ joinBtn.addEventListener('click', () => {
   socket.emit('joinRoom', { roomCode, username });
 });
 
-socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty }) => {
+// Quit / Resign Handler
+quitBtn.addEventListener('click', () => {
+  if (confirm('Are you sure you want to resign from the match?')) {
+    socket.emit('quitGame', { roomCode: currentRoomCode });
+    quitBtn.disabled = true;
+    isEliminated = true;
+    eliminatedBanner.classList.remove('hidden');
+    eliminatedBanner.textContent = '🏳️ You resigned from the match.';
+    document.querySelectorAll('.cell input:not(.correct)').forEach(i => i.disabled = true);
+  }
+});
+
+socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty, durationMinutes }) => {
   currentRoomCode = roomCode;
-  roomStatus.textContent = `Room: ${roomCode} | ${difficulty.toUpperCase()} | 3 Strikes Mode | Waiting (1/${maxPlayers})...`;
+  roomStatus.textContent = `Room: ${roomCode} | ${difficulty.toUpperCase()} | ${durationMinutes} mins | Waiting (1/${maxPlayers})...`;
 });
 
 socket.on('joinedRoomSuccess', ({ roomCode }) => {
@@ -72,9 +95,10 @@ socket.on('playerListUpdate', (players) => {
 socket.on('errorMessage', (msg) => alert(msg));
 socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 
-// Start Game
+// 3. Start Game
 socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   isEliminated = false;
+  quitBtn.disabled = false;
   lobbyView.classList.add('hidden');
   gameView.classList.remove('hidden');
   eliminatedBanner.classList.add('hidden');
@@ -82,7 +106,6 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   updateLivesDisplay(0);
   updateTimerDisplay(duration);
 
-  // Initialize Scoreboard
   scoreboard.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');
@@ -155,7 +178,6 @@ function renderBoard(puzzle) {
   }
 }
 
-// Receive verification feedback
 socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
   const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
   if (!input) return;
@@ -170,8 +192,8 @@ socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
 
     if (eliminated) {
       isEliminated = true;
+      quitBtn.disabled = true;
       eliminatedBanner.classList.remove('hidden');
-      // Lock all empty inputs
       document.querySelectorAll('.cell input:not(.correct)').forEach(i => i.disabled = true);
     }
 
@@ -182,7 +204,6 @@ socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
   }
 });
 
-// Update opponents & self in scoreboard
 socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlanks }) => {
   const bar = document.getElementById(`bar-${playerId}`);
   const scoreSpan = document.getElementById(`score-${playerId}`);
@@ -203,7 +224,6 @@ socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlank
   }
 });
 
-// End Game Leaderboard Display
 socket.on('gameOver', ({ reason, leaderboard }) => {
   winnerReason.textContent = reason;
   leaderboardBody.innerHTML = '';
@@ -216,7 +236,7 @@ socket.on('gameOver', ({ reason, leaderboard }) => {
       <td>${player.name} ${player.id === myId ? '(You)' : ''}</td>
       <td>${player.score}</td>
       <td>${player.mistakes}/3</td>
-      <td>${player.eliminated ? '❌ Struck Out' : '✅ Survived'}</td>
+      <td>${player.eliminated ? '❌ Struck Out / Resigned' : '✅ Survived'}</td>
     `;
     leaderboardBody.appendChild(tr);
   });

@@ -1,3 +1,4 @@
+/* Preset Themes */
 [data-theme="dark"] {
   --bg: #0f172a;
   --card: #1e293b;
@@ -35,6 +36,45 @@
   --border: #065f46;
   --grid-line: #6ee7b7;
   --cell-fixed: #022c22;
+}
+
+[data-theme="sunset"] {
+  --bg: #2b0938;
+  --card: #421257;
+  --accent: #ff7a00;
+  --success: #ffd166;
+  --error: #ff3366;
+  --text: #fff5eb;
+  --muted: #d896ff;
+  --border: #631b82;
+  --grid-line: #9c27b0;
+  --cell-fixed: #1a0324;
+}
+
+[data-theme="dracula"] {
+  --bg: #282a36;
+  --card: #44475a;
+  --accent: #bd93f9;
+  --success: #50fa7b;
+  --error: #ff5555;
+  --text: #f8f8f2;
+  --muted: #6272a4;
+  --border: #6272a4;
+  --grid-line: #ff79c6;
+  --cell-fixed: #1e1f29;
+}
+
+[data-theme="amber"] {
+  --bg: #1c1917;
+  --card: #292524;
+  --accent: #f59e0b;
+  --success: #84cc16;
+  --error: #dc2626;
+  --text: #fef3c7;
+  --muted: #a8a29e;
+  --border: #44403c;
+  --grid-line: #78716c;
+  --cell-fixed: #0c0a09;
 }
 
 [data-theme="paper"] {
@@ -84,12 +124,28 @@ body {
 
 .top-bar h1 { font-size: 1.4rem; }
 
-.theme-picker {
+.palette-bar {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.85rem;
 }
+
+#custom-color-picker {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+}
+
+#custom-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+#custom-color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
 
 .card {
   background: var(--card);
@@ -108,9 +164,9 @@ body {
   margin-bottom: 4px;
 }
 
-input[type="text"], select {
+input[type="text"], input[type="number"], select {
   width: 100%;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
@@ -120,7 +176,7 @@ input[type="text"], select {
 
 .host-settings {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1.2fr 1fr 1fr;
   gap: 8px;
   margin-top: 10px;
 }
@@ -144,6 +200,20 @@ input[type="text"], select {
 
 .btn.primary { background: var(--accent); color: #000; }
 .btn.secondary { background: var(--border); color: var(--text); }
+
+.btn.danger-small {
+  background: transparent;
+  color: var(--error);
+  border: 1px solid var(--error);
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn.danger-small:hover {
+  background: var(--error);
+  color: #fff;
+}
 
 .divider {
   text-align: center;
@@ -185,7 +255,7 @@ input[type="text"], select {
 }
 
 .my-lives {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: bold;
 }
 
