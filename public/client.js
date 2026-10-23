@@ -1,43 +1,49 @@
 const socket = io();
 
 let currentRoomCode = null;
-let currentBlanks = 0;
 let myId = null;
 
-// DOM Elements
+// UI Elements
+const themeSelect = document.getElementById('theme-select');
 const lobbyView = document.getElementById('lobby-view');
 const gameView = document.getElementById('game-view');
 const usernameInput = document.getElementById('username');
+const difficultySelect = document.getElementById('difficulty');
+const maxPlayersSelect = document.getElementById('max-players');
+const durationSelect = document.getElementById('duration');
 const roomCodeInput = document.getElementById('room-code-input');
 const createBtn = document.getElementById('create-btn');
 const joinBtn = document.getElementById('join-btn');
 const roomStatus = document.getElementById('room-status');
+const lobbyRoster = document.getElementById('lobby-roster');
 const currentRoomSpan = document.getElementById('current-room');
+const timerDisplay = document.getElementById('timer-display');
+const scoreboard = document.getElementById('scoreboard');
 const gridContainer = document.getElementById('sudoku-grid');
 const winnerModal = document.getElementById('winner-modal');
 const winnerMessage = document.getElementById('winner-message');
 
-const p1Name = document.getElementById('p1-name');
-const p1Bar = document.getElementById('p1-bar');
-const p1Score = document.getElementById('p1-score');
+// Theme Switcher
+themeSelect.addEventListener('change', (e) => {
+  document.documentElement.setAttribute('data-theme', e.target.value);
+});
 
-const p2Name = document.getElementById('p2-name');
-const p2Bar = document.getElementById('p2-bar');
-const p2Score = document.getElementById('p2-score');
-
-// Get socket ID on connect
 socket.on('connect', () => {
   myId = socket.id;
 });
 
-// Event Listeners
+// Create & Join Actions
 createBtn.addEventListener('click', () => {
   const username = usernameInput.value.trim() || 'Player 1';
-  socket.emit('createRoom', { username });
+  const difficulty = difficultySelect.value;
+  const maxPlayers = maxPlayersSelect.value;
+  const durationMinutes = durationSelect.value;
+
+  socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes });
 });
 
 joinBtn.addEventListener('click', () => {
-  const username = usernameInput.value.trim() || 'Player 2';
+  const username = usernameInput.value.trim() || 'Player';
   const roomCode = roomCodeInput.value.trim();
   if (!roomCode) {
     alert('Please enter a room code');
@@ -46,51 +52,71 @@ joinBtn.addEventListener('click', () => {
   socket.emit('joinRoom', { roomCode, username });
 });
 
-// Socket Events
-socket.on('roomCreated', ({ roomCode }) => {
+socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty }) => {
   currentRoomCode = roomCode;
-  roomStatus.textContent = `Room created: ${roomCode}. Waiting for an opponent to join...`;
+  roomStatus.textContent = `Room: ${roomCode} | Mode: ${difficulty.toUpperCase()} | Waiting for players (1/${maxPlayers})...`;
 });
 
 socket.on('joinedRoomSuccess', ({ roomCode }) => {
   currentRoomCode = roomCode;
-  roomStatus.textContent = `Joined room ${roomCode}! Preparing game...`;
+  roomStatus.textContent = `Joined room ${roomCode}! Waiting for match to fill...`;
 });
 
-socket.on('errorMessage', (msg) => {
-  alert(msg);
+socket.on('playerListUpdate', (players) => {
+  lobbyRoster.innerHTML = '<strong>Players Joined:</strong> ' + players.map(p => p.name).join(', ');
 });
 
-socket.on('playerDisconnected', ({ name }) => {
-  alert(`${name} disconnected from the match.`);
-});
+socket.on('errorMessage', (msg) => alert(msg));
+socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 
-socket.on('startGame', ({ puzzle, players, totalBlanks }) => {
-  currentBlanks = totalBlanks;
+// Start Game
+socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   lobbyView.classList.add('hidden');
   gameView.classList.remove('hidden');
   currentRoomSpan.textContent = currentRoomCode;
 
-  // Initialize Scoreboard
-  p1Name.textContent = players[0].name;
-  p1Score.textContent = `0 / ${totalBlanks}`;
-  p2Name.textContent = players[1].name;
-  p2Score.textContent = `0 / ${totalBlanks}`;
+  updateTimerDisplay(duration);
+
+  // Setup dynamic scoreboard for up to 4 players
+  scoreboard.innerHTML = '';
+  players.forEach(p => {
+    const card = document.createElement('div');
+    card.classList.add('player-card');
+    card.id = `card-${p.id}`;
+    card.innerHTML = `
+      <span class="player-name">${p.name}</span>
+      <div class="progress-bar"><div class="progress-fill" id="bar-${p.id}"></div></div>
+      <span class="score-text" id="score-${p.id}">0 / ${totalBlanks}</span>
+    `;
+    scoreboard.appendChild(card);
+  });
 
   renderBoard(puzzle);
 });
 
+// Timer Updates
+socket.on('timerTick', ({ timeLeft }) => {
+  updateTimerDisplay(timeLeft);
+});
+
+function updateTimerDisplay(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+// Sudoku Board Rendering
 function renderBoard(puzzle) {
   gridContainer.innerHTML = '';
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
-      const cellVal = puzzle[r][c];
-      const cellDiv = document.createElement('div');
-      cellDiv.classList.add('cell');
+      const val = puzzle[r][c];
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
 
-      if (cellVal !== 0) {
-        cellDiv.classList.add('prefilled');
-        cellDiv.textContent = cellVal;
+      if (val !== 0) {
+        cell.classList.add('prefilled');
+        cell.textContent = val;
       } else {
         const input = document.createElement('input');
         input.type = 'text';
@@ -99,8 +125,8 @@ function renderBoard(puzzle) {
         input.dataset.col = c;
 
         input.addEventListener('input', (e) => {
-          const val = e.target.value;
-          if (!/^[1-9]$/.test(val)) {
+          const typed = e.target.value;
+          if (!/^[1-9]$/.test(typed)) {
             e.target.value = '';
             return;
           }
@@ -108,13 +134,13 @@ function renderBoard(puzzle) {
             roomCode: currentRoomCode,
             row: parseInt(e.target.dataset.row, 10),
             col: parseInt(e.target.dataset.col, 10),
-            value: val
+            value: typed
           });
         });
 
-        cellDiv.appendChild(input);
+        cell.appendChild(input);
       }
-      gridContainer.appendChild(cellDiv);
+      gridContainer.appendChild(cell);
     }
   }
 }
@@ -132,18 +158,17 @@ socket.on('moveResult', ({ row, col, correct }) => {
     setTimeout(() => {
       input.classList.remove('wrong');
       input.value = '';
-    }, 600);
+    }, 500);
   }
 });
 
 socket.on('progressUpdate', ({ playerId, score, totalBlanks }) => {
-  const pct = Math.min(100, Math.round((score / totalBlanks) * 100));
-  if (playerId === myId) {
-    p1Bar.style.width = `${pct}%`;
-    p1Score.textContent = `${score} / ${totalBlanks}`;
-  } else {
-    p2Bar.style.width = `${pct}%`;
-    p2Score.textContent = `${score} / ${totalBlanks}`;
+  const bar = document.getElementById(`bar-${playerId}`);
+  const scoreSpan = document.getElementById(`score-${playerId}`);
+  if (bar && scoreSpan) {
+    const pct = Math.min(100, Math.round((score / totalBlanks) * 100));
+    bar.style.width = `${pct}%`;
+    scoreSpan.textContent = `${score} / ${totalBlanks}`;
   }
 });
 

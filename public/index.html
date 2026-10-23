@@ -1,57 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multiplayer Sudoku Arena</title>
+  <title>Sudoku Multiplayer Arena</title>
   <link rel="stylesheet" href="style.css" />
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
   <div class="arena-container">
-    <header>
-      <h1>⚡ Multiplayer Sudoku Arena</h1>
-    </header>
+    <div class="top-bar">
+      <h1>⚡ Sudoku Arena</h1>
+      <div class="theme-picker">
+        <label for="theme-select">🎨 Theme:</label>
+        <select id="theme-select">
+          <option value="dark">Midnight Dark</option>
+          <option value="neon">Cyberpunk Neon</option>
+          <option value="emerald">Emerald Forest</option>
+          <option value="paper">Paper Light</option>
+        </select>
+      </div>
+    </div>
 
-    <!-- Lobby Section -->
+    <!-- Lobby View -->
     <div id="lobby-view" class="card">
       <div class="input-group">
-        <label for="username">Your Nickname:</label>
+        <label for="username">Nickname:</label>
         <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="12" />
       </div>
 
+      <div class="host-settings">
+        <div class="setting-col">
+          <label for="difficulty">Difficulty:</label>
+          <select id="difficulty">
+            <option value="easy">Easy (20 Blanks)</option>
+            <option value="medium" selected>Medium (35 Blanks)</option>
+            <option value="hard">Hard (50 Blanks)</option>
+          </select>
+        </div>
+
+        <div class="setting-col">
+          <label for="max-players">Max Players:</label>
+          <select id="max-players">
+            <option value="2" selected>2 Players</option>
+            <option value="3">3 Players</option>
+            <option value="4">4 Players</option>
+          </select>
+        </div>
+
+        <div class="setting-col">
+          <label for="duration">Timer (Minutes):</label>
+          <select id="duration">
+            <option value="5">5 Minutes</option>
+            <option value="10" selected>10 Minutes</option>
+            <option value="15">15 Minutes</option>
+          </select>
+        </div>
+      </div>
+
       <div class="actions">
-        <button id="create-btn" class="btn primary">Create New Room</button>
+        <button id="create-btn" class="btn primary">Create Room</button>
         <div class="divider">OR</div>
         <div class="join-group">
-          <input type="text" id="room-code-input" placeholder="Room Code" maxlength="5" />
+          <input type="text" id="room-code-input" placeholder="5-Letter Room Code" maxlength="5" />
           <button id="join-btn" class="btn secondary">Join Room</button>
         </div>
       </div>
 
       <div id="room-status" class="status-msg"></div>
+      <div id="lobby-roster" class="roster-list"></div>
     </div>
 
-    <!-- Match Arena Section -->
+    <!-- Active Game Arena -->
     <div id="game-view" class="card hidden">
       <div class="hud">
-        <div class="room-tag">Room: <span id="current-room"></span></div>
-        <div class="scoreboard">
-          <div class="player-card" id="p1-card">
-            <span class="player-name" id="p1-name">Player 1</span>
-            <div class="progress-bar"><div class="progress-fill" id="p1-bar"></div></div>
-            <span class="score-text" id="p1-score">0</span>
-          </div>
-          <div class="vs">VS</div>
-          <div class="player-card" id="p2-card">
-            <span class="player-name" id="p2-name">Player 2</span>
-            <div class="progress-bar"><div class="progress-fill" id="p2-bar"></div></div>
-            <span class="score-text" id="p2-score">0</span>
-          </div>
+        <div class="hud-top">
+          <div class="room-tag">Room: <span id="current-room"></span></div>
+          <div class="timer-box">⏳ Time Left: <span id="timer-display">10:00</span></div>
         </div>
+        <div class="scoreboard" id="scoreboard"></div>
       </div>
 
-      <!-- Sudoku Board -->
       <div class="board-wrapper">
         <div id="sudoku-grid" class="sudoku-grid"></div>
       </div>
