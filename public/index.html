@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-font="default">
+<html lang="en" data-theme="dark" data-font="default" data-bg="stars">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,22 +12,37 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+  <!-- Dynamic Scenic Background Layers -->
+  <div id="scenic-bg" class="scenic-bg stars-bg">
+    <div class="sky-layer"></div>
+    <div class="horizon-layer"></div>
+  </div>
+
   <div class="arena-container">
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
       <div class="palette-bar">
-        <!-- Preset Theme Selector -->
+        <!-- Scenic Background Selector -->
+        <select id="bg-select" title="Scenic Background">
+          <option value="stars">✨ Cosmic Stars</option>
+          <option value="sunset">🌅 Golden Sunset</option>
+          <option value="city">🏙️ Neon City</option>
+          <option value="nature">🌲 Lush Nature</option>
+          <option value="sky">🌤️ Azure Sky</option>
+        </select>
+
+        <!-- Color Palette -->
         <select id="theme-select" title="Preset Themes">
           <option value="dark">Midnight Dark</option>
-          <option value="neon">Cyberpunk Neon</option>
-          <option value="emerald">Emerald Forest</option>
+          <option value="neon">Cyber Neon</option>
+          <option value="emerald">Emerald</option>
           <option value="sunset">Sunset Orange</option>
-          <option value="dracula">Dracula Purple</option>
-          <option value="amber">Retro Amber</option>
+          <option value="dracula">Dracula</option>
+          <option value="amber">Amber</option>
           <option value="paper">Paper Light</option>
         </select>
 
-        <!-- Font Selector -->
+        <!-- Typography -->
         <select id="font-select" title="Custom Font">
           <option value="default">Default Sans</option>
           <option value="fredoka">Fun / Rounded</option>
@@ -36,13 +51,12 @@
           <option value="arcade">8-Bit Arcade</option>
         </select>
 
-        <!-- Custom Accent Color -->
         <input type="color" id="custom-color-picker" value="#38bdf8" title="Custom Accent Color" />
       </div>
     </div>
 
     <!-- Lobby View -->
-    <div id="lobby-view" class="card">
+    <div id="lobby-view" class="card frosted">
       <div class="input-group">
         <label for="username">Nickname:</label>
         <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="12" />
@@ -56,7 +70,7 @@
             <option value="letters">A - I (Letters)</option>
             <option value="roman">I - IX (Roman)</option>
             <option value="emojis">🍎 Fruits (Emojis)</option>
-            <option value="shapes">★ Geometric Shapes</option>
+            <option value="shapes">★ Shapes</option>
           </select>
         </div>
 
@@ -98,7 +112,7 @@
     </div>
 
     <!-- Active Game Arena -->
-    <div id="game-view" class="card hidden">
+    <div id="game-view" class="card frosted hidden">
       <div class="hud">
         <div class="hud-top">
           <div class="room-tag">Room: <span id="current-room"></span></div>
@@ -113,7 +127,7 @@
         <div id="sudoku-grid" class="sudoku-grid"></div>
       </div>
 
-      <!-- Quick Symbol Selector / On-Screen Numpad -->
+      <!-- Quick Symbol Selector -->
       <div class="symbol-pad-container">
         <span class="symbol-pad-title">Tap a cell, then tap a symbol to place it:</span>
         <div id="symbol-pad" class="symbol-pad"></div>
@@ -127,7 +141,7 @@
 
   <!-- Leaderboard Modal -->
   <div id="winner-modal" class="modal-backdrop hidden">
-    <div class="modal-card">
+    <div class="modal-card frosted">
       <div class="modal-header">
         <h2>🏆 Match Over</h2>
         <span class="close-x" id="modal-close-x">&times;</span>

@@ -6,7 +6,7 @@ let isEliminated = false;
 let selectedCell = null;
 let activeSymbolSet = 'numbers';
 
-// --- SYMBOL DICTIONARIES (Maps digit 1-9 to symbol) ---
+// Symbol Dictionaries
 const SYMBOL_SETS = {
   numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
   letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
@@ -21,12 +21,14 @@ function getSymbol(num) {
   return list[num - 1] || num;
 }
 
-// Track completions
+// Track completed sections
 const completedRows = new Set();
 const completedCols = new Set();
 const completedBoxes = new Set();
 
 // UI Elements
+const scenicBg = document.getElementById('scenic-bg');
+const bgSelect = document.getElementById('bg-select');
 const themeSelect = document.getElementById('theme-select');
 const fontSelect = document.getElementById('font-select');
 const customColorPicker = document.getElementById('custom-color-picker');
@@ -55,6 +57,12 @@ const winnerModal = document.getElementById('winner-modal');
 const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
+
+// --- SCENIC BACKGROUND SWITCHER ---
+bgSelect.addEventListener('change', (e) => {
+  const chosen = e.target.value;
+  scenicBg.className = `scenic-bg ${chosen}-bg`;
+});
 
 // --- THEME & FONT SWITCHERS ---
 themeSelect.addEventListener('change', (e) => {
@@ -207,7 +215,6 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet }) =
   updateLivesDisplay(0);
   updateTimerDisplay(duration);
 
-  // Build Scoreboard
   scoreboard.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');
@@ -241,7 +248,6 @@ function updateTimerDisplay(seconds) {
   timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-// Render Board with Symbols
 function renderBoard(puzzle) {
   gridContainer.innerHTML = '';
   for (let r = 0; r < 9; r++) {
@@ -256,7 +262,6 @@ function renderBoard(puzzle) {
         cell.classList.add('prefilled');
         cell.textContent = getSymbol(val);
       } else {
-        // Blank selectable cell
         cell.addEventListener('click', () => {
           if (isEliminated || cell.classList.contains('correct')) return;
           if (selectedCell) selectedCell.classList.remove('selected');
@@ -269,13 +274,12 @@ function renderBoard(puzzle) {
   }
 }
 
-// Build clickable on-screen keypad
 function renderSymbolPad() {
   symbolPad.innerHTML = '';
   const symbols = SYMBOL_SETS[activeSymbolSet] || SYMBOL_SETS.numbers;
 
   symbols.forEach((symbol, index) => {
-    const val = index + 1; // Underlying value 1-9
+    const val = index + 1;
     const btn = document.createElement('button');
     btn.classList.add('symbol-btn');
     btn.textContent = symbol;
@@ -289,18 +293,14 @@ function renderSymbolPad() {
   });
 }
 
-// Allow keyboard entry (Pressing 1-9 or A-I on keyboard)
 window.addEventListener('keydown', (e) => {
   if (isEliminated || !selectedCell) return;
   const key = e.key.toUpperCase();
 
-  // Check numeric 1-9
   if (/^[1-9]$/.test(key)) {
     makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), parseInt(key, 10));
-  }
-  // Check letters A-I
-  else if (/^[A-I]$/.test(key)) {
-    const val = key.charCodeAt(0) - 64; // A=1, B=2, etc.
+  } else if (/^[A-I]$/.test(key)) {
+    const val = key.charCodeAt(0) - 64;
     makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), val);
   }
 });
@@ -314,7 +314,6 @@ function makeMove(row, col, value) {
   });
 }
 
-// Process move response
 socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => {
   const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
   if (!cell) return;
@@ -347,7 +346,6 @@ socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => 
 function checkCompletions() {
   let anyCompleted = false;
 
-  // Check Rows
   for (let r = 0; r < 9; r++) {
     if (completedRows.has(r)) continue;
     let full = true;
@@ -364,7 +362,6 @@ function checkCompletions() {
     }
   }
 
-  // Check Columns
   for (let c = 0; c < 9; c++) {
     if (completedCols.has(c)) continue;
     let full = true;
@@ -381,7 +378,6 @@ function checkCompletions() {
     }
   }
 
-  // Check 3x3 Boxes
   for (let br = 0; br < 3; br++) {
     for (let bc = 0; bc < 3; bc++) {
       const boxKey = `${br}-${bc}`;
