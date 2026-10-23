@@ -4,7 +4,12 @@ let currentRoomCode = null;
 let myId = null;
 let isEliminated = false;
 
-// DOM Elements
+// Tracking already-completed sections so sound/animations trigger only once
+const completedRows = new Set();
+const completedCols = new Set();
+const completedBoxes = new Set();
+
+// UI Elements
 const themeSelect = document.getElementById('theme-select');
 const customColorPicker = document.getElementById('custom-color-picker');
 const lobbyView = document.getElementById('lobby-view');
@@ -32,7 +37,182 @@ const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
 
-// Close modal without reloading (allows inspecting the board)
+// --- WEB AUDIO API SYNTHESIZER ---
+let audioCtx = null;
+
+function getAudioContext() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+  try {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+    gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch (e) {
+    // Ignore audio restrictions
+  }
+}
+
+// Single correct cell sound: high melodic chime
+function playSuccessSound() {
+  playTone(587.33, 'sine', 0.1, 0.08); // D5
+  setTimeout(() => playTone(880, 'sine', 0.15, 0.08), 80); // A5
+}
+
+// Wrong move / strike sound: low buzz
+function playErrorSound() {
+  playTone(150, 'sawtooth', 0.25, 0.12);
+}
+
+// Row / Col / 3x3 complete fanfare: 3-note ascending arpeggio
+function playSectionCompleteSound() {
+  playTone(523.25, 'triangle', 0.12, 0.1); // C5
+  setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.1), 100); // E5
+  setTimeout(() => playTone(783.99, 'triangle', 0.12, 0.1), 200); // G5
+  setTimeout(() => playTone(1046.50, 'triangle', 0.25, 0.12), 300); // C6
+}
+
+// Match Victory sound
+function playVictoryFanfare() {
+  const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+  notes.forEach((freq, i) => {
+    setTimeout(() => playTone(freq, 'triangle', 0.2, 0.12), i * 120);
+  });
+}
+
+// --- EMOJI BURST EFFECT ---
+function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '🎯', '🚀']) {
+  const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+  const span = document.createElement('span');
+  span.classList.add('floating-emoji');
+  span.textContent = randomEmoji;
+
+  const rect = cellElement.getBoundingClientRect();
+  const boardRect = gridContainer.getBoundingClientRect();
+
+  // Position relative to Sudoku grid container
+  span.style.left = `${rect.left - boardRect.left + rect.width / 2}px`;
+  span.style.top = `${rect.top - boardRect.top + rect.height / 2}px`;
+
+  gridContainer.parentElement.appendChild(span);
+  setTimeout(() => span.remove(), 1200);
+}
+
+// --- COMPLETION CHECKERS FOR ROWS, COLS, 3X3 ---
+function checkCompletions() {
+  let anyCompleted = false;
+
+  // 1. Check all 9 Rows
+  for (let r = 0; r < 9; r++) {
+    if (completedRows.has(r)) continue;
+    let full = true;
+    const cells = [];
+    for (let c = 0; c < 9; c++) {
+      const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      if (!isCellSolved(cell)) {
+        full = false;
+        break;
+      }
+      cells.push(cell);
+    }
+    if (full) {
+      completedRows.add(r);
+      animateCompletedSection(cells, ['🔥', '⚡', '💯']);
+      anyCompleted = true;
+    }
+  }
+
+  // 2. Check all 9 Columns
+  for (let c = 0; c < 9; c++) {
+    if (completedCols.has(c)) continue;
+    let full = true;
+    const cells = [];
+    for (let r = 0; r < 9; r++) {
+      const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      if (!isCellSolved(cell)) {
+        full = false;
+        break;
+      }
+      cells.push(cell);
+    }
+    if (full) {
+      completedCols.add(c);
+      animateCompletedSection(cells, ['🚀', '✨', '🎯']);
+      anyCompleted = true;
+    }
+  }
+
+  // 3. Check all 9 3x3 Boxes
+  for (let br = 0; br < 3; br++) {
+    for (let bc = 0; bc < 3; bc++) {
+      const boxKey = `${br}-${bc}`;
+      if (completedBoxes.has(boxKey)) continue;
+
+      let full = true;
+      const cells = [];
+      for (let r = br * 3; r < br * 3 + 3; r++) {
+        for (let c = bc * 3; c < bc * 3 + 3; c++) {
+          const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+          if (!isCellSolved(cell)) {
+            full = false;
+            break;
+          }
+          cells.push(cell);
+        }
+      }
+      if (full) {
+        completedBoxes.add(boxKey);
+        animateCompletedSection(cells, ['⭐', '👑', '🌟']);
+        anyCompleted = true;
+      }
+    }
+  }
+
+  if (anyCompleted) {
+    playSectionCompleteSound();
+  }
+}
+
+function isCellSolved(cell) {
+  if (!cell) return false;
+  if (cell.classList.contains('prefilled')) return true;
+  const input = cell.querySelector('input');
+  return input && input.classList.contains('correct');
+}
+
+function animateCompletedSection(cells, emojiSet) {
+  cells.forEach((cell, idx) => {
+    setTimeout(() => {
+      cell.classList.add('completed-flash');
+      if (idx === 4) { // Center cell releases emoji
+        spawnFloatingEmoji(cell, emojiSet);
+      }
+      setTimeout(() => cell.classList.remove('completed-flash'), 1000);
+    }, idx * 35); // Wave effect across the section
+  });
+}
+
+// Modal handling
 modalCloseX.addEventListener('click', () => {
   winnerModal.classList.add('hidden');
 });
@@ -53,6 +233,7 @@ socket.on('connect', () => {
 
 // Setup handlers
 createBtn.addEventListener('click', () => {
+  getAudioContext(); // Initialize audio context on user gesture
   const username = usernameInput.value.trim() || 'Player 1';
   const difficulty = difficultySelect.value;
   const maxPlayers = maxPlayersSelect.value;
@@ -62,6 +243,7 @@ createBtn.addEventListener('click', () => {
 });
 
 joinBtn.addEventListener('click', () => {
+  getAudioContext();
   const username = usernameInput.value.trim() || 'Player';
   const roomCode = roomCodeInput.value.trim();
   if (!roomCode) {
@@ -99,6 +281,10 @@ socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   isEliminated = false;
   quitBtn.disabled = false;
+  completedRows.clear();
+  completedCols.clear();
+  completedBoxes.clear();
+
   lobbyView.classList.add('hidden');
   gameView.classList.remove('hidden', 'game-locked');
   eliminatedBanner.classList.add('hidden');
@@ -108,7 +294,6 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   updateLivesDisplay(0);
   updateTimerDisplay(duration);
 
-  // Scoreboard
   scoreboard.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');
@@ -148,6 +333,8 @@ function renderBoard(puzzle) {
       const val = puzzle[r][c];
       const cell = document.createElement('div');
       cell.classList.add('cell');
+      cell.dataset.row = r;
+      cell.dataset.col = c;
 
       if (val !== 0) {
         cell.classList.add('prefilled');
@@ -181,14 +368,12 @@ function renderBoard(puzzle) {
   }
 }
 
-// Handle Elimination Lockout
 function triggerPlayerEliminated(message) {
   isEliminated = true;
   quitBtn.disabled = true;
   eliminatedBanner.textContent = message || '❌ You were eliminated (3 mistakes)!';
   eliminatedBanner.classList.remove('hidden');
 
-  // Disable all active cell inputs
   document.querySelectorAll('.cell input').forEach(input => {
     input.disabled = true;
   });
@@ -199,14 +384,18 @@ socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
   if (!input) return;
 
   if (correct) {
+    playSuccessSound();
     input.classList.remove('wrong');
     input.classList.add('correct');
     input.disabled = true;
+
+    // Check if this move completed any horizontal, vertical, or 3x3 line
+    checkCompletions();
   } else {
+    playErrorSound();
     input.classList.add('wrong');
     updateLivesDisplay(mistakes);
 
-    // Auto-close input capabilities on strikeout
     if (eliminated) {
       triggerPlayerEliminated('❌ You were eliminated (3 mistakes)!');
     }
@@ -238,16 +427,15 @@ socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlank
   }
 });
 
-// Pop-up Leaderboard
 socket.on('gameOver', ({ reason, leaderboard }) => {
-  // Lock game view immediately
   gameView.classList.add('game-locked');
   document.querySelectorAll('.cell input').forEach(input => {
     input.disabled = true;
   });
   quitBtn.disabled = true;
 
-  // Build Leaderboard
+  playVictoryFanfare();
+
   winnerReason.textContent = reason;
   leaderboardBody.innerHTML = '';
 
@@ -264,6 +452,5 @@ socket.on('gameOver', ({ reason, leaderboard }) => {
     leaderboardBody.appendChild(tr);
   });
 
-  // Display pop-up
   winnerModal.classList.remove('hidden');
 });

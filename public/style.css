@@ -10,6 +10,7 @@
   --border: #334155;
   --grid-line: #64748b;
   --cell-fixed: #090e17;
+  --highlight-row: rgba(56, 189, 248, 0.35);
 }
 
 [data-theme="neon"] {
@@ -23,6 +24,7 @@
   --border: #3f1d6b;
   --grid-line: #7209b7;
   --cell-fixed: #0a021c;
+  --highlight-row: rgba(247, 37, 133, 0.35);
 }
 
 [data-theme="emerald"] {
@@ -36,6 +38,7 @@
   --border: #065f46;
   --grid-line: #6ee7b7;
   --cell-fixed: #022c22;
+  --highlight-row: rgba(52, 211, 153, 0.35);
 }
 
 [data-theme="sunset"] {
@@ -49,6 +52,7 @@
   --border: #631b82;
   --grid-line: #9c27b0;
   --cell-fixed: #1a0324;
+  --highlight-row: rgba(255, 122, 0, 0.35);
 }
 
 [data-theme="dracula"] {
@@ -62,6 +66,7 @@
   --border: #6272a4;
   --grid-line: #ff79c6;
   --cell-fixed: #1e1f29;
+  --highlight-row: rgba(189, 147, 249, 0.35);
 }
 
 [data-theme="amber"] {
@@ -75,6 +80,7 @@
   --border: #44403c;
   --grid-line: #78716c;
   --cell-fixed: #0c0a09;
+  --highlight-row: rgba(245, 158, 11, 0.35);
 }
 
 [data-theme="paper"] {
@@ -88,6 +94,7 @@
   --border: #cbd5e1;
   --grid-line: #475569;
   --cell-fixed: #f1f5f9;
+  --highlight-row: rgba(37, 99, 235, 0.25);
 }
 
 * {
@@ -106,6 +113,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 12px;
+  overflow-x: hidden;
 }
 
 .arena-container {
@@ -114,6 +122,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: relative;
 }
 
 .top-bar {
@@ -332,6 +341,7 @@ input[type="text"], input[type="number"], select {
 
 /* 9x9 Sudoku Grid */
 .board-wrapper {
+  position: relative;
   display: flex;
   justify-content: center;
 }
@@ -355,6 +365,7 @@ input[type="text"], input[type="number"], select {
   justify-content: center;
   font-size: 1.25rem;
   font-weight: bold;
+  position: relative;
 }
 
 .cell:nth-child(3n) { border-right: 2px solid var(--grid-line); }
@@ -397,7 +408,55 @@ input[type="text"], input[type="number"], select {
   75% { transform: translateX(4px); }
 }
 
-/* Modal Pop-up with Backdrop */
+/* Grid, Row, & Column Completion Animations */
+.cell.completed-flash {
+  animation: flashPulse 1s ease forwards;
+}
+
+@keyframes flashPulse {
+  0% {
+    background-color: var(--highlight-row);
+    transform: scale(1.08);
+    z-index: 5;
+  }
+  50% {
+    background-color: var(--success);
+    color: #000;
+  }
+  100% {
+    transform: scale(1);
+    z-index: 1;
+  }
+}
+
+/* Floating Emoji Animations */
+.floating-emoji {
+  position: absolute;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 99;
+  animation: floatUpFade 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes floatUpFade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -20px) scale(1.3);
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70px) scale(1.6);
+  }
+}
+
+/* Modal Pop-up */
 .modal-backdrop {
   position: fixed;
   inset: 0;
