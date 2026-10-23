@@ -1,4 +1,4 @@
-/* Preset Themes */
+/* Color Themes */
 [data-theme="dark"] {
   --bg: #0f172a;
   --card: #1e293b;
@@ -141,7 +141,6 @@ body {
   background: none;
   cursor: pointer;
   padding: 0;
-  overflow: hidden;
 }
 
 #custom-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
@@ -153,6 +152,11 @@ body {
   padding: 18px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
   position: relative;
+}
+
+.card.game-locked {
+  filter: grayscale(0.5);
+  pointer-events: none;
 }
 
 .hidden { display: none !important; }
@@ -200,6 +204,7 @@ input[type="text"], input[type="number"], select {
 
 .btn.primary { background: var(--accent); color: #000; }
 .btn.secondary { background: var(--border); color: var(--text); }
+.btn.full-width { width: 100%; }
 
 .btn.danger-small {
   background: transparent;
@@ -278,7 +283,7 @@ input[type="text"], input[type="number"], select {
 }
 
 .player-card.eliminated {
-  opacity: 0.5;
+  opacity: 0.45;
   border-color: var(--error);
 }
 
@@ -392,42 +397,69 @@ input[type="text"], input[type="number"], select {
   75% { transform: translateX(4px); }
 }
 
-/* Modal & Leaderboard Table */
-.modal {
-  position: absolute;
+/* Modal Pop-up with Backdrop */
+.modal-backdrop {
+  position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  z-index: 50;
+  z-index: 999;
   padding: 16px;
 }
 
-.modal-content {
+.modal-card {
   background: var(--card);
-  padding: 20px;
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 22px;
+  border-radius: 12px;
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: 14px;
   width: 100%;
   max-width: 440px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-x {
+  font-size: 1.5rem;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
 }
 
 .winner-reason {
   color: var(--accent);
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .leaderboard-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
-  margin-top: 4px;
+  font-size: 0.85rem;
+  margin: 6px 0;
 }
 
 .leaderboard-table th {
@@ -444,4 +476,5 @@ input[type="text"], input[type="number"], select {
 .leaderboard-table tr:first-child td {
   color: var(--accent);
   font-weight: bold;
+  font-size: 0.95rem;
 }

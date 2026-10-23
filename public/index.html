@@ -12,7 +12,6 @@
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
       <div class="palette-bar">
-        <!-- Preset Theme Selector -->
         <select id="theme-select" title="Preset Themes">
           <option value="dark">Midnight Dark</option>
           <option value="neon">Cyberpunk Neon</option>
@@ -22,12 +21,11 @@
           <option value="amber">Retro Amber</option>
           <option value="paper">Paper Light</option>
         </select>
-        <!-- Custom Accent Color Picker -->
-        <input type="color" id="custom-color-picker" value="#38bdf8" title="Pick Custom Accent Color" />
+        <input type="color" id="custom-color-picker" value="#38bdf8" title="Custom Accent Color" />
       </div>
     </div>
 
-    <!-- Lobby View -->
+    <!-- 1. Lobby View -->
     <div id="lobby-view" class="card">
       <div class="input-group">
         <label for="username">Nickname:</label>
@@ -53,7 +51,6 @@
           </select>
         </div>
 
-        <!-- Custom Duration in Minutes -->
         <div class="setting-col">
           <label for="custom-duration">Time (Mins):</label>
           <input type="number" id="custom-duration" min="1" max="60" value="10" />
@@ -73,14 +70,13 @@
       <div id="lobby-roster" class="roster-list"></div>
     </div>
 
-    <!-- Active Game Arena -->
+    <!-- 2. Active Game Arena -->
     <div id="game-view" class="card hidden">
       <div class="hud">
         <div class="hud-top">
           <div class="room-tag">Room: <span id="current-room"></span></div>
           <div class="my-lives" id="my-lives">Lives: ❤️❤️❤️</div>
           <div class="timer-box">⏳ <span id="timer-display">10:00</span></div>
-          <!-- Quit / Forfeit Button -->
           <button id="quit-btn" class="btn danger-small" title="Quit match">Resign 🏳️</button>
         </div>
         <div class="scoreboard" id="scoreboard"></div>
@@ -91,31 +87,34 @@
       </div>
 
       <div id="eliminated-banner" class="banner hidden">
-        ❌ You were eliminated! Spectating the rest of the match...
+        ❌ You were eliminated!
       </div>
+    </div>
+  </div>
 
-      <!-- Leaderboard Modal -->
-      <div id="winner-modal" class="modal hidden">
-        <div class="modal-content">
-          <h2 id="winner-title">🏆 Match Finished</h2>
-          <p id="winner-reason" class="winner-reason"></p>
-
-          <table class="leaderboard-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Solved</th>
-                <th>Mistakes</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboard-body"></tbody>
-          </table>
-
-          <button class="btn primary" onclick="location.reload()">Back to Lobby</button>
-        </div>
+  <!-- 3. Automatic Leaderboard Pop-Up Modal -->
+  <div id="winner-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>🏆 Match Over</h2>
+        <span class="close-x" id="modal-close-x">&times;</span>
       </div>
+      <p id="winner-reason" class="winner-reason"></p>
+
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Solved</th>
+            <th>Mistakes</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+
+      <button class="btn primary full-width" onclick="location.reload()">Back to Lobby</button>
     </div>
   </div>
 

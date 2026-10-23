@@ -4,7 +4,7 @@ let currentRoomCode = null;
 let myId = null;
 let isEliminated = false;
 
-// UI Elements
+// DOM Elements
 const themeSelect = document.getElementById('theme-select');
 const customColorPicker = document.getElementById('custom-color-picker');
 const lobbyView = document.getElementById('lobby-view');
@@ -25,28 +25,33 @@ const myLivesDisplay = document.getElementById('my-lives');
 const scoreboard = document.getElementById('scoreboard');
 const gridContainer = document.getElementById('sudoku-grid');
 const eliminatedBanner = document.getElementById('eliminated-banner');
+
+// Modal Elements
 const winnerModal = document.getElementById('winner-modal');
 const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
+const modalCloseX = document.getElementById('modal-close-x');
 
-// 1. Theme and Custom Color Handling
+// Close modal without reloading (allows inspecting the board)
+modalCloseX.addEventListener('click', () => {
+  winnerModal.classList.add('hidden');
+});
+
+// Theme & Color Handlers
 themeSelect.addEventListener('change', (e) => {
   document.documentElement.setAttribute('data-theme', e.target.value);
-  // Reset inline accent style to let theme default take over
   document.documentElement.style.removeProperty('--accent');
 });
 
 customColorPicker.addEventListener('input', (e) => {
-  const chosenColor = e.target.value;
-  // Apply live to CSS custom property
-  document.documentElement.style.setProperty('--accent', chosenColor);
+  document.documentElement.style.setProperty('--accent', e.target.value);
 });
 
 socket.on('connect', () => {
   myId = socket.id;
 });
 
-// 2. Room Setup Actions
+// Setup handlers
 createBtn.addEventListener('click', () => {
   const username = usernameInput.value.trim() || 'Player 1';
   const difficulty = difficultySelect.value;
@@ -66,15 +71,10 @@ joinBtn.addEventListener('click', () => {
   socket.emit('joinRoom', { roomCode, username });
 });
 
-// Quit / Resign Handler
 quitBtn.addEventListener('click', () => {
   if (confirm('Are you sure you want to resign from the match?')) {
     socket.emit('quitGame', { roomCode: currentRoomCode });
-    quitBtn.disabled = true;
-    isEliminated = true;
-    eliminatedBanner.classList.remove('hidden');
-    eliminatedBanner.textContent = '🏳️ You resigned from the match.';
-    document.querySelectorAll('.cell input:not(.correct)').forEach(i => i.disabled = true);
+    triggerPlayerEliminated('🏳️ You resigned from the match.');
   }
 });
 
@@ -95,17 +95,20 @@ socket.on('playerListUpdate', (players) => {
 socket.on('errorMessage', (msg) => alert(msg));
 socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 
-// 3. Start Game
+// Start Game
 socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   isEliminated = false;
   quitBtn.disabled = false;
   lobbyView.classList.add('hidden');
-  gameView.classList.remove('hidden');
+  gameView.classList.remove('hidden', 'game-locked');
   eliminatedBanner.classList.add('hidden');
+  winnerModal.classList.add('hidden');
   currentRoomSpan.textContent = currentRoomCode;
+
   updateLivesDisplay(0);
   updateTimerDisplay(duration);
 
+  // Scoreboard
   scoreboard.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');
@@ -178,6 +181,19 @@ function renderBoard(puzzle) {
   }
 }
 
+// Handle Elimination Lockout
+function triggerPlayerEliminated(message) {
+  isEliminated = true;
+  quitBtn.disabled = true;
+  eliminatedBanner.textContent = message || '❌ You were eliminated (3 mistakes)!';
+  eliminatedBanner.classList.remove('hidden');
+
+  // Disable all active cell inputs
+  document.querySelectorAll('.cell input').forEach(input => {
+    input.disabled = true;
+  });
+}
+
 socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
   const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
   if (!input) return;
@@ -190,11 +206,9 @@ socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
     input.classList.add('wrong');
     updateLivesDisplay(mistakes);
 
+    // Auto-close input capabilities on strikeout
     if (eliminated) {
-      isEliminated = true;
-      quitBtn.disabled = true;
-      eliminatedBanner.classList.remove('hidden');
-      document.querySelectorAll('.cell input:not(.correct)').forEach(i => i.disabled = true);
+      triggerPlayerEliminated('❌ You were eliminated (3 mistakes)!');
     }
 
     setTimeout(() => {
@@ -224,7 +238,16 @@ socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlank
   }
 });
 
+// Pop-up Leaderboard
 socket.on('gameOver', ({ reason, leaderboard }) => {
+  // Lock game view immediately
+  gameView.classList.add('game-locked');
+  document.querySelectorAll('.cell input').forEach(input => {
+    input.disabled = true;
+  });
+  quitBtn.disabled = true;
+
+  // Build Leaderboard
   winnerReason.textContent = reason;
   leaderboardBody.innerHTML = '';
 
@@ -236,10 +259,11 @@ socket.on('gameOver', ({ reason, leaderboard }) => {
       <td>${player.name} ${player.id === myId ? '(You)' : ''}</td>
       <td>${player.score}</td>
       <td>${player.mistakes}/3</td>
-      <td>${player.eliminated ? '❌ Struck Out / Resigned' : '✅ Survived'}</td>
+      <td>${player.eliminated ? '❌ Eliminated' : '✅ Survived'}</td>
     `;
     leaderboardBody.appendChild(tr);
   });
 
+  // Display pop-up
   winnerModal.classList.remove('hidden');
 });

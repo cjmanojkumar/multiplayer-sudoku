@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
-// --- SUDOKU GENERATION & VALIDATION ---
+// --- SUDOKU GENERATOR & SOLVER ---
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
     if (board[row][i] === num || board[i][col] === num) return false;
@@ -66,20 +66,51 @@ function generatePuzzle(difficulty = 'medium') {
   return { puzzle, solution, totalBlanks: blanks };
 }
 
+function getLeaderboard(room) {
+  return [...room.players].sort((a, b) => {
+    // 1. Survived players rank higher than knocked out players
+    if (!a.eliminated && b.eliminated) return -1;
+    if (a.eliminated && !b.eliminated) return 1;
+    // 2. Higher score ranks higher
+    if (b.score !== a.score) return b.score - a.score;
+    // 3. Fewer mistakes rank higher
+    return a.mistakes - b.mistakes;
+  });
+}
+
+function terminateMatch(code, reason) {
+  const room = rooms[code];
+  if (!room || !room.started) return;
+  if (room.timerInterval) clearInterval(room.timerInterval);
+  room.started = false;
+
+  const leaderboard = getLeaderboard(room);
+  io.to(code).emit('gameOver', { reason, leaderboard });
+}
+
 // --- SOCKET CONNECTION HANDLING ---
 io.on('connection', (socket) => {
   socket.on('createRoom', ({ username, difficulty, maxPlayers, durationMinutes }) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
 
+    const validMinutes = Math.max(1, Math.min(60, parseInt(durationMinutes, 10) || 10));
+    const totalSeconds = validMinutes * 60;
+
     rooms[roomCode] = {
-      players: [{ id: socket.id, name: username || 'Player 1', score: 0, mistakes: 0, eliminated: false }],
+      players: [{
+        id: socket.id,
+        name: username || 'Player 1',
+        score: 0,
+        mistakes: 0,
+        eliminated: false
+      }],
       puzzle,
       solution,
       totalBlanks,
       maxPlayers: parseInt(maxPlayers, 10) || 2,
-      duration: (parseInt(durationMinutes, 10) || 10) * 60,
-      timeLeft: (parseInt(durationMinutes, 10) || 10) * 60,
+      duration: totalSeconds,
+      timeLeft: totalSeconds,
       timerInterval: null,
       started: false
     };
@@ -88,7 +119,8 @@ io.on('connection', (socket) => {
     socket.emit('roomCreated', { 
       roomCode, 
       maxPlayers: rooms[roomCode].maxPlayers,
-      difficulty 
+      difficulty,
+      durationMinutes: validMinutes
     });
     io.to(roomCode).emit('playerListUpdate', rooms[roomCode].players);
   });
@@ -117,6 +149,7 @@ io.on('connection', (socket) => {
       mistakes: 0,
       eliminated: false
     });
+
     socket.join(code);
     socket.emit('joinedRoomSuccess', { roomCode: code });
     io.to(code).emit('playerListUpdate', room.players);
@@ -138,23 +171,14 @@ io.on('connection', (socket) => {
       duration: room.duration
     });
 
+    // Dedicated 1-second interval loop
     room.timerInterval = setInterval(() => {
       room.timeLeft -= 1;
       io.to(code).emit('timerTick', { timeLeft: room.timeLeft });
 
+      // Automatically terminate when countdown hits 0
       if (room.timeLeft <= 0) {
-        clearInterval(room.timerInterval);
-        let topScore = -1;
-        let winner = 'Nobody';
-        room.players.forEach(p => {
-          if (!p.eliminated && p.score > topScore) {
-            topScore = p.score;
-            winner = p.name;
-          }
-        });
-        io.to(code).emit('gameOver', { 
-          winner: `${winner} (Time Expired with ${topScore} solved)` 
-        });
+        terminateMatch(code, '⏰ Time ran out!');
       }
     }, 1000);
   }
@@ -175,68 +199,42 @@ io.on('connection', (socket) => {
       io.to(code).emit('progressUpdate', {
         playerId: socket.id,
         score: player.score,
+        mistakes: player.mistakes,
+        eliminated: player.eliminated,
         totalBlanks: room.totalBlanks
       });
 
       socket.emit('moveResult', { row, col, correct: true });
 
-      // Check standard win
+      // Full board solved
       if (player.score >= room.totalBlanks) {
-        if (room.timerInterval) clearInterval(room.timerInterval);
-        io.to(code).emit('gameOver', { winner: player.name });
+        terminateMatch(code, `🎉 ${player.name} completed the board!`);
       }
     } else {
       player.mistakes += 1;
 
-      // Broadcast mistakes update to everybody
-      io.to(code).emit('mistakeUpdate', {
-        playerId: socket.id,
-        mistakes: player.mistakes
-      });
-
-      socket.emit('moveResult', { row, col, correct: false });
-
-      // 3 Mistakes Check: Eliminate Player
       if (player.mistakes >= 3) {
         player.eliminated = true;
-        socket.emit('playerEliminated');
-
-        // Check if only 1 active player remains
-        const activePlayers = room.players.filter(p => !p.eliminated);
-        if (activePlayers.length === 1 && room.players.length > 1) {
-          if (room.timerInterval) clearInterval(room.timerInterval);
-          io.to(code).emit('gameOver', { 
-            winner: `${activePlayers[0].name} (Last Survivor)` 
-          });
-        } else if (activePlayers.length === 0) {
-          if (room.timerInterval) clearInterval(room.timerInterval);
-          io.to(code).emit('gameOver', { winner: 'Nobody (All players eliminated)' });
-        }
       }
-    }
-  });
 
-  socket.on('disconnect', () => {
-    for (const code in rooms) {
-      const room = rooms[code];
-      const index = room.players.findIndex(p => p.id === socket.id);
-      if (index !== -1) {
-        const leaving = room.players[index];
-        room.players.splice(index, 1);
-        io.to(code).emit('playerDisconnected', { name: leaving.name });
-        io.to(code).emit('playerListUpdate', room.players);
+      io.to(code).emit('progressUpdate', {
+        playerId: socket.id,
+        score: player.score,
+        mistakes: player.mistakes,
+        eliminated: player.eliminated,
+        totalBlanks: room.totalBlanks
+      });
 
-        if (room.players.length === 0) {
-          if (room.timerInterval) clearInterval(room.timerInterval);
-          delete rooms[code];
-        }
-        break;
-      }
-    }
-  });
-});
+      socket.emit('moveResult', { 
+        row, 
+        col, 
+        correct: false, 
+        mistakes: player.mistakes,
+        eliminated: player.eliminated
+      });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+      // Check survivor conditions
+      const alivePlayers = room.players.filter(p => !p.eliminated);
+      if (alivePlayers.length === 0) {
+        terminateMatch(code, '💀 All players lost their lives!');
+      } else if (room.players.length > 1 && alive
