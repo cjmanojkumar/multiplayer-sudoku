@@ -2,6 +2,7 @@ const socket = io();
 
 let currentRoomCode = null;
 let myId = null;
+let isEliminated = false;
 
 // UI Elements
 const themeSelect = document.getElementById('theme-select');
@@ -18,12 +19,14 @@ const roomStatus = document.getElementById('room-status');
 const lobbyRoster = document.getElementById('lobby-roster');
 const currentRoomSpan = document.getElementById('current-room');
 const timerDisplay = document.getElementById('timer-display');
+const myLivesDisplay = document.getElementById('my-lives');
 const scoreboard = document.getElementById('scoreboard');
 const gridContainer = document.getElementById('sudoku-grid');
+const eliminatedBanner = document.getElementById('eliminated-banner');
 const winnerModal = document.getElementById('winner-modal');
-const winnerMessage = document.getElementById('winner-message');
+const winnerReason = document.getElementById('winner-reason');
+const leaderboardBody = document.getElementById('leaderboard-body');
 
-// Theme Switcher
 themeSelect.addEventListener('change', (e) => {
   document.documentElement.setAttribute('data-theme', e.target.value);
 });
@@ -32,7 +35,7 @@ socket.on('connect', () => {
   myId = socket.id;
 });
 
-// Create & Join Actions
+// Setup actions
 createBtn.addEventListener('click', () => {
   const username = usernameInput.value.trim() || 'Player 1';
   const difficulty = difficultySelect.value;
@@ -54,12 +57,12 @@ joinBtn.addEventListener('click', () => {
 
 socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty }) => {
   currentRoomCode = roomCode;
-  roomStatus.textContent = `Room: ${roomCode} | Mode: ${difficulty.toUpperCase()} | Waiting for players (1/${maxPlayers})...`;
+  roomStatus.textContent = `Room: ${roomCode} | ${difficulty.toUpperCase()} | 3 Strikes Mode | Waiting (1/${maxPlayers})...`;
 });
 
 socket.on('joinedRoomSuccess', ({ roomCode }) => {
   currentRoomCode = roomCode;
-  roomStatus.textContent = `Joined room ${roomCode}! Waiting for match to fill...`;
+  roomStatus.textContent = `Joined ${roomCode}! Waiting for players...`;
 });
 
 socket.on('playerListUpdate', (players) => {
@@ -71,13 +74,15 @@ socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 
 // Start Game
 socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
+  isEliminated = false;
   lobbyView.classList.add('hidden');
   gameView.classList.remove('hidden');
+  eliminatedBanner.classList.add('hidden');
   currentRoomSpan.textContent = currentRoomCode;
-
+  updateLivesDisplay(0);
   updateTimerDisplay(duration);
 
-  // Setup dynamic scoreboard for up to 4 players
+  // Initialize Scoreboard
   scoreboard.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');
@@ -86,7 +91,10 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
     card.innerHTML = `
       <span class="player-name">${p.name}</span>
       <div class="progress-bar"><div class="progress-fill" id="bar-${p.id}"></div></div>
-      <span class="score-text" id="score-${p.id}">0 / ${totalBlanks}</span>
+      <div class="score-text">
+        <span id="score-${p.id}">0 / ${totalBlanks}</span>
+        <span id="mistakes-${p.id}">❤️ 3</span>
+      </div>
     `;
     scoreboard.appendChild(card);
   });
@@ -94,10 +102,12 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   renderBoard(puzzle);
 });
 
-// Timer Updates
-socket.on('timerTick', ({ timeLeft }) => {
-  updateTimerDisplay(timeLeft);
-});
+function updateLivesDisplay(mistakes) {
+  const livesLeft = Math.max(0, 3 - mistakes);
+  myLivesDisplay.textContent = 'Lives: ' + '❤️'.repeat(livesLeft) + '🖤'.repeat(3 - livesLeft);
+}
+
+socket.on('timerTick', ({ timeLeft }) => updateTimerDisplay(timeLeft));
 
 function updateTimerDisplay(seconds) {
   const mins = Math.floor(seconds / 60);
@@ -105,7 +115,6 @@ function updateTimerDisplay(seconds) {
   timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-// Sudoku Board Rendering
 function renderBoard(puzzle) {
   gridContainer.innerHTML = '';
   for (let r = 0; r < 9; r++) {
@@ -125,6 +134,7 @@ function renderBoard(puzzle) {
         input.dataset.col = c;
 
         input.addEventListener('input', (e) => {
+          if (isEliminated) return;
           const typed = e.target.value;
           if (!/^[1-9]$/.test(typed)) {
             e.target.value = '';
@@ -145,7 +155,8 @@ function renderBoard(puzzle) {
   }
 }
 
-socket.on('moveResult', ({ row, col, correct }) => {
+// Receive verification feedback
+socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
   const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
   if (!input) return;
 
@@ -155,6 +166,15 @@ socket.on('moveResult', ({ row, col, correct }) => {
     input.disabled = true;
   } else {
     input.classList.add('wrong');
+    updateLivesDisplay(mistakes);
+
+    if (eliminated) {
+      isEliminated = true;
+      eliminatedBanner.classList.remove('hidden');
+      // Lock all empty inputs
+      document.querySelectorAll('.cell input:not(.correct)').forEach(i => i.disabled = true);
+    }
+
     setTimeout(() => {
       input.classList.remove('wrong');
       input.value = '';
@@ -162,17 +182,44 @@ socket.on('moveResult', ({ row, col, correct }) => {
   }
 });
 
-socket.on('progressUpdate', ({ playerId, score, totalBlanks }) => {
+// Update opponents & self in scoreboard
+socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlanks }) => {
   const bar = document.getElementById(`bar-${playerId}`);
   const scoreSpan = document.getElementById(`score-${playerId}`);
-  if (bar && scoreSpan) {
+  const mistakesSpan = document.getElementById(`mistakes-${playerId}`);
+  const card = document.getElementById(`card-${playerId}`);
+
+  if (bar && scoreSpan && mistakesSpan) {
     const pct = Math.min(100, Math.round((score / totalBlanks) * 100));
     bar.style.width = `${pct}%`;
     scoreSpan.textContent = `${score} / ${totalBlanks}`;
+
+    const livesLeft = Math.max(0, 3 - mistakes);
+    mistakesSpan.textContent = eliminated ? '💀 OUT' : `❤️ ${livesLeft}`;
+
+    if (eliminated && card) {
+      card.classList.add('eliminated');
+    }
   }
 });
 
-socket.on('gameOver', ({ winner }) => {
-  winnerMessage.textContent = `🏆 ${winner} Won the Match!`;
+// End Game Leaderboard Display
+socket.on('gameOver', ({ reason, leaderboard }) => {
+  winnerReason.textContent = reason;
+  leaderboardBody.innerHTML = '';
+
+  leaderboard.forEach((player, idx) => {
+    const tr = document.createElement('tr');
+    const medal = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : `#${idx + 1} `;
+    tr.innerHTML = `
+      <td>${medal}</td>
+      <td>${player.name} ${player.id === myId ? '(You)' : ''}</td>
+      <td>${player.score}</td>
+      <td>${player.mistakes}/3</td>
+      <td>${player.eliminated ? '❌ Struck Out' : '✅ Survived'}</td>
+    `;
+    leaderboardBody.appendChild(tr);
+  });
+
   winnerModal.classList.remove('hidden');
 });

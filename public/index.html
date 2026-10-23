@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sudoku Multiplayer Arena</title>
+  <title>Sudoku Arena</title>
   <link rel="stylesheet" href="style.css" />
   <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -40,7 +40,7 @@
         </div>
 
         <div class="setting-col">
-          <label for="max-players">Max Players:</label>
+          <label for="max-players">Players:</label>
           <select id="max-players">
             <option value="2" selected>2 Players</option>
             <option value="3">3 Players</option>
@@ -49,11 +49,11 @@
         </div>
 
         <div class="setting-col">
-          <label for="duration">Timer (Minutes):</label>
+          <label for="duration">Timer:</label>
           <select id="duration">
-            <option value="5">5 Minutes</option>
-            <option value="10" selected>10 Minutes</option>
-            <option value="15">15 Minutes</option>
+            <option value="5">5 Mins</option>
+            <option value="10" selected>10 Mins</option>
+            <option value="15">15 Mins</option>
           </select>
         </div>
       </div>
@@ -76,7 +76,8 @@
       <div class="hud">
         <div class="hud-top">
           <div class="room-tag">Room: <span id="current-room"></span></div>
-          <div class="timer-box">⏳ Time Left: <span id="timer-display">10:00</span></div>
+          <div class="my-lives" id="my-lives">Lives: ❤️❤️❤️</div>
+          <div class="timer-box">⏳ <span id="timer-display">10:00</span></div>
         </div>
         <div class="scoreboard" id="scoreboard"></div>
       </div>
@@ -85,9 +86,30 @@
         <div id="sudoku-grid" class="sudoku-grid"></div>
       </div>
 
+      <!-- Elimination Banner (shown only to knocked-out players) -->
+      <div id="eliminated-banner" class="banner hidden">
+        ❌ You were eliminated (3 mistakes)! Spectating rest of match...
+      </div>
+
+      <!-- End of Match Leaderboard Modal -->
       <div id="winner-modal" class="modal hidden">
         <div class="modal-content">
-          <h2 id="winner-message">Game Over</h2>
+          <h2 id="winner-title">🏆 Match Finished</h2>
+          <p id="winner-reason" class="winner-reason"></p>
+
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Solved</th>
+                <th>Mistakes</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body"></tbody>
+          </table>
+
           <button class="btn primary" onclick="location.reload()">Back to Lobby</button>
         </div>
       </div>
