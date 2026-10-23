@@ -237,4 +237,68 @@ io.on('connection', (socket) => {
       const alivePlayers = room.players.filter(p => !p.eliminated);
       if (alivePlayers.length === 0) {
         terminateMatch(code, '💀 All players lost their lives!');
-      } else if (room.players.length > 1 && alive
+      } else if (room.players.length > 1 && alivePlayers.length === 1) {
+        terminateMatch(code, `👑 ${alivePlayers[0].name} wins! Opponent ran out of lives.`);
+      }
+    }
+  });
+
+  socket.on('quitGame', ({ roomCode }) => {
+    const code = roomCode.toUpperCase();
+    const room = rooms[code];
+    if (!room || !room.started) return;
+
+    const player = room.players.find(p => p.id === socket.id);
+    if (!player || player.eliminated) return;
+
+    player.eliminated = true;
+
+    io.to(code).emit('progressUpdate', {
+      playerId: socket.id,
+      score: player.score,
+      mistakes: player.mistakes,
+      eliminated: true,
+      totalBlanks: room.totalBlanks
+    });
+
+    const alivePlayers = room.players.filter(p => !p.eliminated);
+    if (alivePlayers.length === 0) {
+      terminateMatch(code, `${player.name} resigned.`);
+    } else if (room.players.length > 1 && alivePlayers.length === 1) {
+      terminateMatch(code, `🏳️ ${player.name} resigned. ${alivePlayers[0].name} wins!`);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    for (const code in rooms) {
+      const room = rooms[code];
+      const index = room.players.findIndex(p => p.id === socket.id);
+      if (index !== -1) {
+        const leaving = room.players[index];
+        room.players.splice(index, 1);
+        io.to(code).emit('playerDisconnected', { name: leaving.name });
+        io.to(code).emit('playerListUpdate', room.players);
+
+        if (room.started) {
+          const alivePlayers = room.players.filter(p => !p.eliminated);
+          if (room.players.length === 0 || alivePlayers.length === 0) {
+            terminateMatch(code, 'Match ended (player left).');
+          } else if (alivePlayers.length === 1) {
+            terminateMatch(code, `${alivePlayers[0].name} won (opponent left).`);
+          }
+        }
+
+        if (room.players.length === 0) {
+          if (room.timerInterval) clearInterval(room.timerInterval);
+          delete rooms[code];
+        }
+        break;
+      }
+    }
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
