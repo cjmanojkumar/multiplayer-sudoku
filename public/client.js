@@ -3,18 +3,37 @@ const socket = io();
 let currentRoomCode = null;
 let myId = null;
 let isEliminated = false;
+let selectedCell = null;
+let activeSymbolSet = 'numbers';
 
-// Tracking already-completed sections so sound/animations trigger only once
+// --- SYMBOL DICTIONARIES (Maps digit 1-9 to symbol) ---
+const SYMBOL_SETS = {
+  numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+  letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
+  roman: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'],
+  emojis: ['🍎', '🍌', '🍇', '🍓', '🍊', '🍉', '🍍', '🍒', '🥝'],
+  shapes: ['★', '✦', '♠', '♥', '♦', '♣', '⬢', '▲', '◈']
+};
+
+function getSymbol(num) {
+  if (num === 0) return '';
+  const list = SYMBOL_SETS[activeSymbolSet] || SYMBOL_SETS.numbers;
+  return list[num - 1] || num;
+}
+
+// Track completions
 const completedRows = new Set();
 const completedCols = new Set();
 const completedBoxes = new Set();
 
 // UI Elements
 const themeSelect = document.getElementById('theme-select');
+const fontSelect = document.getElementById('font-select');
 const customColorPicker = document.getElementById('custom-color-picker');
 const lobbyView = document.getElementById('lobby-view');
 const gameView = document.getElementById('game-view');
 const usernameInput = document.getElementById('username');
+const symbolSetSelect = document.getElementById('symbol-set-select');
 const difficultySelect = document.getElementById('difficulty');
 const maxPlayersSelect = document.getElementById('max-players');
 const customDurationInput = document.getElementById('custom-duration');
@@ -29,25 +48,40 @@ const timerDisplay = document.getElementById('timer-display');
 const myLivesDisplay = document.getElementById('my-lives');
 const scoreboard = document.getElementById('scoreboard');
 const gridContainer = document.getElementById('sudoku-grid');
+const symbolPad = document.getElementById('symbol-pad');
 const eliminatedBanner = document.getElementById('eliminated-banner');
 
-// Modal Elements
 const winnerModal = document.getElementById('winner-modal');
 const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
 
+// --- THEME & FONT SWITCHERS ---
+themeSelect.addEventListener('change', (e) => {
+  document.documentElement.setAttribute('data-theme', e.target.value);
+  document.documentElement.style.removeProperty('--accent');
+});
+
+fontSelect.addEventListener('change', (e) => {
+  document.documentElement.setAttribute('data-font', e.target.value);
+});
+
+customColorPicker.addEventListener('input', (e) => {
+  document.documentElement.style.setProperty('--accent', e.target.value);
+});
+
+modalCloseX.addEventListener('click', () => {
+  winnerModal.classList.add('hidden');
+});
+
 // --- WEB AUDIO API SYNTHESIZER ---
 let audioCtx = null;
-
 function getAudioContext() {
   if (!audioCtx) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
   }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 
@@ -56,51 +90,39 @@ function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
     const ctx = getAudioContext();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
     gain.gain.setValueAtTime(gainVal, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-
     osc.connect(gain);
     gain.connect(ctx.destination);
-
     osc.start();
     osc.stop(ctx.currentTime + duration);
-  } catch (e) {
-    // Ignore audio restrictions
-  }
+  } catch (e) {}
 }
 
-// Single correct cell sound: high melodic chime
 function playSuccessSound() {
-  playTone(587.33, 'sine', 0.1, 0.08); // D5
-  setTimeout(() => playTone(880, 'sine', 0.15, 0.08), 80); // A5
+  playTone(587.33, 'sine', 0.1, 0.08);
+  setTimeout(() => playTone(880, 'sine', 0.15, 0.08), 80);
 }
 
-// Wrong move / strike sound: low buzz
 function playErrorSound() {
   playTone(150, 'sawtooth', 0.25, 0.12);
 }
 
-// Row / Col / 3x3 complete fanfare: 3-note ascending arpeggio
 function playSectionCompleteSound() {
-  playTone(523.25, 'triangle', 0.12, 0.1); // C5
-  setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.1), 100); // E5
-  setTimeout(() => playTone(783.99, 'triangle', 0.12, 0.1), 200); // G5
-  setTimeout(() => playTone(1046.50, 'triangle', 0.25, 0.12), 300); // C6
+  playTone(523.25, 'triangle', 0.12, 0.1);
+  setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.1), 100);
+  setTimeout(() => playTone(783.99, 'triangle', 0.12, 0.1), 200);
+  setTimeout(() => playTone(1046.50, 'triangle', 0.25, 0.12), 300);
 }
 
-// Match Victory sound
 function playVictoryFanfare() {
-  const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-  notes.forEach((freq, i) => {
-    setTimeout(() => playTone(freq, 'triangle', 0.2, 0.12), i * 120);
+  [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
+    setTimeout(() => playTone(f, 'triangle', 0.2, 0.12), i * 120);
   });
 }
 
-// --- EMOJI BURST EFFECT ---
 function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '🎯', '🚀']) {
   const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
   const span = document.createElement('span');
@@ -110,7 +132,6 @@ function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '�
   const rect = cellElement.getBoundingClientRect();
   const boardRect = gridContainer.getBoundingClientRect();
 
-  // Position relative to Sudoku grid container
   span.style.left = `${rect.left - boardRect.left + rect.width / 2}px`;
   span.style.top = `${rect.top - boardRect.top + rect.height / 2}px`;
 
@@ -118,128 +139,18 @@ function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '�
   setTimeout(() => span.remove(), 1200);
 }
 
-// --- COMPLETION CHECKERS FOR ROWS, COLS, 3X3 ---
-function checkCompletions() {
-  let anyCompleted = false;
+socket.on('connect', () => { myId = socket.id; });
 
-  // 1. Check all 9 Rows
-  for (let r = 0; r < 9; r++) {
-    if (completedRows.has(r)) continue;
-    let full = true;
-    const cells = [];
-    for (let c = 0; c < 9; c++) {
-      const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-      if (!isCellSolved(cell)) {
-        full = false;
-        break;
-      }
-      cells.push(cell);
-    }
-    if (full) {
-      completedRows.add(r);
-      animateCompletedSection(cells, ['🔥', '⚡', '💯']);
-      anyCompleted = true;
-    }
-  }
-
-  // 2. Check all 9 Columns
-  for (let c = 0; c < 9; c++) {
-    if (completedCols.has(c)) continue;
-    let full = true;
-    const cells = [];
-    for (let r = 0; r < 9; r++) {
-      const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-      if (!isCellSolved(cell)) {
-        full = false;
-        break;
-      }
-      cells.push(cell);
-    }
-    if (full) {
-      completedCols.add(c);
-      animateCompletedSection(cells, ['🚀', '✨', '🎯']);
-      anyCompleted = true;
-    }
-  }
-
-  // 3. Check all 9 3x3 Boxes
-  for (let br = 0; br < 3; br++) {
-    for (let bc = 0; bc < 3; bc++) {
-      const boxKey = `${br}-${bc}`;
-      if (completedBoxes.has(boxKey)) continue;
-
-      let full = true;
-      const cells = [];
-      for (let r = br * 3; r < br * 3 + 3; r++) {
-        for (let c = bc * 3; c < bc * 3 + 3; c++) {
-          const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-          if (!isCellSolved(cell)) {
-            full = false;
-            break;
-          }
-          cells.push(cell);
-        }
-      }
-      if (full) {
-        completedBoxes.add(boxKey);
-        animateCompletedSection(cells, ['⭐', '👑', '🌟']);
-        anyCompleted = true;
-      }
-    }
-  }
-
-  if (anyCompleted) {
-    playSectionCompleteSound();
-  }
-}
-
-function isCellSolved(cell) {
-  if (!cell) return false;
-  if (cell.classList.contains('prefilled')) return true;
-  const input = cell.querySelector('input');
-  return input && input.classList.contains('correct');
-}
-
-function animateCompletedSection(cells, emojiSet) {
-  cells.forEach((cell, idx) => {
-    setTimeout(() => {
-      cell.classList.add('completed-flash');
-      if (idx === 4) { // Center cell releases emoji
-        spawnFloatingEmoji(cell, emojiSet);
-      }
-      setTimeout(() => cell.classList.remove('completed-flash'), 1000);
-    }, idx * 35); // Wave effect across the section
-  });
-}
-
-// Modal handling
-modalCloseX.addEventListener('click', () => {
-  winnerModal.classList.add('hidden');
-});
-
-// Theme & Color Handlers
-themeSelect.addEventListener('change', (e) => {
-  document.documentElement.setAttribute('data-theme', e.target.value);
-  document.documentElement.style.removeProperty('--accent');
-});
-
-customColorPicker.addEventListener('input', (e) => {
-  document.documentElement.style.setProperty('--accent', e.target.value);
-});
-
-socket.on('connect', () => {
-  myId = socket.id;
-});
-
-// Setup handlers
+// Lobby actions
 createBtn.addEventListener('click', () => {
-  getAudioContext(); // Initialize audio context on user gesture
+  getAudioContext();
   const username = usernameInput.value.trim() || 'Player 1';
   const difficulty = difficultySelect.value;
   const maxPlayers = maxPlayersSelect.value;
   const durationMinutes = parseInt(customDurationInput.value, 10) || 10;
+  const symbolSet = symbolSetSelect.value;
 
-  socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes });
+  socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes, symbolSet });
 });
 
 joinBtn.addEventListener('click', () => {
@@ -260,14 +171,14 @@ quitBtn.addEventListener('click', () => {
   }
 });
 
-socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty, durationMinutes }) => {
+socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty, durationMinutes, symbolSet }) => {
   currentRoomCode = roomCode;
-  roomStatus.textContent = `Room: ${roomCode} | ${difficulty.toUpperCase()} | ${durationMinutes} mins | Waiting (1/${maxPlayers})...`;
+  roomStatus.textContent = `Room: ${roomCode} | Mode: ${symbolSet.toUpperCase()} | Waiting (1/${maxPlayers})...`;
 });
 
 socket.on('joinedRoomSuccess', ({ roomCode }) => {
   currentRoomCode = roomCode;
-  roomStatus.textContent = `Joined ${roomCode}! Waiting for players...`;
+  roomStatus.textContent = `Joined ${roomCode}! Waiting for match...`;
 });
 
 socket.on('playerListUpdate', (players) => {
@@ -278,8 +189,10 @@ socket.on('errorMessage', (msg) => alert(msg));
 socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 
 // Start Game
-socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
+socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet }) => {
   isEliminated = false;
+  selectedCell = null;
+  activeSymbolSet = symbolSet || 'numbers';
   quitBtn.disabled = false;
   completedRows.clear();
   completedCols.clear();
@@ -294,6 +207,7 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   updateLivesDisplay(0);
   updateTimerDisplay(duration);
 
+  // Build Scoreboard
   scoreboard.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');
@@ -311,6 +225,7 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration }) => {
   });
 
   renderBoard(puzzle);
+  renderSymbolPad();
 });
 
 function updateLivesDisplay(mistakes) {
@@ -326,6 +241,7 @@ function updateTimerDisplay(seconds) {
   timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
+// Render Board with Symbols
 function renderBoard(puzzle) {
   gridContainer.innerHTML = '';
   for (let r = 0; r < 9; r++) {
@@ -338,62 +254,83 @@ function renderBoard(puzzle) {
 
       if (val !== 0) {
         cell.classList.add('prefilled');
-        cell.textContent = val;
+        cell.textContent = getSymbol(val);
       } else {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.maxLength = 1;
-        input.dataset.row = r;
-        input.dataset.col = c;
-
-        input.addEventListener('input', (e) => {
-          if (isEliminated) return;
-          const typed = e.target.value;
-          if (!/^[1-9]$/.test(typed)) {
-            e.target.value = '';
-            return;
-          }
-          socket.emit('submitMove', {
-            roomCode: currentRoomCode,
-            row: parseInt(e.target.dataset.row, 10),
-            col: parseInt(e.target.dataset.col, 10),
-            value: typed
-          });
+        // Blank selectable cell
+        cell.addEventListener('click', () => {
+          if (isEliminated || cell.classList.contains('correct')) return;
+          if (selectedCell) selectedCell.classList.remove('selected');
+          selectedCell = cell;
+          cell.classList.add('selected');
         });
-
-        cell.appendChild(input);
       }
       gridContainer.appendChild(cell);
     }
   }
 }
 
-function triggerPlayerEliminated(message) {
-  isEliminated = true;
-  quitBtn.disabled = true;
-  eliminatedBanner.textContent = message || '❌ You were eliminated (3 mistakes)!';
-  eliminatedBanner.classList.remove('hidden');
+// Build clickable on-screen keypad
+function renderSymbolPad() {
+  symbolPad.innerHTML = '';
+  const symbols = SYMBOL_SETS[activeSymbolSet] || SYMBOL_SETS.numbers;
 
-  document.querySelectorAll('.cell input').forEach(input => {
-    input.disabled = true;
+  symbols.forEach((symbol, index) => {
+    const val = index + 1; // Underlying value 1-9
+    const btn = document.createElement('button');
+    btn.classList.add('symbol-btn');
+    btn.textContent = symbol;
+
+    btn.addEventListener('click', () => {
+      if (isEliminated || !selectedCell) return;
+      makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), val);
+    });
+
+    symbolPad.appendChild(btn);
   });
 }
 
-socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
-  const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
-  if (!input) return;
+// Allow keyboard entry (Pressing 1-9 or A-I on keyboard)
+window.addEventListener('keydown', (e) => {
+  if (isEliminated || !selectedCell) return;
+  const key = e.key.toUpperCase();
+
+  // Check numeric 1-9
+  if (/^[1-9]$/.test(key)) {
+    makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), parseInt(key, 10));
+  }
+  // Check letters A-I
+  else if (/^[A-I]$/.test(key)) {
+    const val = key.charCodeAt(0) - 64; // A=1, B=2, etc.
+    makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), val);
+  }
+});
+
+function makeMove(row, col, value) {
+  socket.emit('submitMove', {
+    roomCode: currentRoomCode,
+    row,
+    col,
+    value
+  });
+}
+
+// Process move response
+socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => {
+  const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+  if (!cell) return;
 
   if (correct) {
     playSuccessSound();
-    input.classList.remove('wrong');
-    input.classList.add('correct');
-    input.disabled = true;
+    cell.classList.remove('wrong', 'selected');
+    cell.classList.add('correct', 'user-filled');
+    cell.textContent = getSymbol(value);
+    selectedCell = null;
 
-    // Check if this move completed any horizontal, vertical, or 3x3 line
     checkCompletions();
   } else {
     playErrorSound();
-    input.classList.add('wrong');
+    cell.classList.add('wrong');
+    cell.textContent = getSymbol(value);
     updateLivesDisplay(mistakes);
 
     if (eliminated) {
@@ -401,11 +338,97 @@ socket.on('moveResult', ({ row, col, correct, mistakes, eliminated }) => {
     }
 
     setTimeout(() => {
-      input.classList.remove('wrong');
-      input.value = '';
+      cell.classList.remove('wrong');
+      cell.textContent = '';
     }, 500);
   }
 });
+
+function checkCompletions() {
+  let anyCompleted = false;
+
+  // Check Rows
+  for (let r = 0; r < 9; r++) {
+    if (completedRows.has(r)) continue;
+    let full = true;
+    const cells = [];
+    for (let c = 0; c < 9; c++) {
+      const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      if (!isCellSolved(cell)) { full = false; break; }
+      cells.push(cell);
+    }
+    if (full) {
+      completedRows.add(r);
+      animateCompletedSection(cells, ['🔥', '⚡', '💯']);
+      anyCompleted = true;
+    }
+  }
+
+  // Check Columns
+  for (let c = 0; c < 9; c++) {
+    if (completedCols.has(c)) continue;
+    let full = true;
+    const cells = [];
+    for (let r = 0; r < 9; r++) {
+      const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+      if (!isCellSolved(cell)) { full = false; break; }
+      cells.push(cell);
+    }
+    if (full) {
+      completedCols.add(c);
+      animateCompletedSection(cells, ['🚀', '✨', '🎯']);
+      anyCompleted = true;
+    }
+  }
+
+  // Check 3x3 Boxes
+  for (let br = 0; br < 3; br++) {
+    for (let bc = 0; bc < 3; bc++) {
+      const boxKey = `${br}-${bc}`;
+      if (completedBoxes.has(boxKey)) continue;
+
+      let full = true;
+      const cells = [];
+      for (let r = br * 3; r < br * 3 + 3; r++) {
+        for (let c = bc * 3; c < bc * 3 + 3; c++) {
+          const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+          if (!isCellSolved(cell)) { full = false; break; }
+          cells.push(cell);
+        }
+      }
+      if (full) {
+        completedBoxes.add(boxKey);
+        animateCompletedSection(cells, ['⭐', '👑', '🌟']);
+        anyCompleted = true;
+      }
+    }
+  }
+
+  if (anyCompleted) playSectionCompleteSound();
+}
+
+function isCellSolved(cell) {
+  if (!cell) return false;
+  return cell.classList.contains('prefilled') || cell.classList.contains('correct');
+}
+
+function animateCompletedSection(cells, emojiSet) {
+  cells.forEach((cell, idx) => {
+    setTimeout(() => {
+      cell.classList.add('completed-flash');
+      if (idx === 4) spawnFloatingEmoji(cell, emojiSet);
+      setTimeout(() => cell.classList.remove('completed-flash'), 1000);
+    }, idx * 35);
+  });
+}
+
+function triggerPlayerEliminated(message) {
+  isEliminated = true;
+  quitBtn.disabled = true;
+  eliminatedBanner.textContent = message;
+  eliminatedBanner.classList.remove('hidden');
+  if (selectedCell) selectedCell.classList.remove('selected');
+}
 
 socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlanks }) => {
   const bar = document.getElementById(`bar-${playerId}`);
@@ -421,19 +444,13 @@ socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlank
     const livesLeft = Math.max(0, 3 - mistakes);
     mistakesSpan.textContent = eliminated ? '💀 OUT' : `❤️ ${livesLeft}`;
 
-    if (eliminated && card) {
-      card.classList.add('eliminated');
-    }
+    if (eliminated && card) card.classList.add('eliminated');
   }
 });
 
 socket.on('gameOver', ({ reason, leaderboard }) => {
   gameView.classList.add('game-locked');
-  document.querySelectorAll('.cell input').forEach(input => {
-    input.disabled = true;
-  });
   quitBtn.disabled = true;
-
   playVictoryFanfare();
 
   winnerReason.textContent = reason;
