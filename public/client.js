@@ -11,6 +11,26 @@ let isSoundEnabled = true;
 let isMusicEnabled = false;
 let isEmojiEnabled = true;
 
+let isVibrationEnabled = true;
+
+const vibrationToggle = document.getElementById('vibration-toggle');
+vibrationToggle.addEventListener('change', (e) => {
+  isVibrationEnabled = e.target.checked;
+  // Give a test micro-tap when toggled on
+  if (isVibrationEnabled) triggerVibration([40]);
+});
+
+// Safe Vibration API wrapper
+function triggerVibration(pattern) {
+  if (isVibrationEnabled && 'vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch (e) {
+      // Ignored if device lacks vibration hardware
+    }
+  }
+}
+
 // Symbol sets
 const SYMBOL_SETS = {
   numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
@@ -104,6 +124,23 @@ function updateExhaustedSymbols() {
   }
 }
 
+socket.on('gameOver', ({ reason, leaderboard }) => {
+  gameView.classList.add('game-locked');
+  quitBtn.disabled = true;
+
+  // Determine if the current player won or lost
+  const isWinner = leaderboard.length > 0 && leaderboard[0].id === myId;
+  if (isWinner) {
+    playVictoryFanfare();
+    triggerVibration([80, 60, 100, 60, 140, 60, 250]); // Grand victory vibration
+  } else {
+    triggerVibration([300, 100, 300]); // Defeat pattern
+  }
+
+  winnerReason.textContent = reason;
+  leaderboardBody.innerHTML = '';
+  // ... rest of the existing leaderboard rendering ...
+  
 // Mode toggle handling (Multi vs Bot)
 document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
   radio.addEventListener('change', (e) => {
@@ -222,6 +259,42 @@ function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '�
 
 socket.on('connect', () => { myId = socket.id; });
 
+socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => {
+  const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+  if (!cell) return;
+
+  if (correct) {
+    playSuccessSound();
+    triggerVibration([40]); // Crisp light tap
+    
+    cell.classList.remove('wrong', 'selected');
+    cell.classList.add('correct', 'user-filled');
+    cell.textContent = getSymbol(value);
+    cell.dataset.val = value;
+    selectedCell = null;
+
+    checkCompletions();
+    updateExhaustedSymbols();
+  } else {
+    playErrorSound();
+    triggerVibration([120, 80, 140]); // Double alert buzz
+
+    cell.classList.add('wrong');
+    cell.textContent = getSymbol(value);
+    updateLivesDisplay(mistakes);
+
+    if (eliminated) {
+      triggerVibration([350]); // Solid rumble on elimination
+      triggerPlayerEliminated('❌ You were eliminated (3 mistakes)!');
+    }
+
+    setTimeout(() => {
+      cell.classList.remove('wrong');
+      cell.textContent = '';
+    }, 500);
+  }
+});
+
 // Start / Create Match
 createBtn.addEventListener('click', () => {
   getAudioContext();
@@ -278,6 +351,11 @@ socket.on('playerListUpdate', (players) => {
 
 socket.on('errorMessage', (msg) => alert(msg));
 socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
+
+if (anyCompleted) {
+    playSectionCompleteSound();
+    triggerVibration([60, 50, 60, 50, 100]); // Triple pulse fanfare
+  }
 
 // Start Game
 socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet, roomCode }) => {
