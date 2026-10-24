@@ -118,9 +118,11 @@ customColorPicker.addEventListener('input', (e) => document.documentElement.styl
 soundToggle.addEventListener('change', (e) => isSoundEnabled = e.target.checked);
 vibrationToggle.addEventListener('change', (e) => isVibrationEnabled = e.target.checked);
 emojiToggle.addEventListener('change', (e) => isEmojiEnabled = e.target.checked);
-
+// DELETE or COMMENT OUT this line around line 119:
+// vibrationToggle.addEventListener('change', (e) => isVibrationEnabled = e.target.checked);
 musicToggle.addEventListener('change', (e) => {
-  isMusicEnabled = e.target.checked;
+  isMusicEnabled = e.target.checked;// DELETE this line if it's still near the top:
+// const vibrationToggle = document.getElementById('vibration-toggle');
   if (isMusicEnabled) {
     bgAudio.play().catch(() => {});
   } else {
