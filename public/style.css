@@ -5,7 +5,7 @@
 [data-font="mono"] * { font-family: 'JetBrains Mono', monospace !important; }
 [data-font="arcade"] * { font-family: 'Press Start 2P', monospace !important; }
 
-/* Color Themes */
+/* Themes */
 [data-theme="dark"] {
   --bg: #0f172a;
   --card: rgba(15, 23, 42, 0.28);
@@ -129,11 +129,11 @@ body {
   position: relative;
 }
 
-/* Full-Screen Photography Layers */
+/* Background Layers */
 .scenic-bg {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
@@ -154,7 +154,47 @@ body {
 .bg-ocean { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80'); }
 .bg-mountains { background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80'); }
 
-/* Translucent Frosted Glass */
+/* Dynamic Full-Screen Background Color Overlays on Match Finish */
+.result-flash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease, background-color 0.8s ease;
+}
+
+/* Green Screen on Victory */
+.result-flash-screen.flash-win {
+  opacity: 0.82;
+  background: radial-gradient(circle at center, rgba(34, 197, 94, 0.85) 0%, rgba(5, 70, 30, 0.95) 100%);
+  animation: pulseWin 2.5s infinite alternate;
+}
+
+@keyframes pulseWin {
+  0% { opacity: 0.72; }
+  100% { opacity: 0.92; }
+}
+
+/* Red Screen on Loss / Strikeout */
+.result-flash-screen.flash-loss {
+  opacity: 0.86;
+  background: radial-gradient(circle at center, rgba(239, 68, 68, 0.85) 0%, rgba(70, 5, 5, 0.96) 100%);
+  animation: pulseLoss 2s infinite alternate;
+}
+
+@keyframes pulseLoss {
+  0% { opacity: 0.75; }
+  100% { opacity: 0.95; }
+}
+
+/* White Screen on Resign / Timeout Draw */
+.result-flash-screen.flash-draw {
+  opacity: 0.88;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.92) 0%, rgba(203, 213, 225, 0.95) 100%);
+}
+
+/* Frosted Glass */
 .frosted {
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -184,7 +224,6 @@ body {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
-/* Settings Icon Button */
 .icon-btn {
   background: rgba(0, 0, 0, 0.45);
   border: 1.5px solid var(--border);
@@ -219,6 +258,40 @@ body {
 }
 
 .hidden { display: none !important; }
+
+/* Mode Switcher */
+.mode-select-wrap {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+}
+
+.radio-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+  color: #fff;
+  user-select: none;
+}
+
+.radio-label:has(input:checked) {
+  background: var(--accent);
+  color: #000;
+}
+
+.radio-label input { display: none; }
 
 .input-group label, .host-settings label {
   display: block;
@@ -396,7 +469,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   margin-top: 10px;
 }
 
-/* 9x9 Sudoku Grid */
+/* Sudoku Grid */
 .board-wrapper {
   position: relative;
   display: flex;
@@ -446,14 +519,8 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   cursor: default;
 }
 
-.cell.user-filled {
-  color: var(--accent);
-}
-
-.cell.correct {
-  color: var(--success);
-  pointer-events: none;
-}
+.cell.user-filled { color: var(--accent); }
+.cell.correct { color: var(--success); pointer-events: none; }
 
 .cell.wrong {
   color: var(--error);
@@ -466,7 +533,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   75% { transform: translateX(4px); }
 }
 
-/* Symbol Pad */
+/* Keypad & Vanishing Exhausted Numbers */
 .symbol-pad-container {
   margin-top: 14px;
   display: flex;
@@ -497,11 +564,20 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .symbol-btn:hover {
   background: var(--accent);
   color: #000;
+}
+
+.symbol-btn.exhausted {
+  opacity: 0.15;
+  transform: scale(0.85);
+  pointer-events: none;
+  filter: grayscale(1);
+  border-color: transparent !important;
 }
 
 /* Animations */
@@ -528,7 +604,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   100% { opacity: 0; transform: translate(-50%, -70px) scale(1.6); }
 }
 
-/* Settings & Winner Modals */
+/* Modals */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -553,9 +629,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.settings-card {
-  text-align: left;
-}
+.settings-card { text-align: left; }
 
 .modal-header {
   display: flex;
@@ -604,10 +678,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 #custom-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
 #custom-color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
 
-.color-hint {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
+.color-hint { font-size: 0.8rem; color: var(--muted); }
 
 .setting-toggle-row {
   display: flex;
@@ -661,36 +732,4 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   color: var(--accent);
   font-weight: bold;
   font-size: 0.95rem;
-}
-/* Vanishing / Completed Number Pad Buttons */
-.symbol-btn.exhausted {
-  opacity: 0.15;
-  transform: scale(0.85);
-  pointer-events: none;
-  filter: grayscale(1);
-  border-color: transparent !important;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-/* 1. Ensure the background layers NEVER capture clicks */
-.scenic-bg,
-.scenic-overlay {
-  pointer-events: none !important;
-  z-index: -1 !important;
-}
-
-/* 2. Raise the top bar above everything */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  z-index: 100 !important;
-}
-
-/* 3. Ensure the settings button is clickable and above all cards */
-.icon-btn {
-  position: relative;
-  z-index: 101 !important;
-  pointer-events: auto !important;
-  cursor: pointer;
 }

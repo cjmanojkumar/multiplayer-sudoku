@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
-// Sudoku generation & solver
+// Sudoku Generator & Solver
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
     if (board[row][i] === num || board[i][col] === num) return false;
@@ -75,7 +75,7 @@ function getLeaderboard(room) {
   });
 }
 
-function terminateMatch(code, reason) {
+function terminateMatch(code, reason, matchResultType = 'draw') {
   const room = rooms[code];
   if (!room || !room.started) return;
   if (room.timerInterval) clearInterval(room.timerInterval);
@@ -83,11 +83,15 @@ function terminateMatch(code, reason) {
   room.started = false;
 
   const leaderboard = getLeaderboard(room);
-  io.to(code).emit('gameOver', { reason, leaderboard });
+  io.to(code).emit('gameOver', { 
+    reason, 
+    leaderboard,
+    resultType: matchResultType 
+  });
 }
 
 io.on('connection', (socket) => {
-  // Multiplayer room creation
+  // Multiplayer Room Creation
   socket.on('createRoom', ({ username, difficulty, maxPlayers, durationMinutes, symbolSet }) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
@@ -126,7 +130,7 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('playerListUpdate', rooms[roomCode].players);
   });
 
-  // Solo vs AI Bot room creation
+  // Solo vs AI Bot Mode
   socket.on('createSoloBotRoom', ({ username, difficulty, botSpeed, durationMinutes, symbolSet }) => {
     const roomCode = 'BOT-' + Math.random().toString(36).substring(2, 6).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
@@ -182,7 +186,7 @@ io.on('connection', (socket) => {
       io.to(roomCode).emit('timerTick', { timeLeft: rooms[roomCode].timeLeft });
 
       if (rooms[roomCode].timeLeft <= 0) {
-        terminateMatch(roomCode, '⏰ Time ran out!');
+        terminateMatch(roomCode, '⏰ Time ran out!', 'draw');
       }
     }, 1000);
 
@@ -208,7 +212,7 @@ io.on('connection', (socket) => {
             eliminated: true,
             totalBlanks: room.totalBlanks
           });
-          terminateMatch(roomCode, '🤖 AI Bot struck out! You win!');
+          terminateMatch(roomCode, '🤖 AI Bot struck out! You win!', 'win');
           return;
         }
       } else {
@@ -224,7 +228,7 @@ io.on('connection', (socket) => {
       });
 
       if (bot.score >= room.totalBlanks) {
-        terminateMatch(roomCode, '🤖 AI Bot finished the board first!');
+        terminateMatch(roomCode, '🤖 AI Bot finished the board first!', 'loss');
       }
     }, baseInterval);
   });
@@ -274,7 +278,7 @@ io.on('connection', (socket) => {
         io.to(code).emit('timerTick', { timeLeft: room.timeLeft });
 
         if (room.timeLeft <= 0) {
-          terminateMatch(code, '⏰ Time ran out!');
+          terminateMatch(code, '⏰ Time ran out!', 'draw');
         }
       }, 1000);
     }
@@ -304,7 +308,7 @@ io.on('connection', (socket) => {
       socket.emit('moveResult', { row, col, value, correct: true });
 
       if (player.score >= room.totalBlanks) {
-        terminateMatch(code, `🎉 ${player.name} completed the board!`);
+        terminateMatch(code, `🎉 ${player.name} completed the board!`, 'win');
       }
     } else {
       player.mistakes += 1;
@@ -332,9 +336,9 @@ io.on('connection', (socket) => {
 
       const alivePlayers = room.players.filter(p => !p.eliminated);
       if (alivePlayers.length === 0) {
-        terminateMatch(code, '💀 All players lost their lives!');
+        terminateMatch(code, '💀 All players lost their lives!', 'loss');
       } else if (room.players.length > 1 && alivePlayers.length === 1) {
-        terminateMatch(code, `👑 ${alivePlayers[0].name} wins!`);
+        terminateMatch(code, `👑 ${alivePlayers[0].name} wins!`, 'win');
       }
     }
   });
@@ -359,9 +363,9 @@ io.on('connection', (socket) => {
 
     const alivePlayers = room.players.filter(p => !p.eliminated);
     if (alivePlayers.length === 0) {
-      terminateMatch(code, `${player.name} resigned.`);
+      terminateMatch(code, `${player.name} resigned.`, 'resign');
     } else if (room.players.length > 1 && alivePlayers.length === 1) {
-      terminateMatch(code, `🏳️ ${player.name} resigned. ${alivePlayers[0].name} wins!`);
+      terminateMatch(code, `🏳️ ${player.name} resigned. ${alivePlayers[0].name} wins!`, 'win');
     }
   });
 
@@ -378,9 +382,9 @@ io.on('connection', (socket) => {
         if (room.started) {
           const alivePlayers = room.players.filter(p => !p.eliminated);
           if (alivePlayers.length === 0 || room.players.length === 0) {
-            terminateMatch(code, 'Match ended.');
+            terminateMatch(code, 'Match ended.', 'resign');
           } else if (alivePlayers.length === 1) {
-            terminateMatch(code, `${alivePlayers[0].name} won!`);
+            terminateMatch(code, `${alivePlayers[0].name} won!`, 'win');
           }
         }
 

@@ -11,9 +11,13 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+  <!-- Full-Screen Realistic Scenery -->
   <div id="scenic-bg" class="scenic-bg bg-milkyway">
     <div class="scenic-overlay"></div>
   </div>
+
+  <!-- End-Game Screen Glow Layer (Green for Win, Red for Loss, White for Resign/Draw) -->
+  <div id="result-flash-screen" class="result-flash-screen"></div>
 
   <div class="arena-container">
     <div class="top-bar">
@@ -211,7 +215,7 @@
   <div id="winner-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted">
       <div class="modal-header">
-        <h2>🏆 Match Over</h2>
+        <h2 id="winner-title">🏆 Match Over</h2>
         <span class="close-x" id="modal-close-x">&times;</span>
       </div>
       <p id="winner-reason" class="winner-reason"></p>
