@@ -149,48 +149,18 @@ musicToggle.addEventListener('change', (e) => {
 
 modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
 
-// High-quality public-domain / royalty-free instrumental streams
-const INSTRUMENTAL_TRACKS = {
-  lofi: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3', // Relaxing lo-fi study beat
-  acoustic: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3', // Gentle acoustic guitar
-  ambient: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3'   // Soft piano & strings
-};
-
-const bgAudio = new Audio();
+// Single continuous instrumental soundtrack
+const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
 bgAudio.loop = true;
-bgAudio.volume = 0.25; // Gentle background level
+bgAudio.volume = 0.25;
 
-const trackSelect = document.getElementById('instrumental-track-select');
-
-trackSelect.addEventListener('change', (e) => {
-  const choice = e.target.value;
-  if (choice === 'synth') {
-    bgAudio.pause();
-    if (isMusicEnabled) startAmbientMusic(); // Falls back to your procedural Web Audio synth
-  } else if (INSTRUMENTAL_TRACKS[choice]) {
-    stopAmbientMusic();
-    bgAudio.src = INSTRUMENTAL_TRACKS[choice];
-    if (isMusicEnabled) {
-      bgAudio.play().catch(() => {});
-    }
-  }
-});
-
-// Update the main Music Toggle
+// Music ON/OFF toggle handler
 musicToggle.addEventListener('change', (e) => {
   isMusicEnabled = e.target.checked;
-  const choice = trackSelect.value;
-
   if (isMusicEnabled) {
-    if (choice === 'synth') {
-      startAmbientMusic();
-    } else {
-      if (!bgAudio.src) bgAudio.src = INSTRUMENTAL_TRACKS[choice];
-      bgAudio.play().catch(() => {});
-    }
+    bgAudio.play().catch(() => {});
   } else {
     bgAudio.pause();
-    stopAmbientMusic();
   }
 });
 
