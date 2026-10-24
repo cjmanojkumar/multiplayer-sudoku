@@ -326,21 +326,30 @@ function stopAmbientMusic() {
 }
 
 // Sound effects
-function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+function playTone(freq, type = 'sine', duration = 0.2, gainVal = 0.25) {
   if (!isSoundEnabled) return;
   try {
     const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+
     osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+    // Ensure clear volume
     gain.gain.setValueAtTime(gainVal, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.start();
+
+    osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + duration);
-  } catch (e) {}
+  } catch (err) {
+    console.error("Audio playback error:", err);
+  }
 }
 
 function playSuccessSound() {
@@ -745,3 +754,33 @@ socket.on('gameOver', ({ reason, leaderboard }) => {
 
   winnerModal.classList.remove('hidden');
 });
+
+let audioCtx = null;
+
+function getAudioContext() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+  }
+  // If the browser suspended audio because the user hadn't clicked yet, resume it:
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+// Global unlock: resume audio on the very first touch/click anywhere on the screen
+const unlockAudioOnFirstInteraction = () => {
+  const ctx = getAudioContext();
+  if (ctx.state === 'suspended') {
+    ctx.resume();
+  }
+  // Once unlocked, remove the listeners
+  window.removeEventListener('click', unlockAudioOnFirstInteraction);
+  window.removeEventListener('touchstart', unlockAudioOnFirstInteraction);
+  window.removeEventListener('keydown', unlockAudioOnFirstInteraction);
+};
+
+window.addEventListener('click', unlockAudioOnFirstInteraction);
+window.addEventListener('touchstart', unlockAudioOnFirstInteraction);
+window.addEventListener('keydown', unlockAudioOnFirstInteraction);
