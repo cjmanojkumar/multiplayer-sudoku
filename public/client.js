@@ -58,10 +58,13 @@ const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
 
-// --- SCENIC BACKGROUND SWITCHER ---
+// Realistic Scenic Background Switcher
+const scenicbackground = document.getElementById('scenic-bg');
+const BackgroundSelect = document.getElementById('bg-select');
+
 bgSelect.addEventListener('change', (e) => {
-  const chosen = e.target.value;
-  scenicBg.className = `scenic-bg ${chosen}-bg`;
+  const choice = e.target.value;
+  scenicBg.className = `scenic-bg bg-${choice}`;
 });
 
 // --- THEME & FONT SWITCHERS ---

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-font="default" data-bg="stars">
+<html lang="en" data-theme="dark" data-font="default">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sudoku Arena</title>
-  <!-- Google Fonts for custom typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Fredoka:wght@600;700&family=JetBrains+Mono:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -12,26 +11,26 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <!-- Dynamic Scenic Background Layers -->
-  <div id="scenic-bg" class="scenic-bg stars-bg">
-    <div class="sky-layer"></div>
-    <div class="horizon-layer"></div>
+  <!-- Realistic Full-Screen Backdrop Layer -->
+  <div id="scenic-bg" class="scenic-bg bg-milkyway">
+    <div class="scenic-overlay"></div>
   </div>
 
   <div class="arena-container">
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
       <div class="palette-bar">
-        <!-- Scenic Background Selector -->
-        <select id="bg-select" title="Scenic Background">
-          <option value="stars">✨ Cosmic Stars</option>
-          <option value="sunset">🌅 Golden Sunset</option>
-          <option value="city">🏙️ Neon City</option>
-          <option value="nature">🌲 Lush Nature</option>
-          <option value="sky">🌤️ Azure Sky</option>
+        <!-- Realistic Background Selector -->
+        <select id="bg-select" title="Realistic Background">
+          <option value="milkyway">🌌 Milky Way Galaxy</option>
+          <option value="sunset">🌄 Mountain Sunset</option>
+          <option value="forest">🌲 Misty Redwood Forest</option>
+          <option value="city">🏙️ Tokyo Night City</option>
+          <option value="ocean">🌊 Twilight Ocean</option>
+          <option value="mountains">🏔️ Snowy Alpine Peak</option>
         </select>
 
-        <!-- Color Palette -->
+        <!-- Palette Theme -->
         <select id="theme-select" title="Preset Themes">
           <option value="dark">Midnight Dark</option>
           <option value="neon">Cyber Neon</option>
