@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
-// Sudoku Generator & Solver Helpers
+// --- SUDOKU GENERATION & VALIDATION ---
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
     if (board[row][i] === num || board[i][col] === num) return false;

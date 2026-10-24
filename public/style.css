@@ -1,11 +1,28 @@
-/* Font Families */
+/* =========================================
+   20 CURATED FONT FAMILIES
+   ========================================= */
 [data-font="default"] * { font-family: system-ui, -apple-system, sans-serif !important; }
 [data-font="fredoka"] * { font-family: 'Fredoka', cursive, sans-serif !important; }
 [data-font="cinzel"] * { font-family: 'Cinzel', serif !important; }
-[data-font="mono"] * { font-family: 'JetBrains Mono', monospace !important; }
-[data-font="arcade"] * { font-family: 'Press Start 2P', monospace !important; }
+[data-font="jetbrains"] * { font-family: 'JetBrains Mono', monospace !important; }
+[data-font="arcade"] * { font-family: 'Press Start 2P', monospace !important; font-size: 0.95em; }
+[data-font="inter"] * { font-family: 'Inter', sans-serif !important; }
+[data-font="montserrat"] * { font-family: 'Montserrat', sans-serif !important; }
+[data-font="orbitron"] * { font-family: 'Orbitron', sans-serif !important; }
+[data-font="righteous"] * { font-family: 'Righteous', cursive !important; }
+[data-font="space"] * { font-family: 'Space Grotesk', sans-serif !important; }
+[data-font="playfair"] * { font-family: 'Playfair Display', serif !important; }
+[data-font="cormorant"] * { font-family: 'Cormorant Garamond', serif !important; }
+[data-font="oswald"] * { font-family: 'Oswald', sans-serif !important; }
+[data-font="russo"] * { font-family: 'Russo One', sans-serif !important; }
+[data-font="comfortaa"] * { font-family: 'Comfortaa', cursive !important; }
+[data-font="fira"] * { font-family: 'Fira Code', monospace !important; }
+[data-font="silkscreen"] * { font-family: 'Silkscreen', monospace !important; }
+[data-font="lobster"] * { font-family: 'Lobster', cursive !important; }
+[data-font="pacifico"] * { font-family: 'Pacifico', cursive !important; }
+[data-font="dancing"] * { font-family: 'Dancing Script', cursive !important; }
 
-/* Themes */
+/* Color Themes */
 [data-theme="dark"] {
   --bg: #0f172a;
   --card: rgba(15, 23, 42, 0.28);
@@ -148,7 +165,7 @@ body {
   pointer-events: none;
 }
 
-/* White Glitter Particle Canvas */
+/* Ambient White Glitter Canvas */
 .glitter-canvas {
   position: fixed;
   inset: 0;
@@ -158,7 +175,7 @@ body {
   pointer-events: none !important;
 }
 
-/* Dynamic Full-Screen Background Color Overlays on Match Finish */
+/* Match Finish Screen Overlay */
 .result-flash-screen {
   position: fixed;
   inset: 0;
@@ -200,7 +217,7 @@ body {
   background: radial-gradient(circle at center, rgba(148, 163, 184, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
 }
 
-/* Frosted Glass */
+/* Translucent Frosted Glass Card */
 .frosted {
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -391,7 +408,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   color: var(--muted);
 }
 
-/* Match HUD */
+/* HUD */
 .hud {
   display: flex;
   flex-direction: column;

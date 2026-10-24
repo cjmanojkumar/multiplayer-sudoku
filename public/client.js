@@ -12,14 +12,28 @@ document.addEventListener('DOMContentLoaded', () => {
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
 
-  // Background Images Dictionary (Fixes stuck background by applying direct URL)
+  // 20 High-Resolution Curated Unsplash Sceneries
   const BACKGROUND_IMAGES = {
     milkyway: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
     sunset: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
     forest: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
     city: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
     ocean: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
-    mountains: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80'
+    mountains: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80',
+    desert: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80',
+    aurora: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80',
+    autumn: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
+    cyber: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80',
+    foglake: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80',
+    nebula: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80',
+    bamboo: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
+    temple: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1920&q=80',
+    waterfall: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80',
+    cherry: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80',
+    rain: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80',
+    lightning: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80',
+    wheat: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
+    canyon: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80'
   };
 
   // Continuous Instrumental Soundtrack
@@ -95,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
-  // --- WHITE GLITTER PARTICLE ENGINE ---
+  // --- WHITE GLITTER PARTICLE CANVAS ---
   const glitterCanvas = document.getElementById('glitter-canvas');
   if (glitterCanvas) {
     const gCtx = glitterCanvas.getContext('2d');
@@ -147,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGlitter();
   }
 
-  // --- PROCEDURAL AUDIO SYNTHESIZERS ---
+  // --- AUDIO SYNTHESIZERS ---
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -175,13 +189,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
-  // 1. Right Move (Crystalline chime)
   function playSuccessSound() {
     playTone(587.33, 'sine', 0.09, 0.09);
     setTimeout(() => playTone(880, 'sine', 0.16, 0.09), 75);
   }
 
-  // 2. Wrong Move (Pitch-dropping heavy buzz)
   function playErrorSound() {
     if (!isSoundEnabled) return;
     try {
@@ -189,23 +201,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const now = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(180, now);
       osc.frequency.exponentialRampToValueAtTime(60, now + 0.32);
-
       gain.gain.setValueAtTime(0.14, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
-
       osc.connect(gain);
       gain.connect(ctx.destination);
-
       osc.start(now);
       osc.stop(now + 0.33);
     } catch (e) {}
   }
 
-  // 3. Line / 3x3 Block Complete (Ascending arpeggio)
   function playSectionCompleteSound() {
     playTone(523.25, 'triangle', 0.12, 0.1);
     setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.1), 90);
@@ -213,12 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => playTone(1046.50, 'triangle', 0.25, 0.12), 270);
   }
 
-  // 4. Dramatic Victory Brass Fanfare
   function playDramaticVictory() {
     if (!isSoundEnabled) return;
     const ctx = getAudioContext();
     const now = ctx.currentTime;
-
     const brassNotes = [
       { freq: 261.63, delay: 0.0, dur: 0.35 },
       { freq: 329.63, delay: 0.15, dur: 0.35 },
@@ -228,31 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
       { freq: 783.99, delay: 0.90, dur: 0.90 },
       { freq: 1046.5, delay: 1.15, dur: 1.40 }
     ];
-
     brassNotes.forEach(n => {
       const osc = ctx.createOscillator();
       const osc2 = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
-
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(n.freq, now + n.delay);
-
       osc2.type = 'triangle';
       osc2.frequency.setValueAtTime(n.freq * 0.5, now + n.delay);
-
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(1400, now + n.delay);
-
       gain.gain.setValueAtTime(0.0001, now + n.delay);
       gain.gain.linearRampToValueAtTime(0.09, now + n.delay + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
-
       osc.connect(filter);
       osc2.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
-
       osc.start(now + n.delay);
       osc2.start(now + n.delay);
       osc.stop(now + n.delay + n.dur);
@@ -260,43 +258,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Dramatic Defeat Cadence
   function playDramaticLoss() {
     if (!isSoundEnabled) return;
     const ctx = getAudioContext();
     const now = ctx.currentTime;
-
     const minorDescent = [
       { freq: 220.00, delay: 0.0, dur: 0.7 },
       { freq: 207.65, delay: 0.45, dur: 0.7 },
       { freq: 196.00, delay: 0.90, dur: 0.8 },
       { freq: 146.83, delay: 1.40, dur: 1.8 }
     ];
-
     minorDescent.forEach(n => {
       const osc = ctx.createOscillator();
       const sub = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
-
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(n.freq, now + n.delay);
-
       sub.type = 'sine';
       sub.frequency.setValueAtTime(n.freq * 0.5, now + n.delay);
-
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(600, now + n.delay);
-
       gain.gain.setValueAtTime(0.0001, now + n.delay);
       gain.gain.linearRampToValueAtTime(0.12, now + n.delay + 0.08);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
-
       osc.connect(filter);
       sub.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
-
       osc.start(now + n.delay);
       sub.start(now + n.delay);
       osc.stop(now + n.delay + n.dur);
@@ -304,37 +293,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 6. Draw / Tie Dual-Tone Chime
   function playDrawSound() {
     if (!isSoundEnabled) return;
     const ctx = getAudioContext();
     const now = ctx.currentTime;
-
     [392.00, 523.25].forEach(freq => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
-
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.linearRampToValueAtTime(0.08, now + 0.1);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
-
       osc.connect(gain);
       gain.connect(ctx.destination);
-
       osc.start(now);
       osc.stop(now + 1.9);
     });
   }
 
-  // 7. Resign Neutral Tone
   function playResignSound() {
     playTone(440, 'sine', 0.22, 0.08);
     setTimeout(() => playTone(330, 'sine', 0.40, 0.08), 120);
   }
 
-  // Mode radio selector
+  // Radio button mode selector
   document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
       if (e.target.value === 'bot') {
@@ -357,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
   settingsCloseX?.addEventListener('click', closeSettings);
   settingsSaveBtn?.addEventListener('click', closeSettings);
 
-  // Background Image Switcher (Applies direct URL dynamically)
+  // Background Image Selector: Dynamically assigns high-res URL
   bgSelect?.addEventListener('change', (e) => {
     const chosenKey = e.target.value;
     const imageUrl = BACKGROUND_IMAGES[chosenKey];
@@ -366,13 +349,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Font Family Selector: Switches data-font on <html>
+  fontSelect?.addEventListener('change', (e) => {
+    document.documentElement.setAttribute('data-font', e.target.value);
+  });
+
   themeSelect?.addEventListener('change', (e) => {
     document.documentElement.setAttribute('data-theme', e.target.value);
     document.documentElement.style.removeProperty('--accent');
-  });
-
-  fontSelect?.addEventListener('change', (e) => {
-    document.documentElement.setAttribute('data-font', e.target.value);
   });
 
   customColorPicker?.addEventListener('input', (e) => {
