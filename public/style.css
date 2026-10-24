@@ -671,3 +671,26 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   border-color: transparent !important;
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
+/* 1. Ensure the background layers NEVER capture clicks */
+.scenic-bg,
+.scenic-overlay {
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
+/* 2. Raise the top bar above everything */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 100 !important;
+}
+
+/* 3. Ensure the settings button is clickable and above all cards */
+.icon-btn {
+  position: relative;
+  z-index: 101 !important;
+  pointer-events: auto !important;
+  cursor: pointer;
+}
