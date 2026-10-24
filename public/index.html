@@ -184,16 +184,10 @@
           </div>
         </div>
 
-       <!-- Instrumental Music Selector -->
-        <div class="setting-row">
-          <label for="music-track-select">🎵 Background Music Track:</label>
-          <select id="music-track-select">
-            <option value="off">Off (Silent)</option>
-            <option value="piano" selected>🎹 Cozy Lofi Piano</option>
-            <option value="guitar">🎸 Acoustic Fingerstyle</option>
-            <option value="kalimba">🔔 Zen Kalimba & Harp</option>
-            <option value="ambient">🌌 Cinematic Strings</option>
-          </select>
+        <!-- Music & Sound Effect Toggles -->
+        <div class="setting-toggle-row">
+          <label for="music-toggle">🎵 Background Music</label>
+          <input type="checkbox" id="music-toggle" class="toggle-checkbox" />
         </div>
 
         <div class="setting-toggle-row">
@@ -205,6 +199,7 @@
           <label for="emoji-toggle">✨ Completion Emojis</label>
           <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
         </div>
+      </div>
 
       <button id="settings-save-btn" class="btn primary full-width">Done</button>
     </div>
