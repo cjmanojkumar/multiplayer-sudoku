@@ -122,85 +122,68 @@ musicToggle.addEventListener('change', (e) => {
 
 modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
 
-// --- DYNAMIC SCENERY & THEME MUSIC ENGINE ---
+// --- LIVELY, UPBEAT & CASUAL MUSIC ENGINE ---
 let audioCtx = null;
 let musicInterval = null;
-let currentChordIndex = 0;
-let currentMusicProfile = 'milkyway'; // Default profile
+let currentStep = 0;
+let currentMusicProfile = 'milkyway';
 
-// Unique chord progressions and synth tones tailored for each background
+// Upbeat, bouncy arpeggiated patterns for each scenery
 const MUSIC_PROFILES = {
   milkyway: {
-    tempo: 3800,
+    tempoMs: 190, // Fast, snappy cosmic pop
     waveform: 'sine',
-    filterFreq: 420,
-    volume: 0.022,
-    chords: [
-      [220.00, 329.63, 440.00, 659.25], // Em9
-      [174.61, 261.63, 392.00, 523.25], // Fmaj7
-      [146.83, 220.00, 349.23, 440.00], // Dm7
-      [196.00, 293.66, 392.00, 587.33]  // Gsus4
-    ]
+    bassWave: 'triangle',
+    filterFreq: 1200,
+    volume: 0.045,
+    // Lively, cheerful pentatonic electro pattern (frequencies in Hz)
+    leadPattern: [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 880.00, 1046.50, 587.33, 659.25, 880.00, 1174.66, 880.00, 659.25, 783.99, 987.77],
+    bassPattern: [130.81, 0, 130.81, 164.81, 174.61, 0, 174.61, 196.00, 146.83, 0, 146.83, 174.61, 196.00, 0, 196.00, 246.94]
   },
   sunset: {
-    tempo: 3200,
+    tempoMs: 210, // Warm, sunny tropical bounce
     waveform: 'triangle',
-    filterFreq: 650,
-    volume: 0.02,
-    chords: [
-      [261.63, 329.63, 392.00, 493.88], // Cmaj7
-      [220.00, 261.63, 329.63, 392.00], // Am7
-      [174.61, 220.00, 261.63, 329.63], // Fmaj7
-      [196.00, 246.94, 293.66, 392.00]  // G
-    ]
+    bassWave: 'sine',
+    filterFreq: 1400,
+    volume: 0.04,
+    leadPattern: [659.25, 0, 783.99, 880.00, 0, 783.99, 659.25, 523.25, 587.33, 0, 659.25, 783.99, 0, 880.00, 783.99, 659.25],
+    bassPattern: [130.81, 130.81, 0, 130.81, 174.61, 174.61, 0, 174.61, 220.00, 220.00, 0, 220.00, 196.00, 196.00, 0, 196.00]
   },
   forest: {
-    tempo: 4000,
-    waveform: 'sine',
-    filterFreq: 380,
-    volume: 0.024,
-    chords: [
-      [164.81, 246.94, 329.63, 493.88], // E5 ambient
-      [146.83, 220.00, 329.63, 440.00], // Dsus2
-      [130.81, 196.00, 261.63, 392.00], // C9 open
-      [146.83, 220.00, 293.66, 440.00]  // Dadd9
-    ]
+    tempoMs: 220, // Playful, upbeat acoustic pluck
+    waveform: 'triangle',
+    bassWave: 'sine',
+    filterFreq: 1100,
+    volume: 0.045,
+    leadPattern: [440.00, 493.88, 523.25, 659.25, 0, 523.25, 493.88, 440.00, 392.00, 440.00, 523.25, 587.33, 0, 523.25, 440.00, 493.88],
+    bassPattern: [110.00, 0, 164.81, 0, 130.81, 0, 196.00, 0, 98.00, 0, 146.83, 0, 130.81, 0, 164.81, 0]
   },
   city: {
-    tempo: 2600,
+    tempoMs: 175, // Energetic retro synthwave groove
     waveform: 'sawtooth',
-    filterFreq: 280, // Low-passed for warm synthwave hum
-    volume: 0.015,
-    chords: [
-      [110.00, 220.00, 261.63, 329.63], // Am low pad
-      [130.81, 196.00, 246.94, 329.63], // C/E
-      [87.31, 174.61, 220.00, 261.63],  // F low
-      [98.00, 196.00, 246.94, 293.66]   // G low
-    ]
+    bassWave: 'square',
+    filterFreq: 650, // Warm funk filter
+    volume: 0.03,
+    leadPattern: [587.33, 0, 783.99, 587.33, 880.00, 0, 783.99, 0, 659.25, 0, 783.99, 659.25, 987.77, 880.00, 783.99, 0],
+    bassPattern: [146.83, 146.83, 0, 146.83, 174.61, 174.61, 0, 174.61, 196.00, 196.00, 0, 196.00, 220.00, 220.00, 196.00, 0]
   },
   ocean: {
-    tempo: 4200,
+    tempoMs: 205, // Upbeat sunny calypso/bossa groove
     waveform: 'sine',
-    filterFreq: 400,
-    volume: 0.025,
-    chords: [
-      [174.61, 261.63, 329.63, 392.00], // Fmaj7 swell
-      [196.00, 246.94, 293.66, 392.00], // G swell
-      [220.00, 261.63, 329.63, 440.00], // Am swell
-      [174.61, 220.00, 261.63, 349.23]  // Fsus2
-    ]
+    bassWave: 'triangle',
+    filterFreq: 1500,
+    volume: 0.045,
+    leadPattern: [523.25, 0, 659.25, 0, 783.99, 880.00, 783.99, 659.25, 587.33, 0, 698.46, 0, 783.99, 880.00, 783.99, 587.33],
+    bassPattern: [130.81, 0, 196.00, 130.81, 174.61, 0, 261.63, 174.61, 146.83, 0, 220.00, 146.83, 196.00, 0, 293.66, 196.00]
   },
   mountains: {
-    tempo: 3600,
-    waveform: 'triangle',
-    filterFreq: 850, // Bright, crystal open sound
-    volume: 0.018,
-    chords: [
-      [146.83, 220.00, 440.00, 587.33], // D cold 5th
-      [110.00, 220.00, 329.63, 440.00], // A cold 5th
-      [130.81, 196.00, 392.00, 523.25], // C cold 5th
-      [98.00, 196.00, 293.66, 440.00]   // G cold 5th
-    ]
+    tempoMs: 180, // Crisp, cheerful arcade marimba bounce
+    waveform: 'sine',
+    bassWave: 'triangle',
+    filterFreq: 1800,
+    volume: 0.045,
+    leadPattern: [659.25, 783.99, 987.77, 1174.66, 987.77, 783.99, 880.00, 1046.50, 659.25, 783.99, 880.00, 1046.50, 880.00, 783.99, 659.25, 587.33],
+    bassPattern: [164.81, 0, 164.81, 0, 174.61, 0, 174.61, 0, 196.00, 0, 196.00, 0, 220.00, 0, 196.00, 0]
   }
 };
 
@@ -213,52 +196,65 @@ function getAudioContext() {
   return audioCtx;
 }
 
-function playAmbientChord(freqs, profile) {
-  if (!isMusicEnabled) return;
+// Plays a percussive, short-decay note (lively synth pluck)
+function playPluckNote(freq, waveform, duration, volume, filterFreq) {
+  if (!isMusicEnabled || !freq || freq <= 0) return;
   const ctx = getAudioContext();
   const now = ctx.currentTime;
-  const duration = (profile.tempo / 1000) * 1.15; // Natural cross-fade overlap
 
-  freqs.forEach((freq, idx) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
 
-    osc.type = profile.waveform;
-    osc.frequency.setValueAtTime(freq, now);
+  osc.type = waveform;
+  osc.frequency.setValueAtTime(freq, now);
 
-    // Warm, non-fatiguing filter
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(profile.filterFreq, now);
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(filterFreq || 1200, now);
+  // Fast envelope filter sweep gives it a percussive pop
+  filter.frequency.exponentialRampToValueAtTime(300, now + duration);
 
-    // Dynamic wave swells: higher notes enter slightly staggered
-    const stagger = idx * 0.08;
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(profile.volume, now + 1.2 + stagger);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  // Fast snappy attack and pleasant decay
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(volume, now + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
 
-    osc.start(now);
-    osc.stop(now + duration);
-  });
+  osc.start(now);
+  osc.stop(now + duration + 0.05);
 }
 
 function startAmbientMusic() {
   getAudioContext();
   if (musicInterval) clearInterval(musicInterval);
 
+  currentStep = 0;
   const profile = MUSIC_PROFILES[currentMusicProfile] || MUSIC_PROFILES.milkyway;
-  playAmbientChord(profile.chords[currentChordIndex], profile);
 
   musicInterval = setInterval(() => {
     if (!isMusicEnabled) return;
-    const currentProf = MUSIC_PROFILES[currentMusicProfile] || MUSIC_PROFILES.milkyway;
-    currentChordIndex = (currentChordIndex + 1) % currentProf.chords.length;
-    playAmbientChord(currentProf.chords[currentChordIndex], currentProf);
-  }, profile.tempo);
+    const prof = MUSIC_PROFILES[currentMusicProfile] || MUSIC_PROFILES.milkyway;
+    const len = prof.leadPattern.length;
+    const step = currentStep % len;
+
+    const leadNote = prof.leadPattern[step];
+    const bassNote = prof.bassPattern[step];
+
+    // Play upbeat lead bounce
+    if (leadNote > 0) {
+      playPluckNote(leadNote, prof.waveform, (prof.tempoMs / 1000) * 0.85, prof.volume, prof.filterFreq);
+    }
+
+    // Play rhythmic groove bass
+    if (bassNote > 0) {
+      playPluckNote(bassNote, prof.bassWave, (prof.tempoMs / 1000) * 0.95, prof.volume * 1.3, prof.filterFreq * 0.6);
+    }
+
+    currentStep++;
+  }, profile.tempoMs);
 }
 
 function stopAmbientMusic() {
