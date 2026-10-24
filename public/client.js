@@ -149,193 +149,169 @@ musicToggle.addEventListener('change', (e) => {
 
 modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
 
-// --- PROCEDURAL ACOUSTIC INSTRUMENTAL MUSIC ENGINE ---
-let audioCtx = null;
+// --- MULTI-TRACK INSTRUMENTAL MUSIC ENGINE ---
+let currentMusicTrack = 'piano'; // 'off', 'piano', 'guitar', 'kalimba', 'ambient'
 let musicInterval = null;
-let arpeggioInterval = null;
-let currentChordIndex = 0;
+let leadInterval = null;
+let trackChordIdx = 0;
 
-function getAudioContext() {
-  if (!audioCtx) {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new AudioContext();
+const musicTrackSelect = document.getElementById('music-track-select');
+
+// Music Track Change Listener
+musicTrackSelect.addEventListener('change', (e) => {
+  currentMusicTrack = e.target.value;
+  stopAmbientMusic();
+  if (currentMusicTrack !== 'off') {
+    startAmbientMusic();
   }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
+});
 
-// Warm chord progression (Cmaj9 -> Am9 -> Fmaj7#11 -> G6)
-const instrumentalProgression = [
-  {
-    bass: 65.41, // C2 (Warm Acoustic Bass)
-    piano: [130.81, 196.00, 246.94, 293.66, 329.63], // C3, G3, B3, D4, E4 (Cmaj9)
-    harp: [293.66, 329.63, 392.00, 493.88, 587.33]   // D4, E4, G4, B4, D5
+// Sound Profiles & Chords
+const musicTracks = {
+  // 1. Cozy Lofi Piano
+  piano: {
+    progression: [
+      { bass: 65.41, chords: [130.81, 196.00, 246.94, 329.63], lead: [293.66, 392.00, 493.88] }, // Cmaj9
+      { bass: 55.00, chords: [110.00, 164.81, 261.63, 329.63], lead: [329.63, 440.00, 523.25] }, // Am9
+      { bass: 43.65, chords: [87.31, 130.81, 174.61, 261.63],  lead: [261.63, 329.63, 440.00] }, // Fmaj7
+      { bass: 49.00, chords: [98.00, 146.83, 196.00, 246.94],  lead: [293.66, 392.00, 587.33] }  // G6
+    ],
+    barLength: 3600,
+    arpeggioRate: 900,
+    oscType: 'triangle',
+    filterFreq: 500
   },
-  {
-    bass: 55.00, // A1
-    piano: [110.00, 164.81, 246.94, 261.63, 329.63], // A2, E3, B3, C4, E4 (Am9)
-    harp: [261.63, 329.63, 440.00, 493.88, 659.25]   // C4, E4, A4, B4, E5
+
+  // 2. Acoustic Fingerstyle Guitar
+  guitar: {
+    progression: [
+      { bass: 82.41, chords: [164.81, 246.94, 329.63, 392.00], lead: [329.63, 392.00, 493.88, 659.25] }, // Em
+      { bass: 110.00, chords: [220.00, 277.18, 329.63, 440.00], lead: [277.18, 440.00, 554.37] },        // A
+      { bass: 73.42, chords: [146.83, 220.00, 293.66, 369.99], lead: [293.66, 369.99, 440.00] },        // D
+      { bass: 98.00, chords: [196.00, 246.94, 293.66, 392.00], lead: [392.00, 493.88, 587.33] }         // G
+    ],
+    barLength: 3200,
+    arpeggioRate: 500,
+    oscType: 'sawtooth',
+    filterFreq: 850
   },
-  {
-    bass: 43.65, // F1
-    piano: [87.31, 130.81, 174.61, 246.94, 261.63],  // F2, C3, F3, B3, C4 (Fmaj7#11)
-    harp: [261.63, 329.63, 369.99, 440.00, 523.25]   // C4, E4, F#4, A4, C5
+
+  // 3. Zen Kalimba & Bell Harp
+  kalimba: {
+    progression: [
+      { bass: 130.81, chords: [261.63, 329.63, 392.00, 523.25], lead: [523.25, 587.33, 659.25, 783.99] },
+      { bass: 146.83, chords: [293.66, 349.23, 440.00, 587.33], lead: [440.00, 587.33, 698.46, 880.00] },
+      { bass: 164.81, chords: [329.63, 392.00, 493.88, 659.25], lead: [493.88, 659.25, 783.99, 987.77] },
+      { bass: 174.61, chords: [349.23, 440.00, 523.25, 698.46], lead: [523.25, 698.46, 783.99, 1046.50] }
+    ],
+    barLength: 4000,
+    arpeggioRate: 650,
+    oscType: 'sine',
+    filterFreq: 1400
   },
-  {
-    bass: 49.00, // G1
-    piano: [98.00, 146.83, 196.00, 246.94, 329.63],  // G2, D3, G3, B3, E4 (G6)
-    harp: [246.94, 293.66, 392.00, 493.88, 587.33]   // B3, D4, G4, B4, D5
+
+  // 4. Cinematic Ambient Strings
+  ambient: {
+    progression: [
+      { bass: 55.00, chords: [110.00, 164.81, 220.00, 277.18], lead: [220.00, 329.63, 440.00] },
+      { bass: 43.65, chords: [87.31, 130.81, 174.61, 220.00],  lead: [174.61, 261.63, 349.23] },
+      { bass: 65.41, chords: [130.81, 196.00, 261.63, 329.63], lead: [261.63, 392.00, 523.25] },
+      { bass: 49.00, chords: [98.00, 146.83, 196.00, 246.94],  lead: [196.00, 293.66, 392.00] }
+    ],
+    barLength: 5000,
+    arpeggioRate: 1250,
+    oscType: 'triangle',
+    filterFreq: 320
   }
-];
+};
 
-// 1. Felt Piano Voice Synthesis
-function playFeltPianoNote(freq, time, velocity = 0.05) {
-  if (!isMusicEnabled) return;
+// Play Plucked/Strummed Note
+function playInstrumentNote(freq, time, trackConfig, duration = 2.5, velocity = 0.04) {
+  if (currentMusicTrack === 'off') return;
   const ctx = getAudioContext();
 
   const osc = ctx.createOscillator();
-  const oscHarmonic = ctx.createOscillator();
   const gain = ctx.createGain();
   const filter = ctx.createBiquadFilter();
 
-  // Natural warm timber: Triangle core with subtle Sine harmonic
+  osc.type = trackConfig.oscType;
+  osc.frequency.setValueAtTime(freq, time);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(trackConfig.filterFreq, time);
+
+  // Smooth attack & natural decay
+  gain.gain.setValueAtTime(0.0001, time);
+  gain.gain.linearRampToValueAtTime(velocity, time + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(time);
+  osc.stop(time + duration);
+}
+
+// Play Bass Root Note
+function playBassNote(freq, time) {
+  if (currentMusicTrack === 'off') return;
+  const ctx = getAudioContext();
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
   osc.type = 'triangle';
   osc.frequency.setValueAtTime(freq, time);
 
-  oscHarmonic.type = 'sine';
-  oscHarmonic.frequency.setValueAtTime(freq * 2, time);
-
-  // Mellow wood filter
   filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(520, time);
-  filter.frequency.exponentialRampToValueAtTime(180, time + 2.8);
+  filter.frequency.setValueAtTime(180, time);
 
-  // Piano dynamic envelope: rapid wooden attack, smooth decay
   gain.gain.setValueAtTime(0.0001, time);
-  gain.gain.linearRampToValueAtTime(velocity, time + 0.04);
-  gain.gain.exponentialRampToValueAtTime(velocity * 0.35, time + 0.6);
+  gain.gain.linearRampToValueAtTime(0.07, time + 0.05);
   gain.gain.exponentialRampToValueAtTime(0.0001, time + 3.2);
 
   osc.connect(filter);
-  oscHarmonic.connect(filter);
   filter.connect(gain);
   gain.connect(ctx.destination);
 
   osc.start(time);
-  oscHarmonic.start(time);
   osc.stop(time + 3.3);
-  oscHarmonic.stop(time + 3.3);
 }
 
-// 2. Upright Acoustic Bass Voice
-function playAcousticBass(freq, time) {
-  if (!isMusicEnabled) return;
-  const ctx = getAudioContext();
-
-  const osc = ctx.createOscillator();
-  const sub = ctx.createOscillator();
-  const gain = ctx.createGain();
-  const filter = ctx.createBiquadFilter();
-
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(freq, time);
-
-  sub.type = 'sine';
-  sub.frequency.setValueAtTime(freq / 2, time);
-
-  filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(220, time);
-
-  gain.gain.setValueAtTime(0.0001, time);
-  gain.gain.linearRampToValueAtTime(0.08, time + 0.08);
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + 3.5);
-
-  osc.connect(filter);
-  sub.connect(filter);
-  filter.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start(time);
-  sub.start(time);
-  osc.stop(time + 3.6);
-  sub.stop(time + 3.6);
-}
-
-// 3. Plucked Kalimba / Acoustic Harp Note
-function playPluckedHarp(freq, time) {
-  if (!isMusicEnabled) return;
-  const ctx = getAudioContext();
-
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  const filter = ctx.createBiquadFilter();
-
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(freq, time);
-
-  filter.type = 'bandpass';
-  filter.frequency.setValueAtTime(freq, time);
-  filter.Q.setValueAtTime(3.5, time);
-
-  // Sharp delicate pluck attack
-  gain.gain.setValueAtTime(0.0001, time);
-  gain.gain.linearRampToValueAtTime(0.035, time + 0.015);
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + 1.4);
-
-  osc.connect(filter);
-  filter.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start(time);
-  osc.stop(time + 1.5);
-}
-
-// Play a full measure of acoustic accompaniment
-function playInstrumentalBar(chord) {
-  if (!isMusicEnabled) return;
-  const ctx = getAudioContext();
-  const now = ctx.currentTime;
-
-  // Trigger Acoustic Bass on beat 1
-  playAcousticBass(chord.bass, now);
-
-  // Strum Felt Piano with micro-timing offsets for an authentic human touch
-  chord.piano.forEach((note, i) => {
-    playFeltPianoNote(note, now + (i * 0.035), 0.045);
-  });
-
-  // Light secondary chord touch on beat 3
-  setTimeout(() => {
-    if (!isMusicEnabled) return;
-    const midTime = ctx.currentTime;
-    chord.piano.slice(1, 4).forEach((note, i) => {
-      playFeltPianoNote(note, midTime + (i * 0.025), 0.028);
-    });
-  }, 1800);
-}
-
-// Start continuous instrumental background soundtrack
+// Master Loop Trigger
 function startAmbientMusic() {
+  if (currentMusicTrack === 'off') return;
   getAudioContext();
   stopAmbientMusic();
 
-  // 1. Main Chord & Bass Loop (every 3.8 seconds per measure)
-  playInstrumentalBar(instrumentalProgression[currentChordIndex]);
-  musicInterval = setInterval(() => {
-    if (!isMusicEnabled) return;
-    currentChordIndex = (currentChordIndex + 1) % instrumentalProgression.length;
-    playInstrumentalBar(instrumentalProgression[currentChordIndex]);
-  }, 3800);
+  const track = musicTracks[currentMusicTrack];
+  if (!track) return;
 
-  // 2. Gentle cascading Harp arpeggio notes drifting in between beats
-  arpeggioInterval = setInterval(() => {
-    if (!isMusicEnabled) return;
-    const currentChord = instrumentalProgression[currentChordIndex];
-    const harpNotes = currentChord.harp;
-    const randomNote = harpNotes[Math.floor(Math.random() * harpNotes.length)];
-    const ctx = getAudioContext();
-    playPluckedHarp(randomNote, ctx.currentTime);
-  }, 950);
+  const playBar = () => {
+    const chord = track.progression[trackChordIdx];
+    const now = getAudioContext().currentTime;
+
+    playBassNote(chord.bass, now);
+    chord.chords.forEach((note, i) => {
+      playInstrumentNote(note, now + (i * 0.03), track, 3.2, 0.035);
+    });
+  };
+
+  playBar();
+  musicInterval = setInterval(() => {
+    trackChordIdx = (trackChordIdx + 1) % track.progression.length;
+    playBar();
+  }, track.barLength);
+
+  // Arpeggios / Lead Plucks
+  leadInterval = setInterval(() => {
+    const chord = track.progression[trackChordIdx];
+    const leadNotes = chord.lead;
+    const note = leadNotes[Math.floor(Math.random() * leadNotes.length)];
+    playInstrumentNote(note, getAudioContext().currentTime, track, 1.6, 0.025);
+  }, track.arpeggioRate);
 }
 
 function stopAmbientMusic() {
@@ -343,9 +319,9 @@ function stopAmbientMusic() {
     clearInterval(musicInterval);
     musicInterval = null;
   }
-  if (arpeggioInterval) {
-    clearInterval(arpeggioInterval);
-    arpeggioInterval = null;
+  if (leadInterval) {
+    clearInterval(leadInterval);
+    leadInterval = null;
   }
 }
 
@@ -637,7 +613,7 @@ socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => 
     updateExhaustedSymbols();
   } else {
     // ...
-    
+
     setTimeout(() => {
       cell.classList.remove('wrong');
       cell.textContent = '';
