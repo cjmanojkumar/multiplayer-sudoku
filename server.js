@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
-// Sudoku Generator & Solver
+// Sudoku Generator & Solver Helpers
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
     if (board[row][i] === num || board[i][col] === num) return false;
@@ -75,7 +75,7 @@ function getLeaderboard(room) {
   });
 }
 
-function terminateMatch(code, reason, matchResultType = 'draw') {
+function terminateMatch(code, reason, matchOutcome = 'draw') {
   const room = rooms[code];
   if (!room || !room.started) return;
   if (room.timerInterval) clearInterval(room.timerInterval);
@@ -86,12 +86,12 @@ function terminateMatch(code, reason, matchResultType = 'draw') {
   io.to(code).emit('gameOver', { 
     reason, 
     leaderboard,
-    resultType: matchResultType 
+    outcome: matchOutcome 
   });
 }
 
 io.on('connection', (socket) => {
-  // Multiplayer Room Creation
+  // Multiplayer Room
   socket.on('createRoom', ({ username, difficulty, maxPlayers, durationMinutes, symbolSet }) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
@@ -130,7 +130,7 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('playerListUpdate', rooms[roomCode].players);
   });
 
-  // Solo vs AI Bot Mode
+  // Solo vs Bot Room
   socket.on('createSoloBotRoom', ({ username, difficulty, botSpeed, durationMinutes, symbolSet }) => {
     const roomCode = 'BOT-' + Math.random().toString(36).substring(2, 6).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);

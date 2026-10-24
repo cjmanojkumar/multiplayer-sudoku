@@ -166,32 +166,38 @@ body {
 
 /* Green Screen on Victory */
 .result-flash-screen.flash-win {
-  opacity: 0.82;
-  background: radial-gradient(circle at center, rgba(34, 197, 94, 0.85) 0%, rgba(5, 70, 30, 0.95) 100%);
+  opacity: 0.85;
+  background: radial-gradient(circle at center, rgba(34, 197, 94, 0.88) 0%, rgba(5, 70, 30, 0.96) 100%);
   animation: pulseWin 2.5s infinite alternate;
 }
 
 @keyframes pulseWin {
-  0% { opacity: 0.72; }
-  100% { opacity: 0.92; }
-}
-
-/* Red Screen on Loss / Strikeout */
-.result-flash-screen.flash-loss {
-  opacity: 0.86;
-  background: radial-gradient(circle at center, rgba(239, 68, 68, 0.85) 0%, rgba(70, 5, 5, 0.96) 100%);
-  animation: pulseLoss 2s infinite alternate;
-}
-
-@keyframes pulseLoss {
   0% { opacity: 0.75; }
   100% { opacity: 0.95; }
 }
 
-/* White Screen on Resign / Timeout Draw */
+/* Red Screen on Loss / Strikeout */
+.result-flash-screen.flash-loss {
+  opacity: 0.88;
+  background: radial-gradient(circle at center, rgba(239, 68, 68, 0.88) 0%, rgba(70, 5, 5, 0.98) 100%);
+  animation: pulseLoss 2s infinite alternate;
+}
+
+@keyframes pulseLoss {
+  0% { opacity: 0.78; }
+  100% { opacity: 0.98; }
+}
+
+/* White Screen on Draw / Tie */
 .result-flash-screen.flash-draw {
   opacity: 0.88;
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.92) 0%, rgba(203, 213, 225, 0.95) 100%);
+}
+
+/* Muted Slate Gray Screen on Resign */
+.result-flash-screen.flash-resign {
+  opacity: 0.85;
+  background: radial-gradient(circle at center, rgba(148, 163, 184, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
 }
 
 /* Frosted Glass */
@@ -580,7 +586,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   border-color: transparent !important;
 }
 
-/* Animations */
+/* Visual Flash Animations */
 .cell.completed-flash { animation: flashPulse 1s ease forwards; }
 
 @keyframes flashPulse {
