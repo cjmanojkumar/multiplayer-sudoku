@@ -175,11 +175,85 @@ body {
   background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80');
 }
 
-/* High-clarity Frosted Glass Card */
+/* True Translucent Glass Card */
 .frosted {
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid var(--border);
+  /* Ultra-sheer tint that lets the backdrop through */
+  background: rgba(15, 23, 42, 0.28) !important;
+  
+  /* Heavy backdrop blur creates the optical glass effect */
+  backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
+  
+  /* Firm, glowing glass rim */
+  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5),
+              inset 0 1px 1px rgba(255, 255, 255, 0.4),
+              inset 0 -1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+.card {
+  border-radius: 16px;
+  padding: 22px;
+  position: relative;
+}
+
+/* Firm, readable labels over any background */
+.input-group label, .host-settings label {
+  display: block;
+  font-size: 0.85rem;
+  color: #ffffff;
+  margin-bottom: 6px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.2px;
+}
+
+/* Translucent Inputs & Selects with firm edges */
+input[type="text"], input[type="number"], select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  outline: none;
+  backdrop-filter: blur(8px);
+}
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Firm Buttons */
+.btn.primary {
+  background: var(--accent);
+  color: #000;
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Top bar Dropdowns */
+.palette-bar select {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .arena-container {
