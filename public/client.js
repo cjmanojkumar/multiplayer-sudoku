@@ -122,70 +122,74 @@ musicToggle.addEventListener('change', (e) => {
 
 modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
 
-// --- LIVELY, UPBEAT & CASUAL MUSIC ENGINE ---
-let audioCtx = null;
-let musicInterval = null;
-let currentStep = 0;
-let currentMusicProfile = 'milkyway';
-
-// Upbeat, bouncy arpeggiated patterns for each scenery
-const MUSIC_PROFILES = {
-  milkyway: {
-    tempoMs: 190, // Fast, snappy cosmic pop
-    waveform: 'sine',
-    bassWave: 'triangle',
-    filterFreq: 1200,
-    volume: 0.045,
-    // Lively, cheerful pentatonic electro pattern (frequencies in Hz)
-    leadPattern: [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 880.00, 1046.50, 587.33, 659.25, 880.00, 1174.66, 880.00, 659.25, 783.99, 987.77],
-    bassPattern: [130.81, 0, 130.81, 164.81, 174.61, 0, 174.61, 196.00, 146.83, 0, 146.83, 174.61, 196.00, 0, 196.00, 246.94]
+// --- UNIFIED ATMOSPHERE PROFILES (Background + Theme Palette + Custom Instrument) ---
+const ATMOSPHERES = {
+  forest: {
+    bgClass: 'bg-forest',
+    theme: 'emerald',
+    defaultAccent: '#34d399',
+    instrument: 'guitar',
+    tempoMs: 220,
+    // Upbeat folk fingerstyle progression
+    leadPattern: [329.63, 392.00, 440.00, 587.33, 440.00, 392.00, 329.63, 293.66, 329.63, 440.00, 493.88, 587.33, 493.88, 440.00, 392.00, 329.63],
+    bassPattern: [164.81, 0, 164.81, 0, 146.83, 0, 146.83, 0, 130.81, 0, 130.81, 0, 146.83, 0, 164.81, 0]
   },
   sunset: {
-    tempoMs: 210, // Warm, sunny tropical bounce
-    waveform: 'triangle',
-    bassWave: 'sine',
-    filterFreq: 1400,
-    volume: 0.04,
-    leadPattern: [659.25, 0, 783.99, 880.00, 0, 783.99, 659.25, 523.25, 587.33, 0, 659.25, 783.99, 0, 880.00, 783.99, 659.25],
-    bassPattern: [130.81, 130.81, 0, 130.81, 174.61, 174.61, 0, 174.61, 220.00, 220.00, 0, 220.00, 196.00, 196.00, 0, 196.00]
+    bgClass: 'bg-sunset',
+    theme: 'sunset',
+    defaultAccent: '#ff7a00',
+    instrument: 'rhodes',
+    tempoMs: 230,
+    // Mellow Neo-Soul / Rhodes Piano progression
+    leadPattern: [523.25, 659.25, 783.99, 987.77, 0, 783.99, 659.25, 523.25, 587.33, 698.46, 880.00, 1046.50, 0, 880.00, 698.46, 587.33],
+    bassPattern: [130.81, 0, 196.00, 130.81, 146.83, 0, 220.00, 146.83, 174.61, 0, 261.63, 174.61, 196.00, 0, 293.66, 196.00]
   },
-  forest: {
-    tempoMs: 220, // Playful, upbeat acoustic pluck
-    waveform: 'triangle',
-    bassWave: 'sine',
-    filterFreq: 1100,
-    volume: 0.045,
-    leadPattern: [440.00, 493.88, 523.25, 659.25, 0, 523.25, 493.88, 440.00, 392.00, 440.00, 523.25, 587.33, 0, 523.25, 440.00, 493.88],
-    bassPattern: [110.00, 0, 164.81, 0, 130.81, 0, 196.00, 0, 98.00, 0, 146.83, 0, 130.81, 0, 164.81, 0]
+  milkyway: {
+    bgClass: 'bg-milkyway',
+    theme: 'dark',
+    defaultAccent: '#38bdf8',
+    instrument: 'celesta',
+    tempoMs: 195,
+    // Sparkly cosmic music box & chimes
+    leadPattern: [1046.50, 1318.51, 1567.98, 2093.00, 1567.98, 1318.51, 1760.00, 2093.00, 1174.66, 1318.51, 1760.00, 2349.32, 1760.00, 1318.51, 1567.98, 1975.53],
+    bassPattern: [261.63, 0, 261.63, 329.63, 349.23, 0, 349.23, 392.00, 293.66, 0, 293.66, 349.23, 392.00, 0, 392.00, 493.88]
   },
   city: {
-    tempoMs: 175, // Energetic retro synthwave groove
-    waveform: 'sawtooth',
-    bassWave: 'square',
-    filterFreq: 650, // Warm funk filter
-    volume: 0.03,
+    bgClass: 'bg-city',
+    theme: 'neon',
+    defaultAccent: '#f72585',
+    instrument: 'synth',
+    tempoMs: 180,
+    // High-energy 80s arcade synth
     leadPattern: [587.33, 0, 783.99, 587.33, 880.00, 0, 783.99, 0, 659.25, 0, 783.99, 659.25, 987.77, 880.00, 783.99, 0],
     bassPattern: [146.83, 146.83, 0, 146.83, 174.61, 174.61, 0, 174.61, 196.00, 196.00, 0, 196.00, 220.00, 220.00, 196.00, 0]
   },
   ocean: {
-    tempoMs: 205, // Upbeat sunny calypso/bossa groove
-    waveform: 'sine',
-    bassWave: 'triangle',
-    filterFreq: 1500,
-    volume: 0.045,
-    leadPattern: [523.25, 0, 659.25, 0, 783.99, 880.00, 783.99, 659.25, 587.33, 0, 698.46, 0, 783.99, 880.00, 783.99, 587.33],
-    bassPattern: [130.81, 0, 196.00, 130.81, 174.61, 0, 261.63, 174.61, 146.83, 0, 220.00, 146.83, 196.00, 0, 293.66, 196.00]
+    bgClass: 'bg-ocean',
+    theme: 'paper',
+    defaultAccent: '#2563eb',
+    instrument: 'piano',
+    tempoMs: 215,
+    // Breezy grand piano & acoustic resonance
+    leadPattern: [523.25, 659.25, 783.99, 880.00, 783.99, 659.25, 523.25, 440.00, 587.33, 698.46, 783.99, 880.00, 783.99, 587.33, 493.88, 440.00],
+    bassPattern: [130.81, 0, 130.81, 196.00, 174.61, 0, 174.61, 261.63, 146.83, 0, 146.83, 220.00, 196.00, 0, 196.00, 246.94]
   },
   mountains: {
-    tempoMs: 180, // Crisp, cheerful arcade marimba bounce
-    waveform: 'sine',
-    bassWave: 'triangle',
-    filterFreq: 1800,
-    volume: 0.045,
+    bgClass: 'bg-mountains',
+    theme: 'amber',
+    defaultAccent: '#f59e0b',
+    instrument: 'kalimba',
+    tempoMs: 185,
+    // Percussive, melodic African thumb piano
     leadPattern: [659.25, 783.99, 987.77, 1174.66, 987.77, 783.99, 880.00, 1046.50, 659.25, 783.99, 880.00, 1046.50, 880.00, 783.99, 659.25, 587.33],
     bassPattern: [164.81, 0, 164.81, 0, 174.61, 0, 174.61, 0, 196.00, 0, 196.00, 0, 220.00, 0, 196.00, 0]
   }
 };
+
+let currentAtmosphere = 'milkyway';
+let musicInterval = null;
+let currentStep = 0;
+let audioCtx = null;
 
 function getAudioContext() {
   if (!audioCtx) {
@@ -196,9 +200,103 @@ function getAudioContext() {
   return audioCtx;
 }
 
-// Plays a percussive, short-decay note (lively synth pluck)
-function playPluckNote(freq, waveform, duration, volume, filterFreq) {
-  if (!isMusicEnabled || !freq || freq <= 0) return;
+// --- PHYSICAL INSTRUMENT EMULATORS (Web Audio API) ---
+
+// 1. Acoustic Guitar (String Pluck with Overtones & Body Resonance)
+function playGuitarNote(freq, duration, volume) {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
+  // Dual detuned oscillators for string width
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  osc1.type = 'triangle';
+  osc2.type = 'sawtooth';
+  osc1.frequency.setValueAtTime(freq, now);
+  osc2.frequency.setValueAtTime(freq * 1.002, now); // Slight acoustic chorus
+
+  // Guitar body resonance: dampens harsh highs quickly
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(2400, now);
+  filter.frequency.exponentialRampToValueAtTime(320, now + duration * 0.7);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(volume * 1.4, now + 0.008); // Sharp plectrum strike
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  osc1.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc1.start(now);
+  osc2.start(now);
+  osc1.stop(now + duration + 0.05);
+  osc2.stop(now + duration + 0.05);
+}
+
+// 2. Electric Piano / Rhodes (Soft Tine Strike with Tremolo/Vibrato)
+function playRhodesNote(freq, duration, volume) {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  const tine = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, now);
+
+  // Metallic bell chime (7th harmonic of the tine)
+  tine.type = 'sine';
+  tine.frequency.setValueAtTime(freq * 4, now);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(1400, now);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(volume * 1.2, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  osc.connect(filter);
+  tine.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  tine.start(now);
+  osc.stop(now + duration);
+  tine.stop(now + duration * 0.3); // Bell disappears quickly
+}
+
+// 3. Celesta / Music Box (Pure Bell Chimes)
+function playCelestaNote(freq, duration, volume) {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, now);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(volume * 0.9, now + 0.004);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.9);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+// 4. Grand Piano (Rich Fundamental + Dual Harmonic Filter)
+function playPianoNote(freq, duration, volume) {
   const ctx = getAudioContext();
   const now = ctx.currentTime;
 
@@ -206,17 +304,15 @@ function playPluckNote(freq, waveform, duration, volume, filterFreq) {
   const gain = ctx.createGain();
   const filter = ctx.createBiquadFilter();
 
-  osc.type = waveform;
+  osc.type = 'triangle';
   osc.frequency.setValueAtTime(freq, now);
 
   filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(filterFreq || 1200, now);
-  // Fast envelope filter sweep gives it a percussive pop
-  filter.frequency.exponentialRampToValueAtTime(300, now + duration);
+  filter.frequency.setValueAtTime(2000, now);
+  filter.frequency.exponentialRampToValueAtTime(450, now + duration * 0.8);
 
-  // Fast snappy attack and pleasant decay
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.linearRampToValueAtTime(volume, now + 0.012);
+  gain.gain.linearRampToValueAtTime(volume * 1.3, now + 0.01);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
   osc.connect(filter);
@@ -224,37 +320,111 @@ function playPluckNote(freq, waveform, duration, volume, filterFreq) {
   gain.connect(ctx.destination);
 
   osc.start(now);
-  osc.stop(now + duration + 0.05);
+  osc.stop(now + duration);
 }
 
+// 5. Kalimba (Hollow Wooden Thumb Piano)
+function playKalimbaNote(freq, duration, volume) {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, now);
+
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(freq * 1.5, now);
+  filter.Q.setValueAtTime(2, now);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(volume * 1.5, now + 0.006);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.7);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+// 6. Retro Synth Pluck
+function playSynthNote(freq, duration, volume) {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(freq, now);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(950, now);
+  filter.frequency.exponentialRampToValueAtTime(280, now + duration * 0.7);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(volume * 0.8, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + duration);
+}
+
+// Master Note Dispatcher
+function dispatchInstrumentNote(instrument, freq, duration, volume) {
+  if (!isMusicEnabled || !freq || freq <= 0) return;
+  switch (instrument) {
+    case 'guitar': playGuitarNote(freq, duration, volume); break;
+    case 'rhodes': playRhodesNote(freq, duration, volume); break;
+    case 'celesta': playCelestaNote(freq, duration, volume); break;
+    case 'piano': playPianoNote(freq, duration, volume); break;
+    case 'kalimba': playKalimbaNote(freq, duration, volume); break;
+    case 'synth':
+    default:
+      playSynthNote(freq, duration, volume); break;
+  }
+}
+
+// --- MUSIC SEQUENCER ---
 function startAmbientMusic() {
   getAudioContext();
   if (musicInterval) clearInterval(musicInterval);
 
   currentStep = 0;
-  const profile = MUSIC_PROFILES[currentMusicProfile] || MUSIC_PROFILES.milkyway;
+  const atmo = ATMOSPHERES[currentAtmosphere] || ATMOSPHERES.milkyway;
 
   musicInterval = setInterval(() => {
     if (!isMusicEnabled) return;
-    const prof = MUSIC_PROFILES[currentMusicProfile] || MUSIC_PROFILES.milkyway;
-    const len = prof.leadPattern.length;
+    const currentAtmo = ATMOSPHERES[currentAtmosphere] || ATMOSPHERES.milkyway;
+    const len = currentAtmo.leadPattern.length;
     const step = currentStep % len;
 
-    const leadNote = prof.leadPattern[step];
-    const bassNote = prof.bassPattern[step];
+    const leadFreq = currentAtmo.leadPattern[step];
+    const bassFreq = currentAtmo.bassPattern[step];
+    const stepDur = (currentAtmo.tempoMs / 1000) * 0.85;
 
-    // Play upbeat lead bounce
-    if (leadNote > 0) {
-      playPluckNote(leadNote, prof.waveform, (prof.tempoMs / 1000) * 0.85, prof.volume, prof.filterFreq);
+    // Play Instrument Melody
+    if (leadFreq > 0) {
+      dispatchInstrumentNote(currentAtmo.instrument, leadFreq, stepDur, 0.04);
     }
 
-    // Play rhythmic groove bass
-    if (bassNote > 0) {
-      playPluckNote(bassNote, prof.bassWave, (prof.tempoMs / 1000) * 0.95, prof.volume * 1.3, prof.filterFreq * 0.6);
+    // Play Complementary Bass Pluck
+    if (bassFreq > 0) {
+      // Use piano or warm triangle for bass accompaniment
+      playPianoNote(bassFreq, stepDur * 1.2, 0.05);
     }
 
     currentStep++;
-  }, profile.tempoMs);
+  }, atmo.tempoMs);
 }
 
 function stopAmbientMusic() {
@@ -263,6 +433,30 @@ function stopAmbientMusic() {
     musicInterval = null;
   }
 }
+
+// --- MERGED ATMOSPHERE SELECTION HANDLER ---
+const atmosphereSelect = document.getElementById('atmosphere-select');
+
+atmosphereSelect.addEventListener('change', (e) => {
+  const chosenKey = e.target.value;
+  const atmo = ATMOSPHERES[chosenKey];
+  if (!atmo) return;
+
+  currentAtmosphere = chosenKey;
+
+  // 1. Switch Scenic Background
+  scenicBg.className = `scenic-bg ${atmo.bgClass}`;
+
+  // 2. Switch Color Palette
+  document.documentElement.setAttribute('data-theme', atmo.theme);
+  document.documentElement.style.removeProperty('--accent');
+  customColorPicker.value = atmo.defaultAccent;
+
+  // 3. Seamlessly restart music with the new instrument & song
+  if (isMusicEnabled) {
+    startAmbientMusic();
+  }
+});
 
 // Sound effects
 function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
