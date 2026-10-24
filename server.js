@@ -126,7 +126,7 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('playerListUpdate', rooms[roomCode].players);
   });
 
-  // Solo vs Bot Room creation
+  // Solo vs AI Bot room creation
   socket.on('createSoloBotRoom', ({ username, difficulty, botSpeed, durationMinutes, symbolSet }) => {
     const roomCode = 'BOT-' + Math.random().toString(36).substring(2, 6).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
@@ -168,7 +168,6 @@ io.on('connection', (socket) => {
 
     socket.join(roomCode);
 
-    // Auto start immediately
     socket.emit('startGame', {
       puzzle,
       players: rooms[roomCode].players,
@@ -178,7 +177,6 @@ io.on('connection', (socket) => {
       roomCode
     });
 
-    // Start match timer
     rooms[roomCode].timerInterval = setInterval(() => {
       rooms[roomCode].timeLeft -= 1;
       io.to(roomCode).emit('timerTick', { timeLeft: rooms[roomCode].timeLeft });
@@ -188,7 +186,6 @@ io.on('connection', (socket) => {
       }
     }, 1000);
 
-    // Bot solving loop
     const speedIntervals = { slow: 7000, medium: 4500, fast: 2600 };
     const baseInterval = speedIntervals[botSpeed] || 4500;
 
@@ -199,7 +196,6 @@ io.on('connection', (socket) => {
       const bot = room.players.find(p => p.id === 'bot_ai');
       if (!bot || bot.eliminated) return;
 
-      // Small chance bot makes a mistake
       const mistakeChance = Math.random();
       if (mistakeChance < 0.08) {
         bot.mistakes += 1;

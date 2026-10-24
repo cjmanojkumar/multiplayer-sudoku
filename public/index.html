@@ -30,7 +30,6 @@
         <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="12" />
       </div>
 
-      <!-- Mode Selector: Multiplayer vs Solo vs Bot -->
       <div class="mode-select-wrap">
         <label class="radio-label">
           <input type="radio" name="game-mode" value="multi" checked />
@@ -63,7 +62,6 @@
           </select>
         </div>
 
-        <!-- Hidden when in Bot mode -->
         <div class="setting-col" id="col-max-players">
           <label for="max-players">Players:</label>
           <select id="max-players">
@@ -73,7 +71,6 @@
           </select>
         </div>
 
-        <!-- Shown when in Bot mode -->
         <div class="setting-col hidden" id="col-bot-speed">
           <label for="bot-speed">Bot Skill:</label>
           <select id="bot-speed">
@@ -131,7 +128,7 @@
     </div>
   </div>
 
-  <!-- Settings Modal -->
+  <!-- Settings Modal Popup -->
   <div id="settings-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted settings-card">
       <div class="modal-header">
@@ -151,12 +148,7 @@
             <option value="mountains">🏔️ Snowy Alpine Peak</option>
           </select>
         </div>
-         
-        <div class="setting-toggle-row">
-         <label for="vibration-toggle">📳 Haptic Vibration</label>
-         <input type="checkbox" id="vibration-toggle" checked class="toggle-checkbox" />
-        </div>
-        
+
         <div class="setting-row">
           <label for="theme-select">Theme Palette:</label>
           <select id="theme-select">
@@ -189,7 +181,7 @@
           </div>
         </div>
 
-        <!-- Music & Sound Effect Toggles -->
+        <!-- Audio, Vibration & Visual Toggles -->
         <div class="setting-toggle-row">
           <label for="music-toggle">🎵 Background Music</label>
           <input type="checkbox" id="music-toggle" class="toggle-checkbox" />
@@ -198,6 +190,11 @@
         <div class="setting-toggle-row">
           <label for="sound-toggle">🔊 Game Sound FX</label>
           <input type="checkbox" id="sound-toggle" checked class="toggle-checkbox" />
+        </div>
+
+        <div class="setting-toggle-row">
+          <label for="vibration-toggle">📳 Haptic Vibration</label>
+          <input type="checkbox" id="vibration-toggle" checked class="toggle-checkbox" />
         </div>
 
         <div class="setting-toggle-row">

@@ -6,22 +6,16 @@ let isEliminated = false;
 let selectedCell = null;
 let activeSymbolSet = 'numbers';
 
-// Audio & Animation Flags
+// Audio, Vibration & Visual Flags
 let isSoundEnabled = true;
 let isMusicEnabled = false;
-let isEmojiEnabled = true;
 let isVibrationEnabled = true;
+let isEmojiEnabled = true;
 
-// Safe Vibration API wrapper
-function triggerVibration(pattern) {
-  if (isVibrationEnabled && 'vibrate' in navigator) {
-    try {
-      navigator.vibrate(pattern);
-    } catch (e) {
-      // Ignored if device lacks vibration hardware
-    }
-  }
-}
+// Continuous Instrumental Soundtrack
+const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
+bgAudio.loop = true;
+bgAudio.volume = 0.25;
 
 // Symbol sets
 const SYMBOL_SETS = {
@@ -51,30 +45,13 @@ const customColorPicker = document.getElementById('custom-color-picker');
 
 const musicToggle = document.getElementById('music-toggle');
 const soundToggle = document.getElementById('sound-toggle');
-const emojiToggle = document.getElementById('emoji-toggle');
 const vibrationToggle = document.getElementById('vibration-toggle');
+const emojiToggle = document.getElementById('emoji-toggle');
 
-// Safe Settings Modal Toggle
 const settingsOpenBtn = document.getElementById('settings-open-btn');
 const settingsModal = document.getElementById('settings-modal');
 const settingsCloseX = document.getElementById('settings-close-x');
 const settingsSaveBtn = document.getElementById('settings-save-btn');
-
-if (settingsOpenBtn && settingsModal) {
-  settingsOpenBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    settingsModal.classList.remove('hidden');
-  });
-}
-
-const closeSettings = (e) => {
-  if (e) e.preventDefault();
-  if (settingsModal) settingsModal.classList.add('hidden');
-};
-
-if (settingsCloseX) settingsCloseX.addEventListener('click', closeSettings);
-if (settingsSaveBtn) settingsSaveBtn.addEventListener('click', closeSettings);
 
 const lobbyView = document.getElementById('lobby-view');
 const gameView = document.getElementById('game-view');
@@ -107,7 +84,88 @@ const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
 
-// --- AUDIO SETUP ---
+// Mode toggle handling (Multi vs Bot)
+document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if (e.target.value === 'bot') {
+      colMaxPlayers.classList.add('hidden');
+      colBotSpeed.classList.remove('hidden');
+      multiJoinContainer.classList.add('hidden');
+      createBtn.textContent = 'Start vs Bot 🤖';
+    } else {
+      colMaxPlayers.classList.remove('hidden');
+      colBotSpeed.classList.add('hidden');
+      multiJoinContainer.classList.remove('hidden');
+      createBtn.textContent = 'Create Room';
+    }
+  });
+});
+
+// Settings Modal
+settingsOpenBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+const closeSettings = () => settingsModal.classList.add('hidden');
+settingsCloseX.addEventListener('click', closeSettings);
+settingsSaveBtn.addEventListener('click', closeSettings);
+
+bgSelect.addEventListener('change', (e) => scenicBg.className = `scenic-bg bg-${e.target.value}`);
+themeSelect.addEventListener('change', (e) => {
+  document.documentElement.setAttribute('data-theme', e.target.value);
+  document.documentElement.style.removeProperty('--accent');
+});
+fontSelect.addEventListener('change', (e) => document.documentElement.setAttribute('data-font', e.target.value));
+customColorPicker.addEventListener('input', (e) => document.documentElement.style.setProperty('--accent', e.target.value));
+
+soundToggle.addEventListener('change', (e) => isSoundEnabled = e.target.checked);
+vibrationToggle.addEventListener('change', (e) => isVibrationEnabled = e.target.checked);
+emojiToggle.addEventListener('change', (e) => isEmojiEnabled = e.target.checked);
+
+musicToggle.addEventListener('change', (e) => {
+  isMusicEnabled = e.target.checked;
+  if (isMusicEnabled) {
+    bgAudio.play().catch(() => {});
+  } else {
+    bgAudio.pause();
+  }
+});
+
+modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
+
+// --- HAPTIC VIBRATION ENGINE ---
+function triggerVibration(pattern) {
+  if (!isVibrationEnabled) return;
+  if ('vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch (e) {}
+  }
+}
+
+// 1. Right move: Quick subtle tap
+function vibrateCorrect() {
+  triggerVibration(45);
+}
+
+// 2. Wrong move: Double jarring buzz
+function vibrateWrong() {
+  triggerVibration([90, 50, 110]);
+}
+
+// 3. Section complete (Row, Col, 3x3): Rhythmic triple pulse
+function vibrateSectionComplete() {
+  triggerVibration([50, 40, 50, 40, 90]);
+}
+
+// 4. Victory: Celebratory crescendo pulse
+function vibrateVictory() {
+  triggerVibration([100, 60, 100, 60, 150, 80, 250]);
+}
+
+// 5. Loss / Elimination: Heavy long rumble
+function vibrateLoss() {
+  triggerVibration([300, 100, 450]);
+}
+
+// --- SOUND SYNTHESIZER ---
 let audioCtx = null;
 function getAudioContext() {
   if (!audioCtx) {
@@ -118,12 +176,6 @@ function getAudioContext() {
   return audioCtx;
 }
 
-// Single continuous instrumental soundtrack
-const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
-bgAudio.loop = true;
-bgAudio.volume = 0.25;
-
-// Sound effects generator
 function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
   if (!isSoundEnabled) return;
   try {
@@ -179,78 +231,119 @@ function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '�
   setTimeout(() => span.remove(), 1200);
 }
 
-// --- SETTINGS CONTROLS & LISTENERS ---
-if (vibrationToggle) {
-  vibrationToggle.addEventListener('change', (e) => {
-    isVibrationEnabled = e.target.checked;
-    if (isVibrationEnabled) triggerVibration([40]);
-  });
-}
+socket.on('connect', () => { myId = socket.id; });
 
-if (musicToggle) {
-  musicToggle.addEventListener('change', (e) => {
-    isMusicEnabled = e.target.checked;
-    if (isMusicEnabled) {
-      bgAudio.play().catch(() => {});
-    } else {
-      bgAudio.pause();
-    }
-  });
-}
+// Start / Create Match
+createBtn.addEventListener('click', () => {
+  getAudioContext();
+  if (isMusicEnabled) bgAudio.play().catch(() => {});
 
-if (soundToggle) soundToggle.addEventListener('change', (e) => isSoundEnabled = e.target.checked);
-if (emojiToggle) emojiToggle.addEventListener('change', (e) => isEmojiEnabled = e.target.checked);
+  const username = usernameInput.value.trim() || 'Player 1';
+  const difficulty = difficultySelect.value;
+  const durationMinutes = parseInt(customDurationInput.value, 10) || 10;
+  const symbolSet = symbolSetSelect.value;
+  const selectedMode = document.querySelector('input[name="game-mode"]:checked').value;
 
-if (settingsOpenBtn) settingsOpenBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
-const closeSettings = () => settingsModal.classList.add('hidden');
-if (settingsCloseX) settingsCloseX.addEventListener('click', closeSettings);
-if (settingsSaveBtn) settingsSaveBtn.addEventListener('click', closeSettings);
-
-if (bgSelect) {
-  bgSelect.addEventListener('change', (e) => {
-    scenicBg.className = `scenic-bg bg-${e.target.value}`;
-  });
-}
-
-if (themeSelect) {
-  themeSelect.addEventListener('change', (e) => {
-    document.documentElement.setAttribute('data-theme', e.target.value);
-    document.documentElement.style.removeProperty('--accent');
-  });
-}
-
-if (fontSelect) {
-  fontSelect.addEventListener('change', (e) => {
-    document.documentElement.setAttribute('data-font', e.target.value);
-  });
-}
-
-if (customColorPicker) {
-  customColorPicker.addEventListener('input', (e) => {
-    document.documentElement.style.setProperty('--accent', e.target.value);
-  });
-}
-
-if (modalCloseX) modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
-
-// Mode toggle handling (Multi vs Bot)
-document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
-  radio.addEventListener('change', (e) => {
-    if (e.target.value === 'bot') {
-      colMaxPlayers.classList.add('hidden');
-      colBotSpeed.classList.remove('hidden');
-      multiJoinContainer.classList.add('hidden');
-      createBtn.textContent = 'Start vs Bot 🤖';
-    } else {
-      colMaxPlayers.classList.remove('hidden');
-      colBotSpeed.classList.add('hidden');
-      multiJoinContainer.classList.remove('hidden');
-      createBtn.textContent = 'Create Room';
-    }
-  });
+  if (selectedMode === 'bot') {
+    const botSpeed = botSpeedSelect.value;
+    socket.emit('createSoloBotRoom', { username, difficulty, botSpeed, durationMinutes, symbolSet });
+  } else {
+    const maxPlayers = maxPlayersSelect.value;
+    socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes, symbolSet });
+  }
 });
 
-// --- BOARD & EXHAUSTION LOGIC ---
+joinBtn.addEventListener('click', () => {
+  getAudioContext();
+  if (isMusicEnabled) bgAudio.play().catch(() => {});
+
+  const username = usernameInput.value.trim() || 'Player';
+  const roomCode = roomCodeInput.value.trim();
+  if (!roomCode) {
+    alert('Please enter a room code');
+    return;
+  }
+  socket.emit('joinRoom', { roomCode, username });
+});
+
+quitBtn.addEventListener('click', () => {
+  if (confirm('Are you sure you want to resign from the match?')) {
+    socket.emit('quitGame', { roomCode: currentRoomCode });
+    vibrateLoss();
+    triggerPlayerEliminated('🏳️ You resigned from the match.');
+  }
+});
+
+socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty, durationMinutes, symbolSet }) => {
+  currentRoomCode = roomCode;
+  roomStatus.textContent = `Room: ${roomCode} | Mode: ${symbolSet.toUpperCase()} | Waiting (1/${maxPlayers})...`;
+});
+
+socket.on('joinedRoomSuccess', ({ roomCode }) => {
+  currentRoomCode = roomCode;
+  roomStatus.textContent = `Joined ${roomCode}! Waiting for match...`;
+});
+
+socket.on('playerListUpdate', (players) => {
+  lobbyRoster.innerHTML = '<strong>Players Joined:</strong> ' + players.map(p => p.name).join(', ');
+});
+
+socket.on('errorMessage', (msg) => alert(msg));
+socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
+
+// Start Game
+socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet, roomCode }) => {
+  isEliminated = false;
+  selectedCell = null;
+  activeSymbolSet = symbolSet || 'numbers';
+  currentRoomCode = roomCode || currentRoomCode;
+  quitBtn.disabled = false;
+  completedRows.clear();
+  completedCols.clear();
+  completedBoxes.clear();
+
+  lobbyView.classList.add('hidden');
+  gameView.classList.remove('hidden', 'game-locked');
+  eliminatedBanner.classList.add('hidden');
+  winnerModal.classList.add('hidden');
+  currentRoomSpan.textContent = currentRoomCode;
+
+  updateLivesDisplay(0);
+  updateTimerDisplay(duration);
+
+  scoreboard.innerHTML = '';
+  players.forEach(p => {
+    const card = document.createElement('div');
+    card.classList.add('player-card');
+    card.id = `card-${p.id}`;
+    card.innerHTML = `
+      <span class="player-name">${p.name}</span>
+      <div class="progress-bar"><div class="progress-fill" id="bar-${p.id}"></div></div>
+      <div class="score-text">
+        <span id="score-${p.id}">0 / ${totalBlanks}</span>
+        <span id="mistakes-${p.id}">❤️ 3</span>
+      </div>
+    `;
+    scoreboard.appendChild(card);
+  });
+
+  renderBoard(puzzle);
+  renderSymbolPad();
+});
+
+function updateLivesDisplay(mistakes) {
+  const livesLeft = Math.max(0, 3 - mistakes);
+  myLivesDisplay.textContent = 'Lives: ' + '❤️'.repeat(livesLeft) + '🖤'.repeat(3 - livesLeft);
+}
+
+socket.on('timerTick', ({ timeLeft }) => updateTimerDisplay(timeLeft));
+
+function updateTimerDisplay(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
 function updateExhaustedSymbols() {
   const counts = {};
   for (let i = 1; i <= 9; i++) counts[i] = 0;
@@ -299,6 +392,7 @@ function renderBoard(puzzle) {
       gridContainer.appendChild(cell);
     }
   }
+
   updateExhaustedSymbols();
 }
 
@@ -324,25 +418,64 @@ function renderSymbolPad() {
   updateExhaustedSymbols();
 }
 
-function isCellSolved(cell) {
-  if (!cell) return false;
-  return cell.classList.contains('prefilled') || cell.classList.contains('correct');
-}
+window.addEventListener('keydown', (e) => {
+  if (isEliminated || !selectedCell) return;
+  const key = e.key.toUpperCase();
 
-function animateCompletedSection(cells, emojiSet) {
-  cells.forEach((cell, idx) => {
-    setTimeout(() => {
-      cell.classList.add('completed-flash');
-      if (idx === 4) spawnFloatingEmoji(cell, emojiSet);
-      setTimeout(() => cell.classList.remove('completed-flash'), 1000);
-    }, idx * 35);
+  if (/^[1-9]$/.test(key)) {
+    makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), parseInt(key, 10));
+  } else if (/^[A-I]$/.test(key)) {
+    const val = key.charCodeAt(0) - 64;
+    makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), val);
+  }
+});
+
+function makeMove(row, col, value) {
+  socket.emit('submitMove', {
+    roomCode: currentRoomCode,
+    row,
+    col,
+    value
   });
 }
+
+socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => {
+  const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+  if (!cell) return;
+
+  if (correct) {
+    playSuccessSound();
+    vibrateCorrect();
+    cell.classList.remove('wrong', 'selected');
+    cell.classList.add('correct', 'user-filled');
+    cell.textContent = getSymbol(value);
+    cell.dataset.val = value;
+    selectedCell = null;
+
+    checkCompletions();
+    updateExhaustedSymbols();
+  } else {
+    playErrorSound();
+    vibrateWrong();
+    cell.classList.add('wrong');
+    cell.textContent = getSymbol(value);
+    updateLivesDisplay(mistakes);
+
+    if (eliminated) {
+      vibrateLoss();
+      triggerPlayerEliminated('❌ You were eliminated (3 mistakes)!');
+    }
+
+    setTimeout(() => {
+      cell.classList.remove('wrong');
+      cell.textContent = '';
+    }, 500);
+  }
+});
 
 function checkCompletions() {
   let anyCompleted = false;
 
-  // 1. Rows
   for (let r = 0; r < 9; r++) {
     if (completedRows.has(r)) continue;
     let full = true;
@@ -359,7 +492,6 @@ function checkCompletions() {
     }
   }
 
-  // 2. Columns
   for (let c = 0; c < 9; c++) {
     if (completedCols.has(c)) continue;
     let full = true;
@@ -376,7 +508,6 @@ function checkCompletions() {
     }
   }
 
-  // 3. 3x3 Boxes
   for (let br = 0; br < 3; br++) {
     for (let bc = 0; bc < 3; bc++) {
       const boxKey = `${br}-${bc}`;
@@ -401,19 +532,23 @@ function checkCompletions() {
 
   if (anyCompleted) {
     playSectionCompleteSound();
-    triggerVibration([60, 50, 60, 50, 100]);
+    vibrateSectionComplete();
   }
 }
 
-function updateLivesDisplay(mistakes) {
-  const livesLeft = Math.max(0, 3 - mistakes);
-  myLivesDisplay.textContent = 'Lives: ' + '❤️'.repeat(livesLeft) + '🖤'.repeat(3 - livesLeft);
+function isCellSolved(cell) {
+  if (!cell) return false;
+  return cell.classList.contains('prefilled') || cell.classList.contains('correct');
 }
 
-function updateTimerDisplay(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+function animateCompletedSection(cells, emojiSet) {
+  cells.forEach((cell, idx) => {
+    setTimeout(() => {
+      cell.classList.add('completed-flash');
+      if (idx === 4) spawnFloatingEmoji(cell, emojiSet);
+      setTimeout(() => cell.classList.remove('completed-flash'), 1000);
+    }, idx * 35);
+  });
 }
 
 function triggerPlayerEliminated(message) {
@@ -423,163 +558,6 @@ function triggerPlayerEliminated(message) {
   eliminatedBanner.classList.remove('hidden');
   if (selectedCell) selectedCell.classList.remove('selected');
 }
-
-function makeMove(row, col, value) {
-  socket.emit('submitMove', {
-    roomCode: currentRoomCode,
-    row,
-    col,
-    value
-  });
-}
-
-window.addEventListener('keydown', (e) => {
-  if (isEliminated || !selectedCell) return;
-  const key = e.key.toUpperCase();
-
-  if (/^[1-9]$/.test(key)) {
-    makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), parseInt(key, 10));
-  } else if (/^[A-I]$/.test(key)) {
-    const val = key.charCodeAt(0) - 64;
-    makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), val);
-  }
-});
-
-// --- LOBBY ACTIONS ---
-createBtn.addEventListener('click', () => {
-  getAudioContext();
-  if (isMusicEnabled) bgAudio.play().catch(() => {});
-
-  const username = usernameInput.value.trim() || 'Player 1';
-  const difficulty = difficultySelect.value;
-  const durationMinutes = parseInt(customDurationInput.value, 10) || 10;
-  const symbolSet = symbolSetSelect.value;
-  const selectedMode = document.querySelector('input[name="game-mode"]:checked').value;
-
-  if (selectedMode === 'bot') {
-    const botSpeed = botSpeedSelect.value;
-    socket.emit('createSoloBotRoom', { username, difficulty, botSpeed, durationMinutes, symbolSet });
-  } else {
-    const maxPlayers = maxPlayersSelect.value;
-    socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes, symbolSet });
-  }
-});
-
-joinBtn.addEventListener('click', () => {
-  getAudioContext();
-  if (isMusicEnabled) bgAudio.play().catch(() => {});
-
-  const username = usernameInput.value.trim() || 'Player';
-  const roomCode = roomCodeInput.value.trim();
-  if (!roomCode) {
-    alert('Please enter a room code');
-    return;
-  }
-  socket.emit('joinRoom', { roomCode, username });
-});
-
-quitBtn.addEventListener('click', () => {
-  if (confirm('Are you sure you want to resign from the match?')) {
-    socket.emit('quitGame', { roomCode: currentRoomCode });
-    triggerPlayerEliminated('🏳️ You resigned from the match.');
-  }
-});
-
-// --- SOCKET EVENT HANDLERS ---
-socket.on('connect', () => { myId = socket.id; });
-
-socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty, durationMinutes, symbolSet }) => {
-  currentRoomCode = roomCode;
-  roomStatus.textContent = `Room: ${roomCode} | Mode: ${symbolSet.toUpperCase()} | Waiting (1/${maxPlayers})...`;
-});
-
-socket.on('joinedRoomSuccess', ({ roomCode }) => {
-  currentRoomCode = roomCode;
-  roomStatus.textContent = `Joined ${roomCode}! Waiting for match...`;
-});
-
-socket.on('playerListUpdate', (players) => {
-  lobbyRoster.innerHTML = '<strong>Players Joined:</strong> ' + players.map(p => p.name).join(', ');
-});
-
-socket.on('errorMessage', (msg) => alert(msg));
-socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
-socket.on('timerTick', ({ timeLeft }) => updateTimerDisplay(timeLeft));
-
-socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet, roomCode }) => {
-  isEliminated = false;
-  selectedCell = null;
-  activeSymbolSet = symbolSet || 'numbers';
-  currentRoomCode = roomCode || currentRoomCode;
-  quitBtn.disabled = false;
-  completedRows.clear();
-  completedCols.clear();
-  completedBoxes.clear();
-
-  lobbyView.classList.add('hidden');
-  gameView.classList.remove('hidden', 'game-locked');
-  eliminatedBanner.classList.add('hidden');
-  winnerModal.classList.add('hidden');
-  currentRoomSpan.textContent = currentRoomCode;
-
-  updateLivesDisplay(0);
-  updateTimerDisplay(duration);
-
-  scoreboard.innerHTML = '';
-  players.forEach(p => {
-    const card = document.createElement('div');
-    card.classList.add('player-card');
-    card.id = `card-${p.id}`;
-    card.innerHTML = `
-      <span class="player-name">${p.name}</span>
-      <div class="progress-bar"><div class="progress-fill" id="bar-${p.id}"></div></div>
-      <div class="score-text">
-        <span id="score-${p.id}">0 / ${totalBlanks}</span>
-        <span id="mistakes-${p.id}">❤️ 3</span>
-      </div>
-    `;
-    scoreboard.appendChild(card);
-  });
-
-  renderBoard(puzzle);
-  renderSymbolPad();
-});
-
-socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => {
-  const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
-  if (!cell) return;
-
-  if (correct) {
-    playSuccessSound();
-    triggerVibration([40]);
-    
-    cell.classList.remove('wrong', 'selected');
-    cell.classList.add('correct', 'user-filled');
-    cell.textContent = getSymbol(value);
-    cell.dataset.val = value;
-    selectedCell = null;
-
-    checkCompletions();
-    updateExhaustedSymbols();
-  } else {
-    playErrorSound();
-    triggerVibration([120, 80, 140]);
-
-    cell.classList.add('wrong');
-    cell.textContent = getSymbol(value);
-    updateLivesDisplay(mistakes);
-
-    if (eliminated) {
-      triggerVibration([350]);
-      triggerPlayerEliminated('❌ You were eliminated (3 mistakes)!');
-    }
-
-    setTimeout(() => {
-      cell.classList.remove('wrong');
-      cell.textContent = '';
-    }, 500);
-  }
-});
 
 socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlanks }) => {
   const bar = document.getElementById(`bar-${playerId}`);
@@ -603,12 +581,13 @@ socket.on('gameOver', ({ reason, leaderboard }) => {
   gameView.classList.add('game-locked');
   quitBtn.disabled = true;
 
-  const isWinner = leaderboard.length > 0 && leaderboard[0].id === myId;
-  if (isWinner) {
+  const isMeWinner = leaderboard.length > 0 && leaderboard[0].id === myId;
+  if (isMeWinner) {
     playVictoryFanfare();
-    triggerVibration([80, 60, 100, 60, 140, 60, 250]);
+    vibrateVictory();
   } else {
-    triggerVibration([300, 100, 300]);
+    playErrorSound();
+    vibrateLoss();
   }
 
   winnerReason.textContent = reason;
