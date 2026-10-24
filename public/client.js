@@ -77,6 +77,33 @@ const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
 
+// Check which numbers (1-9) have all 9 instances completed
+function updateExhaustedSymbols() {
+  const counts = {};
+  for (let i = 1; i <= 9; i++) counts[i] = 0;
+
+  // Scan all cells on the board
+  document.querySelectorAll('.cell').forEach(cell => {
+    const val = parseInt(cell.dataset.val, 10);
+    // Count if cell is prefilled or correctly entered
+    if (val && (cell.classList.contains('prefilled') || cell.classList.contains('correct'))) {
+      counts[val] = (counts[val] || 0) + 1;
+    }
+  });
+
+  // Update on-screen buttons
+  for (let num = 1; num <= 9; num++) {
+    const btn = document.querySelector(`.symbol-btn[data-val="${num}"]`);
+    if (btn) {
+      if (counts[num] >= 9) {
+        btn.classList.add('exhausted');
+      } else {
+        btn.classList.remove('exhausted');
+      }
+    }
+  }
+}
+
 // Mode toggle handling (Multi vs Bot)
 document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
   radio.addEventListener('change', (e) => {
@@ -478,6 +505,36 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet, roo
   renderSymbolPad();
 });
 
+function renderBoard(puzzle) {
+  gridContainer.innerHTML = '';
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const val = puzzle[r][c];
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.dataset.val = val; // Store value for counting
+
+      if (val !== 0) {
+        cell.classList.add('prefilled');
+        cell.textContent = getSymbol(val);
+      } else {
+        cell.addEventListener('click', () => {
+          if (isEliminated || cell.classList.contains('correct')) return;
+          if (selectedCell) selectedCell.classList.remove('selected');
+          selectedCell = cell;
+          cell.classList.add('selected');
+        });
+      }
+      gridContainer.appendChild(cell);
+    }
+  }
+
+  // Check exhausted numbers after generating the initial board
+  updateExhaustedSymbols();
+}
+
 function updateLivesDisplay(mistakes) {
   const livesLeft = Math.max(0, 3 - mistakes);
   myLivesDisplay.textContent = 'Lives: ' + '❤️'.repeat(livesLeft) + '🖤'.repeat(3 - livesLeft);
@@ -525,6 +582,7 @@ function renderSymbolPad() {
     const val = index + 1;
     const btn = document.createElement('button');
     btn.classList.add('symbol-btn');
+    btn.dataset.val = val; // Attach value
     btn.textContent = symbol;
 
     btn.addEventListener('click', () => {
@@ -534,6 +592,9 @@ function renderSymbolPad() {
 
     symbolPad.appendChild(btn);
   });
+
+  // Re-check vanished state whenever pad is redrawn
+  updateExhaustedSymbols();
 }
 
 window.addEventListener('keydown', (e) => {
@@ -566,19 +627,17 @@ socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => 
     cell.classList.remove('wrong', 'selected');
     cell.classList.add('correct', 'user-filled');
     cell.textContent = getSymbol(value);
+    cell.dataset.val = value; // Store the placed value
     selectedCell = null;
 
+    // 1. Check if row/col/box is finished
     checkCompletions();
+
+    // 2. Vanish the number from keypad if 9 of them are now on the board!
+    updateExhaustedSymbols();
   } else {
-    playErrorSound();
-    cell.classList.add('wrong');
-    cell.textContent = getSymbol(value);
-    updateLivesDisplay(mistakes);
-
-    if (eliminated) {
-      triggerPlayerEliminated('❌ You were eliminated (3 mistakes)!');
-    }
-
+    // ...
+    
     setTimeout(() => {
       cell.classList.remove('wrong');
       cell.textContent = '';

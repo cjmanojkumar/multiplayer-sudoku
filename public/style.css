@@ -662,3 +662,12 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   font-weight: bold;
   font-size: 0.95rem;
 }
+/* Vanishing / Completed Number Pad Buttons */
+.symbol-btn.exhausted {
+  opacity: 0.15;
+  transform: scale(0.85);
+  pointer-events: none;
+  filter: grayscale(1);
+  border-color: transparent !important;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
