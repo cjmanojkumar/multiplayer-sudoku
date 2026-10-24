@@ -122,10 +122,87 @@ musicToggle.addEventListener('change', (e) => {
 
 modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
 
-// --- PROCEDURAL AMBIENT MUSIC ENGINE (Continuous Lo-Fi Chords) ---
+// --- DYNAMIC SCENERY & THEME MUSIC ENGINE ---
 let audioCtx = null;
 let musicInterval = null;
 let currentChordIndex = 0;
+let currentMusicProfile = 'milkyway'; // Default profile
+
+// Unique chord progressions and synth tones tailored for each background
+const MUSIC_PROFILES = {
+  milkyway: {
+    tempo: 3800,
+    waveform: 'sine',
+    filterFreq: 420,
+    volume: 0.022,
+    chords: [
+      [220.00, 329.63, 440.00, 659.25], // Em9
+      [174.61, 261.63, 392.00, 523.25], // Fmaj7
+      [146.83, 220.00, 349.23, 440.00], // Dm7
+      [196.00, 293.66, 392.00, 587.33]  // Gsus4
+    ]
+  },
+  sunset: {
+    tempo: 3200,
+    waveform: 'triangle',
+    filterFreq: 650,
+    volume: 0.02,
+    chords: [
+      [261.63, 329.63, 392.00, 493.88], // Cmaj7
+      [220.00, 261.63, 329.63, 392.00], // Am7
+      [174.61, 220.00, 261.63, 329.63], // Fmaj7
+      [196.00, 246.94, 293.66, 392.00]  // G
+    ]
+  },
+  forest: {
+    tempo: 4000,
+    waveform: 'sine',
+    filterFreq: 380,
+    volume: 0.024,
+    chords: [
+      [164.81, 246.94, 329.63, 493.88], // E5 ambient
+      [146.83, 220.00, 329.63, 440.00], // Dsus2
+      [130.81, 196.00, 261.63, 392.00], // C9 open
+      [146.83, 220.00, 293.66, 440.00]  // Dadd9
+    ]
+  },
+  city: {
+    tempo: 2600,
+    waveform: 'sawtooth',
+    filterFreq: 280, // Low-passed for warm synthwave hum
+    volume: 0.015,
+    chords: [
+      [110.00, 220.00, 261.63, 329.63], // Am low pad
+      [130.81, 196.00, 246.94, 329.63], // C/E
+      [87.31, 174.61, 220.00, 261.63],  // F low
+      [98.00, 196.00, 246.94, 293.66]   // G low
+    ]
+  },
+  ocean: {
+    tempo: 4200,
+    waveform: 'sine',
+    filterFreq: 400,
+    volume: 0.025,
+    chords: [
+      [174.61, 261.63, 329.63, 392.00], // Fmaj7 swell
+      [196.00, 246.94, 293.66, 392.00], // G swell
+      [220.00, 261.63, 329.63, 440.00], // Am swell
+      [174.61, 220.00, 261.63, 349.23]  // Fsus2
+    ]
+  },
+  mountains: {
+    tempo: 3600,
+    waveform: 'triangle',
+    filterFreq: 850, // Bright, crystal open sound
+    volume: 0.018,
+    chords: [
+      [146.83, 220.00, 440.00, 587.33], // D cold 5th
+      [110.00, 220.00, 329.63, 440.00], // A cold 5th
+      [130.81, 196.00, 392.00, 523.25], // C cold 5th
+      [98.00, 196.00, 293.66, 440.00]   // G cold 5th
+    ]
+  }
+};
 
 function getAudioContext() {
   if (!audioCtx) {
@@ -136,35 +213,28 @@ function getAudioContext() {
   return audioCtx;
 }
 
-// Gentle ambient chord progression (Cmaj7 -> Am7 -> Fmaj7 -> G7)
-const ambientChords = [
-  [261.63, 329.63, 392.00, 493.88], // Cmaj7
-  [220.00, 261.63, 329.63, 392.00], // Am7
-  [174.61, 220.00, 261.63, 329.63], // Fmaj7
-  [196.00, 246.94, 293.66, 349.23]  // G7
-];
-
-function playAmbientChord(freqs) {
+function playAmbientChord(freqs, profile) {
   if (!isMusicEnabled) return;
   const ctx = getAudioContext();
   const now = ctx.currentTime;
-  const duration = 3.6;
+  const duration = (profile.tempo / 1000) * 1.15; // Natural cross-fade overlap
 
-  freqs.forEach(freq => {
+  freqs.forEach((freq, idx) => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     const filter = ctx.createBiquadFilter();
 
-    osc.type = 'sine';
+    osc.type = profile.waveform;
     osc.frequency.setValueAtTime(freq, now);
 
-    // Warm low-pass filter
+    // Warm, non-fatiguing filter
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(450, now);
+    filter.frequency.setValueAtTime(profile.filterFreq, now);
 
-    // Gentle slow fade-in and fade-out
+    // Dynamic wave swells: higher notes enter slightly staggered
+    const stagger = idx * 0.08;
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.018, now + 1.2);
+    gain.gain.linearRampToValueAtTime(profile.volume, now + 1.2 + stagger);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
     osc.connect(filter);
@@ -179,12 +249,16 @@ function playAmbientChord(freqs) {
 function startAmbientMusic() {
   getAudioContext();
   if (musicInterval) clearInterval(musicInterval);
-  playAmbientChord(ambientChords[currentChordIndex]);
+
+  const profile = MUSIC_PROFILES[currentMusicProfile] || MUSIC_PROFILES.milkyway;
+  playAmbientChord(profile.chords[currentChordIndex], profile);
+
   musicInterval = setInterval(() => {
     if (!isMusicEnabled) return;
-    currentChordIndex = (currentChordIndex + 1) % ambientChords.length;
-    playAmbientChord(ambientChords[currentChordIndex]);
-  }, 3400);
+    const currentProf = MUSIC_PROFILES[currentMusicProfile] || MUSIC_PROFILES.milkyway;
+    currentChordIndex = (currentChordIndex + 1) % currentProf.chords.length;
+    playAmbientChord(currentProf.chords[currentChordIndex], currentProf);
+  }, profile.tempo);
 }
 
 function stopAmbientMusic() {
