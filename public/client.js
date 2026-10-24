@@ -6,6 +6,10 @@ let isEliminated = false;
 let selectedCell = null;
 let activeSymbolSet = 'numbers';
 
+// Sound & Emoji Toggles
+let isSoundEnabled = true;
+let isEmojiEnabled = true;
+
 // Symbol Dictionaries
 const SYMBOL_SETS = {
   numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
@@ -32,6 +36,15 @@ const bgSelect = document.getElementById('bg-select');
 const themeSelect = document.getElementById('theme-select');
 const fontSelect = document.getElementById('font-select');
 const customColorPicker = document.getElementById('custom-color-picker');
+const soundToggle = document.getElementById('sound-toggle');
+const emojiToggle = document.getElementById('emoji-toggle');
+
+// Settings Modal
+const settingsOpenBtn = document.getElementById('settings-open-btn');
+const settingsModal = document.getElementById('settings-modal');
+const settingsCloseX = document.getElementById('settings-close-x');
+const settingsSaveBtn = document.getElementById('settings-save-btn');
+
 const lobbyView = document.getElementById('lobby-view');
 const gameView = document.getElementById('game-view');
 const usernameInput = document.getElementById('username');
@@ -58,34 +71,52 @@ const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
 
-// Realistic Scenic Background Switcher
-const scenicbackground = document.getElementById('scenic-bg');
-const BackgroundSelect = document.getElementById('bg-select');
-
-bgSelect.addEventListener('change', (e) => {
-  const choice = e.target.value;
-  scenicBg.className = `scenic-bg bg-${choice}`;
+// --- SETTINGS MODAL CONTROLS ---
+settingsOpenBtn.addEventListener('click', () => {
+  settingsModal.classList.remove('hidden');
 });
 
-// --- THEME & FONT SWITCHERS ---
+const closeSettings = () => {
+  settingsModal.classList.add('hidden');
+};
+settingsCloseX.addEventListener('click', closeSettings);
+settingsSaveBtn.addEventListener('click', closeSettings);
+
+// Background selector
+bgSelect.addEventListener('change', (e) => {
+  scenicBg.className = `scenic-bg bg-${e.target.value}`;
+});
+
+// Theme selector
 themeSelect.addEventListener('change', (e) => {
   document.documentElement.setAttribute('data-theme', e.target.value);
   document.documentElement.style.removeProperty('--accent');
 });
 
+// Font selector
 fontSelect.addEventListener('change', (e) => {
   document.documentElement.setAttribute('data-font', e.target.value);
 });
 
+// Custom accent color
 customColorPicker.addEventListener('input', (e) => {
   document.documentElement.style.setProperty('--accent', e.target.value);
+});
+
+// Toggles
+soundToggle.addEventListener('change', (e) => {
+  isSoundEnabled = e.target.checked;
+});
+
+emojiToggle.addEventListener('change', (e) => {
+  isEmojiEnabled = e.target.checked;
 });
 
 modalCloseX.addEventListener('click', () => {
   winnerModal.classList.add('hidden');
 });
 
-// --- WEB AUDIO API SYNTHESIZER ---
+// --- AUDIO SYNTHESIZER ---
 let audioCtx = null;
 function getAudioContext() {
   if (!audioCtx) {
@@ -97,6 +128,7 @@ function getAudioContext() {
 }
 
 function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+  if (!isSoundEnabled) return;
   try {
     const ctx = getAudioContext();
     const osc = ctx.createOscillator();
@@ -135,6 +167,8 @@ function playVictoryFanfare() {
 }
 
 function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '🎯', '🚀']) {
+  if (!isEmojiEnabled) return;
+
   const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
   const span = document.createElement('span');
   span.classList.add('floating-emoji');

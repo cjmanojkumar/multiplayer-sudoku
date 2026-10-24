@@ -11,47 +11,18 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <!-- Realistic Full-Screen Backdrop Layer -->
+  <!-- Realistic Backdrop -->
   <div id="scenic-bg" class="scenic-bg bg-milkyway">
     <div class="scenic-overlay"></div>
   </div>
 
   <div class="arena-container">
+    <!-- Clean Minimalist Top Bar -->
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
-      <div class="palette-bar">
-        <!-- Realistic Background Selector -->
-        <select id="bg-select" title="Realistic Background">
-          <option value="milkyway">🌌 Milky Way Galaxy</option>
-          <option value="sunset">🌄 Mountain Sunset</option>
-          <option value="forest">🌲 Misty Redwood Forest</option>
-          <option value="city">🏙️ Tokyo Night City</option>
-          <option value="ocean">🌊 Twilight Ocean</option>
-          <option value="mountains">🏔️ Snowy Alpine Peak</option>
-        </select>
-
-        <!-- Palette Theme -->
-        <select id="theme-select" title="Preset Themes">
-          <option value="dark">Midnight Dark</option>
-          <option value="neon">Cyber Neon</option>
-          <option value="emerald">Emerald</option>
-          <option value="sunset">Sunset Orange</option>
-          <option value="dracula">Dracula</option>
-          <option value="amber">Amber</option>
-          <option value="paper">Paper Light</option>
-        </select>
-
-        <!-- Typography -->
-        <select id="font-select" title="Custom Font">
-          <option value="default">Default Sans</option>
-          <option value="fredoka">Fun / Rounded</option>
-          <option value="cinzel">Roman / Serif</option>
-          <option value="mono">Code / Mono</option>
-          <option value="arcade">8-Bit Arcade</option>
-        </select>
-
-        <input type="color" id="custom-color-picker" value="#38bdf8" title="Custom Accent Color" />
-      </div>
+      <button id="settings-open-btn" class="icon-btn" title="Game Settings">
+        ⚙️ Settings
+      </button>
     </div>
 
     <!-- Lobby View -->
@@ -138,7 +109,75 @@
     </div>
   </div>
 
-  <!-- Leaderboard Modal -->
+  <!-- Settings Modal Popup -->
+  <div id="settings-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted settings-card">
+      <div class="modal-header">
+        <h2>⚙️ Arena Settings</h2>
+        <span class="close-x" id="settings-close-x">&times;</span>
+      </div>
+
+      <div class="settings-grid">
+        <div class="setting-row">
+          <label for="bg-select">Scenery Backdrop:</label>
+          <select id="bg-select">
+            <option value="milkyway">🌌 Milky Way Galaxy</option>
+            <option value="sunset">🌄 Mountain Sunset</option>
+            <option value="forest">🌲 Misty Redwood Forest</option>
+            <option value="city">🏙️ Tokyo Night City</option>
+            <option value="ocean">🌊 Twilight Ocean</option>
+            <option value="mountains">🏔️ Snowy Alpine Peak</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label for="theme-select">Theme Palette:</label>
+          <select id="theme-select">
+            <option value="dark">Midnight Dark</option>
+            <option value="neon">Cyber Neon</option>
+            <option value="emerald">Emerald</option>
+            <option value="sunset">Sunset Orange</option>
+            <option value="dracula">Dracula</option>
+            <option value="amber">Amber</option>
+            <option value="paper">Paper Light</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label for="font-select">Font Family:</label>
+          <select id="font-select">
+            <option value="default">Default Sans</option>
+            <option value="fredoka">Fun / Rounded</option>
+            <option value="cinzel">Roman / Serif</option>
+            <option value="mono">Code / Mono</option>
+            <option value="arcade">8-Bit Arcade</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label for="custom-color-picker">Accent Color:</label>
+          <div class="color-picker-wrap">
+            <input type="color" id="custom-color-picker" value="#38bdf8" />
+            <span class="color-hint">Tap circle to pick</span>
+          </div>
+        </div>
+
+        <div class="setting-toggle-row">
+          <label for="sound-toggle">🔊 Sound Effects</label>
+          <input type="checkbox" id="sound-toggle" checked class="toggle-checkbox" />
+        </div>
+
+        <div class="setting-toggle-row">
+          <label for="emoji-toggle">✨ Completion Emojis</label>
+          <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
+        </div>
+      </div>
+
+      <button id="settings-save-btn" class="btn primary full-width">Done</button>
+    </div>
+  </div>
+
+  <!-- End of Match Leaderboard Modal -->
   <div id="winner-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted">
       <div class="modal-header">
