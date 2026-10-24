@@ -6,11 +6,12 @@ let isEliminated = false;
 let selectedCell = null;
 let activeSymbolSet = 'numbers';
 
-// Sound & Emoji Toggles
+// Audio & Animation Flags
 let isSoundEnabled = true;
+let isMusicEnabled = false;
 let isEmojiEnabled = true;
 
-// Symbol Dictionaries
+// Symbol sets
 const SYMBOL_SETS = {
   numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
   letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
@@ -25,7 +26,6 @@ function getSymbol(num) {
   return list[num - 1] || num;
 }
 
-// Track completed sections
 const completedRows = new Set();
 const completedCols = new Set();
 const completedBoxes = new Set();
@@ -36,10 +36,11 @@ const bgSelect = document.getElementById('bg-select');
 const themeSelect = document.getElementById('theme-select');
 const fontSelect = document.getElementById('font-select');
 const customColorPicker = document.getElementById('custom-color-picker');
+
+const musicToggle = document.getElementById('music-toggle');
 const soundToggle = document.getElementById('sound-toggle');
 const emojiToggle = document.getElementById('emoji-toggle');
 
-// Settings Modal
 const settingsOpenBtn = document.getElementById('settings-open-btn');
 const settingsModal = document.getElementById('settings-modal');
 const settingsCloseX = document.getElementById('settings-close-x');
@@ -51,6 +52,7 @@ const usernameInput = document.getElementById('username');
 const symbolSetSelect = document.getElementById('symbol-set-select');
 const difficultySelect = document.getElementById('difficulty');
 const maxPlayersSelect = document.getElementById('max-players');
+const botSpeedSelect = document.getElementById('bot-speed');
 const customDurationInput = document.getElementById('custom-duration');
 const roomCodeInput = document.getElementById('room-code-input');
 const createBtn = document.getElementById('create-btn');
@@ -66,58 +68,65 @@ const gridContainer = document.getElementById('sudoku-grid');
 const symbolPad = document.getElementById('symbol-pad');
 const eliminatedBanner = document.getElementById('eliminated-banner');
 
+const colMaxPlayers = document.getElementById('col-max-players');
+const colBotSpeed = document.getElementById('col-bot-speed');
+const multiJoinContainer = document.getElementById('multi-join-container');
+
 const winnerModal = document.getElementById('winner-modal');
 const winnerReason = document.getElementById('winner-reason');
 const leaderboardBody = document.getElementById('leaderboard-body');
 const modalCloseX = document.getElementById('modal-close-x');
 
-// --- SETTINGS MODAL CONTROLS ---
-settingsOpenBtn.addEventListener('click', () => {
-  settingsModal.classList.remove('hidden');
+// Mode toggle handling (Multi vs Bot)
+document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    if (e.target.value === 'bot') {
+      colMaxPlayers.classList.add('hidden');
+      colBotSpeed.classList.remove('hidden');
+      multiJoinContainer.classList.add('hidden');
+      createBtn.textContent = 'Start vs Bot 🤖';
+    } else {
+      colMaxPlayers.classList.remove('hidden');
+      colBotSpeed.classList.add('hidden');
+      multiJoinContainer.classList.remove('hidden');
+      createBtn.textContent = 'Create Room';
+    }
+  });
 });
 
-const closeSettings = () => {
-  settingsModal.classList.add('hidden');
-};
+// Settings Modal
+settingsOpenBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+const closeSettings = () => settingsModal.classList.add('hidden');
 settingsCloseX.addEventListener('click', closeSettings);
 settingsSaveBtn.addEventListener('click', closeSettings);
 
-// Background selector
-bgSelect.addEventListener('change', (e) => {
-  scenicBg.className = `scenic-bg bg-${e.target.value}`;
-});
-
-// Theme selector
+bgSelect.addEventListener('change', (e) => scenicBg.className = `scenic-bg bg-${e.target.value}`);
 themeSelect.addEventListener('change', (e) => {
   document.documentElement.setAttribute('data-theme', e.target.value);
   document.documentElement.style.removeProperty('--accent');
 });
+fontSelect.addEventListener('change', (e) => document.documentElement.setAttribute('data-font', e.target.value));
+customColorPicker.addEventListener('input', (e) => document.documentElement.style.setProperty('--accent', e.target.value));
 
-// Font selector
-fontSelect.addEventListener('change', (e) => {
-  document.documentElement.setAttribute('data-font', e.target.value);
+soundToggle.addEventListener('change', (e) => isSoundEnabled = e.target.checked);
+emojiToggle.addEventListener('change', (e) => isEmojiEnabled = e.target.checked);
+
+musicToggle.addEventListener('change', (e) => {
+  isMusicEnabled = e.target.checked;
+  if (isMusicEnabled) {
+    startAmbientMusic();
+  } else {
+    stopAmbientMusic();
+  }
 });
 
-// Custom accent color
-customColorPicker.addEventListener('input', (e) => {
-  document.documentElement.style.setProperty('--accent', e.target.value);
-});
+modalCloseX.addEventListener('click', () => winnerModal.classList.add('hidden'));
 
-// Toggles
-soundToggle.addEventListener('change', (e) => {
-  isSoundEnabled = e.target.checked;
-});
-
-emojiToggle.addEventListener('change', (e) => {
-  isEmojiEnabled = e.target.checked;
-});
-
-modalCloseX.addEventListener('click', () => {
-  winnerModal.classList.add('hidden');
-});
-
-// --- AUDIO SYNTHESIZER ---
+// --- PROCEDURAL AMBIENT MUSIC ENGINE (Continuous Lo-Fi Chords) ---
 let audioCtx = null;
+let musicInterval = null;
+let currentChordIndex = 0;
+
 function getAudioContext() {
   if (!audioCtx) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -127,6 +136,65 @@ function getAudioContext() {
   return audioCtx;
 }
 
+// Gentle ambient chord progression (Cmaj7 -> Am7 -> Fmaj7 -> G7)
+const ambientChords = [
+  [261.63, 329.63, 392.00, 493.88], // Cmaj7
+  [220.00, 261.63, 329.63, 392.00], // Am7
+  [174.61, 220.00, 261.63, 329.63], // Fmaj7
+  [196.00, 246.94, 293.66, 349.23]  // G7
+];
+
+function playAmbientChord(freqs) {
+  if (!isMusicEnabled) return;
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+  const duration = 3.6;
+
+  freqs.forEach(freq => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+
+    // Warm low-pass filter
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(450, now);
+
+    // Gentle slow fade-in and fade-out
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.018, now + 1.2);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + duration);
+  });
+}
+
+function startAmbientMusic() {
+  getAudioContext();
+  if (musicInterval) clearInterval(musicInterval);
+  playAmbientChord(ambientChords[currentChordIndex]);
+  musicInterval = setInterval(() => {
+    if (!isMusicEnabled) return;
+    currentChordIndex = (currentChordIndex + 1) % ambientChords.length;
+    playAmbientChord(ambientChords[currentChordIndex]);
+  }, 3400);
+}
+
+function stopAmbientMusic() {
+  if (musicInterval) {
+    clearInterval(musicInterval);
+    musicInterval = null;
+  }
+}
+
+// Sound effects
 function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
   if (!isSoundEnabled) return;
   try {
@@ -168,7 +236,6 @@ function playVictoryFanfare() {
 
 function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '🎯', '🚀']) {
   if (!isEmojiEnabled) return;
-
   const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
   const span = document.createElement('span');
   span.classList.add('floating-emoji');
@@ -176,7 +243,6 @@ function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '�
 
   const rect = cellElement.getBoundingClientRect();
   const boardRect = gridContainer.getBoundingClientRect();
-
   span.style.left = `${rect.left - boardRect.left + rect.width / 2}px`;
   span.style.top = `${rect.top - boardRect.top + rect.height / 2}px`;
 
@@ -186,20 +252,30 @@ function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '�
 
 socket.on('connect', () => { myId = socket.id; });
 
-// Lobby actions
+// Start / Create Match
 createBtn.addEventListener('click', () => {
   getAudioContext();
+  if (isMusicEnabled) startAmbientMusic();
+
   const username = usernameInput.value.trim() || 'Player 1';
   const difficulty = difficultySelect.value;
-  const maxPlayers = maxPlayersSelect.value;
   const durationMinutes = parseInt(customDurationInput.value, 10) || 10;
   const symbolSet = symbolSetSelect.value;
+  const selectedMode = document.querySelector('input[name="game-mode"]:checked').value;
 
-  socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes, symbolSet });
+  if (selectedMode === 'bot') {
+    const botSpeed = botSpeedSelect.value;
+    socket.emit('createSoloBotRoom', { username, difficulty, botSpeed, durationMinutes, symbolSet });
+  } else {
+    const maxPlayers = maxPlayersSelect.value;
+    socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes, symbolSet });
+  }
 });
 
 joinBtn.addEventListener('click', () => {
   getAudioContext();
+  if (isMusicEnabled) startAmbientMusic();
+
   const username = usernameInput.value.trim() || 'Player';
   const roomCode = roomCodeInput.value.trim();
   if (!roomCode) {
@@ -234,10 +310,11 @@ socket.on('errorMessage', (msg) => alert(msg));
 socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 
 // Start Game
-socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet }) => {
+socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet, roomCode }) => {
   isEliminated = false;
   selectedCell = null;
   activeSymbolSet = symbolSet || 'numbers';
+  currentRoomCode = roomCode || currentRoomCode;
   quitBtn.disabled = false;
   completedRows.clear();
   completedCols.clear();
@@ -252,6 +329,7 @@ socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet }) =
   updateLivesDisplay(0);
   updateTimerDisplay(duration);
 
+  // Scoreboard
   scoreboard.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');

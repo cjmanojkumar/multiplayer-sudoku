@@ -11,13 +11,11 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <!-- Realistic Backdrop -->
   <div id="scenic-bg" class="scenic-bg bg-milkyway">
     <div class="scenic-overlay"></div>
   </div>
 
   <div class="arena-container">
-    <!-- Clean Minimalist Top Bar -->
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
       <button id="settings-open-btn" class="icon-btn" title="Game Settings">
@@ -30,6 +28,18 @@
       <div class="input-group">
         <label for="username">Nickname:</label>
         <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="12" />
+      </div>
+
+      <!-- Mode Selector: Multiplayer vs Solo vs Bot -->
+      <div class="mode-select-wrap">
+        <label class="radio-label">
+          <input type="radio" name="game-mode" value="multi" checked />
+          <span>👥 Multiplayer Room</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="game-mode" value="bot" />
+          <span>🤖 Solo vs Bot</span>
+        </label>
       </div>
 
       <div class="host-settings">
@@ -53,12 +63,23 @@
           </select>
         </div>
 
-        <div class="setting-col">
+        <!-- Hidden when in Bot mode -->
+        <div class="setting-col" id="col-max-players">
           <label for="max-players">Players:</label>
           <select id="max-players">
             <option value="2" selected>2 Players</option>
             <option value="3">3 Players</option>
             <option value="4">4 Players</option>
+          </select>
+        </div>
+
+        <!-- Shown when in Bot mode -->
+        <div class="setting-col hidden" id="col-bot-speed">
+          <label for="bot-speed">Bot Skill:</label>
+          <select id="bot-speed">
+            <option value="slow">Casual (Slow)</option>
+            <option value="medium" selected>Balanced</option>
+            <option value="fast">Master (Fast)</option>
           </select>
         </div>
 
@@ -69,11 +90,13 @@
       </div>
 
       <div class="actions">
-        <button id="create-btn" class="btn primary">Create Room</button>
-        <div class="divider">OR</div>
-        <div class="join-group">
-          <input type="text" id="room-code-input" placeholder="5-Letter Room Code" maxlength="5" />
-          <button id="join-btn" class="btn secondary">Join Room</button>
+        <button id="create-btn" class="btn primary">Start Game</button>
+        <div id="multi-join-container">
+          <div class="divider">OR</div>
+          <div class="join-group">
+            <input type="text" id="room-code-input" placeholder="5-Letter Room Code" maxlength="5" />
+            <button id="join-btn" class="btn secondary">Join Room</button>
+          </div>
         </div>
       </div>
 
@@ -85,7 +108,7 @@
     <div id="game-view" class="card frosted hidden">
       <div class="hud">
         <div class="hud-top">
-          <div class="room-tag">Room: <span id="current-room"></span></div>
+          <div class="room-tag">Match: <span id="current-room"></span></div>
           <div class="my-lives" id="my-lives">Lives: ❤️❤️❤️</div>
           <div class="timer-box">⏳ <span id="timer-display">10:00</span></div>
           <button id="quit-btn" class="btn danger-small" title="Quit match">Resign 🏳️</button>
@@ -97,7 +120,6 @@
         <div id="sudoku-grid" class="sudoku-grid"></div>
       </div>
 
-      <!-- Quick Symbol Selector -->
       <div class="symbol-pad-container">
         <span class="symbol-pad-title">Tap a cell, then tap a symbol to place it:</span>
         <div id="symbol-pad" class="symbol-pad"></div>
@@ -109,7 +131,7 @@
     </div>
   </div>
 
-  <!-- Settings Modal Popup -->
+  <!-- Settings Modal -->
   <div id="settings-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted settings-card">
       <div class="modal-header">
@@ -162,8 +184,14 @@
           </div>
         </div>
 
+        <!-- Music & Sound Effect Toggles -->
         <div class="setting-toggle-row">
-          <label for="sound-toggle">🔊 Sound Effects</label>
+          <label for="music-toggle">🎵 Background Music</label>
+          <input type="checkbox" id="music-toggle" class="toggle-checkbox" />
+        </div>
+
+        <div class="setting-toggle-row">
+          <label for="sound-toggle">🔊 Game Sound FX</label>
           <input type="checkbox" id="sound-toggle" checked class="toggle-checkbox" />
         </div>
 

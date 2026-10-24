@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const rooms = {};
 
-// --- SUDOKU GENERATION & VALIDATION ---
+// Sudoku generation & solver
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
     if (board[row][i] === num || board[i][col] === num) return false;
@@ -79,14 +79,15 @@ function terminateMatch(code, reason) {
   const room = rooms[code];
   if (!room || !room.started) return;
   if (room.timerInterval) clearInterval(room.timerInterval);
+  if (room.botInterval) clearInterval(room.botInterval);
   room.started = false;
 
   const leaderboard = getLeaderboard(room);
   io.to(code).emit('gameOver', { reason, leaderboard });
 }
 
-// --- SOCKET CONNECTION HANDLING ---
 io.on('connection', (socket) => {
+  // Multiplayer room creation
   socket.on('createRoom', ({ username, difficulty, maxPlayers, durationMinutes, symbolSet }) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
@@ -95,6 +96,7 @@ io.on('connection', (socket) => {
     const totalSeconds = validMinutes * 60;
 
     rooms[roomCode] = {
+      isBotGame: false,
       players: [{
         id: socket.id,
         name: username || 'Player 1',
@@ -122,6 +124,113 @@ io.on('connection', (socket) => {
       symbolSet: rooms[roomCode].symbolSet
     });
     io.to(roomCode).emit('playerListUpdate', rooms[roomCode].players);
+  });
+
+  // Solo vs Bot Room creation
+  socket.on('createSoloBotRoom', ({ username, difficulty, botSpeed, durationMinutes, symbolSet }) => {
+    const roomCode = 'BOT-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
+
+    const validMinutes = Math.max(1, Math.min(60, parseInt(durationMinutes, 10) || 10));
+    const totalSeconds = validMinutes * 60;
+
+    const botPlayer = {
+      id: 'bot_ai',
+      name: '🤖 AI Bot',
+      score: 0,
+      mistakes: 0,
+      eliminated: false
+    };
+
+    const humanPlayer = {
+      id: socket.id,
+      name: username || 'Player 1',
+      score: 0,
+      mistakes: 0,
+      eliminated: false
+    };
+
+    rooms[roomCode] = {
+      isBotGame: true,
+      botSpeed: botSpeed || 'medium',
+      players: [humanPlayer, botPlayer],
+      puzzle,
+      solution,
+      totalBlanks,
+      symbolSet: symbolSet || 'numbers',
+      maxPlayers: 2,
+      duration: totalSeconds,
+      timeLeft: totalSeconds,
+      timerInterval: null,
+      botInterval: null,
+      started: true
+    };
+
+    socket.join(roomCode);
+
+    // Auto start immediately
+    socket.emit('startGame', {
+      puzzle,
+      players: rooms[roomCode].players,
+      totalBlanks,
+      duration: totalSeconds,
+      symbolSet: rooms[roomCode].symbolSet,
+      roomCode
+    });
+
+    // Start match timer
+    rooms[roomCode].timerInterval = setInterval(() => {
+      rooms[roomCode].timeLeft -= 1;
+      io.to(roomCode).emit('timerTick', { timeLeft: rooms[roomCode].timeLeft });
+
+      if (rooms[roomCode].timeLeft <= 0) {
+        terminateMatch(roomCode, '⏰ Time ran out!');
+      }
+    }, 1000);
+
+    // Bot solving loop
+    const speedIntervals = { slow: 7000, medium: 4500, fast: 2600 };
+    const baseInterval = speedIntervals[botSpeed] || 4500;
+
+    rooms[roomCode].botInterval = setInterval(() => {
+      const room = rooms[roomCode];
+      if (!room || !room.started) return;
+
+      const bot = room.players.find(p => p.id === 'bot_ai');
+      if (!bot || bot.eliminated) return;
+
+      // Small chance bot makes a mistake
+      const mistakeChance = Math.random();
+      if (mistakeChance < 0.08) {
+        bot.mistakes += 1;
+        if (bot.mistakes >= 3) {
+          bot.eliminated = true;
+          io.to(roomCode).emit('progressUpdate', {
+            playerId: bot.id,
+            score: bot.score,
+            mistakes: bot.mistakes,
+            eliminated: true,
+            totalBlanks: room.totalBlanks
+          });
+          terminateMatch(roomCode, '🤖 AI Bot struck out! You win!');
+          return;
+        }
+      } else {
+        bot.score += 1;
+      }
+
+      io.to(roomCode).emit('progressUpdate', {
+        playerId: bot.id,
+        score: bot.score,
+        mistakes: bot.mistakes,
+        eliminated: bot.eliminated,
+        totalBlanks: room.totalBlanks
+      });
+
+      if (bot.score >= room.totalBlanks) {
+        terminateMatch(roomCode, '🤖 AI Bot finished the board first!');
+      }
+    }, baseInterval);
   });
 
   socket.on('joinRoom', ({ roomCode, username }) => {
@@ -154,32 +263,26 @@ io.on('connection', (socket) => {
     io.to(code).emit('playerListUpdate', room.players);
 
     if (room.players.length === room.maxPlayers) {
-      startMatch(code);
+      room.started = true;
+      io.to(code).emit('startGame', {
+        puzzle: room.puzzle,
+        players: room.players,
+        totalBlanks: room.totalBlanks,
+        duration: room.duration,
+        symbolSet: room.symbolSet,
+        roomCode: code
+      });
+
+      room.timerInterval = setInterval(() => {
+        room.timeLeft -= 1;
+        io.to(code).emit('timerTick', { timeLeft: room.timeLeft });
+
+        if (room.timeLeft <= 0) {
+          terminateMatch(code, '⏰ Time ran out!');
+        }
+      }, 1000);
     }
   });
-
-  function startMatch(code) {
-    const room = rooms[code];
-    if (!room || room.started) return;
-    room.started = true;
-
-    io.to(code).emit('startGame', {
-      puzzle: room.puzzle,
-      players: room.players,
-      totalBlanks: room.totalBlanks,
-      duration: room.duration,
-      symbolSet: room.symbolSet
-    });
-
-    room.timerInterval = setInterval(() => {
-      room.timeLeft -= 1;
-      io.to(code).emit('timerTick', { timeLeft: room.timeLeft });
-
-      if (room.timeLeft <= 0) {
-        terminateMatch(code, '⏰ Time ran out!');
-      }
-    }, 1000);
-  }
 
   socket.on('submitMove', ({ roomCode, row, col, value }) => {
     const code = roomCode.toUpperCase();
@@ -189,7 +292,6 @@ io.on('connection', (socket) => {
     const player = room.players.find(p => p.id === socket.id);
     if (!player || player.eliminated) return;
 
-    // Value sent is 1 through 9 internally
     const isCorrect = room.solution[row][col] === parseInt(value, 10);
 
     if (isCorrect) {
@@ -236,7 +338,7 @@ io.on('connection', (socket) => {
       if (alivePlayers.length === 0) {
         terminateMatch(code, '💀 All players lost their lives!');
       } else if (room.players.length > 1 && alivePlayers.length === 1) {
-        terminateMatch(code, `👑 ${alivePlayers[0].name} wins! Opponent ran out of lives.`);
+        terminateMatch(code, `👑 ${alivePlayers[0].name} wins!`);
       }
     }
   });
@@ -279,15 +381,16 @@ io.on('connection', (socket) => {
 
         if (room.started) {
           const alivePlayers = room.players.filter(p => !p.eliminated);
-          if (room.players.length === 0 || alivePlayers.length === 0) {
-            terminateMatch(code, 'Match ended (player left).');
+          if (alivePlayers.length === 0 || room.players.length === 0) {
+            terminateMatch(code, 'Match ended.');
           } else if (alivePlayers.length === 1) {
-            terminateMatch(code, `${alivePlayers[0].name} won (opponent left).`);
+            terminateMatch(code, `${alivePlayers[0].name} won!`);
           }
         }
 
-        if (room.players.length === 0) {
+        if (room.players.length === 0 || (room.isBotGame && room.players.length <= 1)) {
           if (room.timerInterval) clearInterval(room.timerInterval);
+          if (room.botInterval) clearInterval(room.botInterval);
           delete rooms[code];
         }
         break;
