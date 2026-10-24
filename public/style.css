@@ -133,11 +133,12 @@ body {
 .scenic-bg {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: -3;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
   transition: background-image 0.5s ease-in-out;
+  background-image: url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80');
 }
 
 .scenic-overlay {
@@ -147,24 +148,26 @@ body {
   pointer-events: none;
 }
 
-.bg-milkyway { background-image: url('https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80'); }
-.bg-sunset { background-image: url('https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80'); }
-.bg-forest { background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80'); }
-.bg-city { background-image: url('https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80'); }
-.bg-ocean { background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80'); }
-.bg-mountains { background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80'); }
+/* White Glitter Particle Canvas */
+.glitter-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  pointer-events: none !important;
+}
 
 /* Dynamic Full-Screen Background Color Overlays on Match Finish */
 .result-flash-screen {
   position: fixed;
   inset: 0;
   z-index: -1;
-  pointer-events: none;
+  pointer-events: none !important;
   opacity: 0;
   transition: opacity 0.8s ease, background-color 0.8s ease;
 }
 
-/* Green Screen on Victory */
 .result-flash-screen.flash-win {
   opacity: 0.85;
   background: radial-gradient(circle at center, rgba(34, 197, 94, 0.88) 0%, rgba(5, 70, 30, 0.96) 100%);
@@ -176,7 +179,6 @@ body {
   100% { opacity: 0.95; }
 }
 
-/* Red Screen on Loss / Strikeout */
 .result-flash-screen.flash-loss {
   opacity: 0.88;
   background: radial-gradient(circle at center, rgba(239, 68, 68, 0.88) 0%, rgba(70, 5, 5, 0.98) 100%);
@@ -188,13 +190,11 @@ body {
   100% { opacity: 0.98; }
 }
 
-/* White Screen on Draw / Tie */
 .result-flash-screen.flash-draw {
   opacity: 0.88;
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.92) 0%, rgba(203, 213, 225, 0.95) 100%);
 }
 
-/* Muted Slate Gray Screen on Resign */
 .result-flash-screen.flash-resign {
   opacity: 0.85;
   background: radial-gradient(circle at center, rgba(148, 163, 184, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
@@ -216,7 +216,8 @@ body {
   flex-direction: column;
   gap: 14px;
   position: relative;
-  z-index: 10;
+  z-index: 10 !important;
+  pointer-events: auto !important;
 }
 
 .top-bar {
@@ -245,6 +246,7 @@ body {
   align-items: center;
   gap: 6px;
 }
+
 .icon-btn:hover {
   background: var(--accent);
   color: #000;
@@ -363,6 +365,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .btn.danger-small:hover { background: var(--error); color: #fff; }
 
 .divider {
@@ -586,7 +589,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   border-color: transparent !important;
 }
 
-/* Visual Flash Animations */
+/* Animations */
 .cell.completed-flash { animation: flashPulse 1s ease forwards; }
 
 @keyframes flashPulse {
@@ -681,6 +684,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   cursor: pointer;
   padding: 0;
 }
+
 #custom-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
 #custom-color-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
 
@@ -738,13 +742,4 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   color: var(--accent);
   font-weight: bold;
   font-size: 0.95rem;
-}
-/* White Glitter Particle Canvas */
-.glitter-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  pointer-events: none !important;
 }

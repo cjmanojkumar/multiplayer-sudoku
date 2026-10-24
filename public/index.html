@@ -12,21 +12,14 @@
 </head>
 <body>
   <!-- Full-Screen Realistic Scenery -->
-  <div id="scenic-bg" class="scenic-bg bg-milkyway">
+  <div id="scenic-bg" class="scenic-bg">
     <div class="scenic-overlay"></div>
   </div>
 
-<!-- Full-Screen Realistic Scenery -->
- <div id="scenic-bg" class="scenic-bg bg-milkyway">
-   <div class="scenic-overlay"></div>
- </div>
+  <!-- White Glitter Particle Canvas -->
+  <canvas id="glitter-canvas" class="glitter-canvas"></canvas>
 
-<!-- White Glitter Particles Canvas -->
-<canvas id="glitter-canvas" class="glitter-canvas"></canvas>
-
-<!-- End-Game Screen Glow Layer -->
-<div id="result-flash-screen" class="result-flash-screen"></div>
-  <!-- End-Game Screen Glow Layer (Green for Win, Red for Loss, White for Draw, Muted Slate for Resign) -->
+  <!-- End-Game Screen Glow Layer (Green for Win, Red for Loss, White for Draw, Slate for Resign) -->
   <div id="result-flash-screen" class="result-flash-screen"></div>
 
   <div class="arena-container">
@@ -154,7 +147,7 @@
         <div class="setting-row">
           <label for="bg-select">Scenery Backdrop:</label>
           <select id="bg-select">
-            <option value="milkyway">🌌 Milky Way Galaxy</option>
+            <option value="milkyway" selected>🌌 Milky Way Galaxy</option>
             <option value="sunset">🌄 Mountain Sunset</option>
             <option value="forest">🌲 Misty Redwood Forest</option>
             <option value="city">🏙️ Tokyo Night City</option>
@@ -195,7 +188,6 @@
           </div>
         </div>
 
-        <!-- Audio & Visual Toggles (Vibration Removed) -->
         <div class="setting-toggle-row">
           <label for="music-toggle">🎵 Background Music</label>
           <input type="checkbox" id="music-toggle" class="toggle-checkbox" />

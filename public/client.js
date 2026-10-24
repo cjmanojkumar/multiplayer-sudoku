@@ -7,68 +7,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedCell = null;
   let activeSymbolSet = 'numbers';
 
-  // --- AMBIENT WHITE GLITTER ENGINE ---
-const glitterCanvas = document.getElementById('glitter-canvas');
-if (glitterCanvas) {
-  const gCtx = glitterCanvas.getContext('2d');
-  let width = (glitterCanvas.width = window.innerWidth);
-  let height = (glitterCanvas.height = window.innerHeight);
-
-  window.addEventListener('resize', () => {
-    width = glitterCanvas.width = window.innerWidth;
-    height = glitterCanvas.height = window.innerHeight;
-  });
-
-  const PARTICLE_COUNT = 70;
-  const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    radius: Math.random() * 2 + 0.8,
-    speedY: Math.random() * 0.4 + 0.15,
-    speedX: (Math.random() - 0.5) * 0.3,
-    alpha: Math.random() * 0.8 + 0.2,
-    alphaSpeed: (Math.random() * 0.02 + 0.008) * (Math.random() < 0.5 ? 1 : -1)
-  }));
-
-  function renderGlitter() {
-    gCtx.clearRect(0, 0, width, height);
-
-    for (let p of particles) {
-      p.y -= p.speedY;
-      p.x += p.speedX;
-      p.alpha += p.alphaSpeed;
-
-      // Twinkle bounds
-      if (p.alpha <= 0.1 || p.alpha >= 0.95) {
-        p.alphaSpeed = -p.alphaSpeed;
-      }
-
-      // Wrap-around screen bounds
-      if (p.y < -5) p.y = height + 5;
-      if (p.x < -5) p.x = width + 5;
-      if (p.x > width + 5) p.x = -5;
-
-      // Draw white particle with soft radial glow
-      gCtx.save();
-      gCtx.beginPath();
-      gCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      gCtx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, p.alpha)})`;
-      gCtx.shadowColor = 'rgba(255, 255, 255, 0.9)';
-      gCtx.shadowBlur = 6;
-      gCtx.fill();
-      gCtx.restore();
-    }
-
-    requestAnimationFrame(renderGlitter);
-  }
-
-  renderGlitter();
-}
-
   // Audio & Animation Flags
   let isSoundEnabled = true;
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
+
+  // Background Images Dictionary (Fixes stuck background by applying direct URL)
+  const BACKGROUND_IMAGES = {
+    milkyway: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
+    sunset: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
+    forest: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
+    city: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
+    ocean: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
+    mountains: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80'
+  };
 
   // Continuous Instrumental Soundtrack
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
@@ -142,6 +94,58 @@ if (glitterCanvas) {
   const winnerReason = document.getElementById('winner-reason');
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
+
+  // --- WHITE GLITTER PARTICLE ENGINE ---
+  const glitterCanvas = document.getElementById('glitter-canvas');
+  if (glitterCanvas) {
+    const gCtx = glitterCanvas.getContext('2d');
+    let width = (glitterCanvas.width = window.innerWidth);
+    let height = (glitterCanvas.height = window.innerHeight);
+
+    window.addEventListener('resize', () => {
+      width = glitterCanvas.width = window.innerWidth;
+      height = glitterCanvas.height = window.innerHeight;
+    });
+
+    const PARTICLE_COUNT = 75;
+    const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      radius: Math.random() * 2 + 0.8,
+      speedY: Math.random() * 0.4 + 0.15,
+      speedX: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random() * 0.8 + 0.2,
+      alphaSpeed: (Math.random() * 0.02 + 0.008) * (Math.random() < 0.5 ? 1 : -1)
+    }));
+
+    function renderGlitter() {
+      gCtx.clearRect(0, 0, width, height);
+      for (let p of particles) {
+        p.y -= p.speedY;
+        p.x += p.speedX;
+        p.alpha += p.alphaSpeed;
+
+        if (p.alpha <= 0.1 || p.alpha >= 0.95) {
+          p.alphaSpeed = -p.alphaSpeed;
+        }
+
+        if (p.y < -5) p.y = height + 5;
+        if (p.x < -5) p.x = width + 5;
+        if (p.x > width + 5) p.x = -5;
+
+        gCtx.save();
+        gCtx.beginPath();
+        gCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        gCtx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, p.alpha)})`;
+        gCtx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+        gCtx.shadowBlur = 6;
+        gCtx.fill();
+        gCtx.restore();
+      }
+      requestAnimationFrame(renderGlitter);
+    }
+    renderGlitter();
+  }
 
   // --- PROCEDURAL AUDIO SYNTHESIZERS ---
   let audioCtx = null;
@@ -353,16 +357,24 @@ if (glitterCanvas) {
   settingsCloseX?.addEventListener('click', closeSettings);
   settingsSaveBtn?.addEventListener('click', closeSettings);
 
+  // Background Image Switcher (Applies direct URL dynamically)
   bgSelect?.addEventListener('change', (e) => {
-    if (scenicBg) scenicBg.className = `scenic-bg bg-${e.target.value}`;
+    const chosenKey = e.target.value;
+    const imageUrl = BACKGROUND_IMAGES[chosenKey];
+    if (scenicBg && imageUrl) {
+      scenicBg.style.backgroundImage = `url('${imageUrl}')`;
+    }
   });
+
   themeSelect?.addEventListener('change', (e) => {
     document.documentElement.setAttribute('data-theme', e.target.value);
     document.documentElement.style.removeProperty('--accent');
   });
+
   fontSelect?.addEventListener('change', (e) => {
     document.documentElement.setAttribute('data-font', e.target.value);
   });
+
   customColorPicker?.addEventListener('input', (e) => {
     document.documentElement.style.setProperty('--accent', e.target.value);
   });
