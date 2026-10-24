@@ -132,66 +132,104 @@
   </div>
 
   <!-- Settings Modal -->
-<div id="settings-modal" class="modal-backdrop hidden">
-  <div class="modal-card frosted settings-card">
-    <div class="modal-header">
-      <h2>⚙️ Arena Settings</h2>
-      <span class="close-x" id="settings-close-x">&times;</span>
-    </div>
-
-    <div class="settings-grid">
-      <!-- Unified Atmosphere & Instrument Selection -->
-      <div class="setting-row">
-        <label for="atmosphere-select">Atmosphere & Music:</label>
-        <select id="atmosphere-select">
-          <option value="forest">🌲 Misty Forest (Acoustic Guitar)</option>
-          <option value="sunset">🌄 Mountain Sunset (Electric Piano)</option>
-          <option value="milkyway" selected>🌌 Milky Way (Celesta & Chimes)</option>
-          <option value="city">🏙️ Tokyo Neon (Synth Lead & Bass)</option>
-          <option value="ocean">🌊 Twilight Ocean (Grand Piano)</option>
-          <option value="mountains">🏔️ Alpine Peak (Crystal Kalimba)</option>
-        </select>
+  <div id="settings-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted settings-card">
+      <div class="modal-header">
+        <h2>⚙️ Arena Settings</h2>
+        <span class="close-x" id="settings-close-x">&times;</span>
       </div>
 
-      <div class="setting-row">
-        <label for="font-select">Font Family:</label>
-        <select id="font-select">
-          <option value="default">Default Sans</option>
-          <option value="fredoka">Fun / Rounded</option>
-          <option value="cinzel">Roman / Serif</option>
-          <option value="mono">Code / Mono</option>
-          <option value="arcade">8-Bit Arcade</option>
-        </select>
-      </div>
+      <div class="settings-grid">
+        <div class="setting-row">
+          <label for="bg-select">Scenery Backdrop:</label>
+          <select id="bg-select">
+            <option value="milkyway">🌌 Milky Way Galaxy</option>
+            <option value="sunset">🌄 Mountain Sunset</option>
+            <option value="forest">🌲 Misty Redwood Forest</option>
+            <option value="city">🏙️ Tokyo Night City</option>
+            <option value="ocean">🌊 Twilight Ocean</option>
+            <option value="mountains">🏔️ Snowy Alpine Peak</option>
+          </select>
+        </div>
 
-      <div class="setting-row">
-        <label for="custom-color-picker">Custom Accent Override:</label>
-        <div class="color-picker-wrap">
-          <input type="color" id="custom-color-picker" value="#38bdf8" />
-          <span class="color-hint">Tap circle to override accent color</span>
+        <div class="setting-row">
+          <label for="theme-select">Theme Palette:</label>
+          <select id="theme-select">
+            <option value="dark">Midnight Dark</option>
+            <option value="neon">Cyber Neon</option>
+            <option value="emerald">Emerald</option>
+            <option value="sunset">Sunset Orange</option>
+            <option value="dracula">Dracula</option>
+            <option value="amber">Amber</option>
+            <option value="paper">Paper Light</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label for="font-select">Font Family:</label>
+          <select id="font-select">
+            <option value="default">Default Sans</option>
+            <option value="fredoka">Fun / Rounded</option>
+            <option value="cinzel">Roman / Serif</option>
+            <option value="mono">Code / Mono</option>
+            <option value="arcade">8-Bit Arcade</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label for="custom-color-picker">Accent Color:</label>
+          <div class="color-picker-wrap">
+            <input type="color" id="custom-color-picker" value="#38bdf8" />
+            <span class="color-hint">Tap circle to pick</span>
+          </div>
+        </div>
+
+        <!-- Music & Sound Effect Toggles -->
+        <div class="setting-toggle-row">
+          <label for="music-toggle">🎵 Background Music</label>
+          <input type="checkbox" id="music-toggle" class="toggle-checkbox" />
+        </div>
+
+        <div class="setting-toggle-row">
+          <label for="sound-toggle">🔊 Game Sound FX</label>
+          <input type="checkbox" id="sound-toggle" checked class="toggle-checkbox" />
+        </div>
+
+        <div class="setting-toggle-row">
+          <label for="emoji-toggle">✨ Completion Emojis</label>
+          <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
         </div>
       </div>
 
-      <!-- Audio Toggles -->
-      <div class="setting-toggle-row">
-        <label for="music-toggle">🎵 Instrumental Music</label>
-        <input type="checkbox" id="music-toggle" class="toggle-checkbox" />
-      </div>
-
-      <div class="setting-toggle-row">
-        <label for="sound-toggle">🔊 Game Sound FX</label>
-        <input type="checkbox" id="sound-toggle" checked class="toggle-checkbox" />
-      </div>
-
-      <div class="setting-toggle-row">
-        <label for="emoji-toggle">✨ Completion Emojis</label>
-        <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
-      </div>
+      <button id="settings-save-btn" class="btn primary full-width">Done</button>
     </div>
-
-    <button id="settings-save-btn" class="btn primary full-width">Done</button>
   </div>
-</div>
+
+  <!-- End of Match Leaderboard Modal -->
+  <div id="winner-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted">
+      <div class="modal-header">
+        <h2>🏆 Match Over</h2>
+        <span class="close-x" id="modal-close-x">&times;</span>
+      </div>
+      <p id="winner-reason" class="winner-reason"></p>
+
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Solved</th>
+            <th>Mistakes</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+
+      <button class="btn primary full-width" onclick="location.reload()">Back to Lobby</button>
+    </div>
+  </div>
 
   <script src="client.js"></script>
 </body>
