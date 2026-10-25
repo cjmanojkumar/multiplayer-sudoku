@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-font="default" data-art-style="realistic">
+<html lang="en" data-theme="dark" data-font="default">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -29,33 +29,33 @@
     </div>
 
     <!-- User Account Status Bar -->
-    <div id="auth-status-bar" class="card frosted auth-bar">
+    <div id="auth-status-bar" class="card frosted auth-bar sketch-border">
       <div id="guest-auth-controls" class="auth-row">
         <span>👤 Playing as Guest</span>
         <div class="auth-btn-group">
-          <button id="open-login-btn" class="btn small">Log In</button>
-          <button id="open-register-btn" class="btn primary small">Register</button>
+          <button id="open-login-btn" class="btn small sketch-border">Log In</button>
+          <button id="open-register-btn" class="btn primary small sketch-border">Register</button>
         </div>
       </div>
       <div id="logged-auth-controls" class="auth-row hidden">
         <span>Welcome, <strong id="logged-username">Player</strong> (<span id="user-stats">0W / 0P</span>)</span>
         <div class="auth-btn-group">
-          <button id="open-profile-btn" class="btn small" title="View player statistics">📊 Profile</button>
-          <button id="open-friends-btn" class="btn small" title="Manage friends">👥 Friends</button>
-          <button id="open-history-btn" class="btn small" title="View match history">📜 History</button>
-          <button id="logout-btn" class="btn danger-small">Log Out</button>
+          <button id="open-profile-btn" class="btn small sketch-border" title="View player statistics">📊 Profile</button>
+          <button id="open-friends-btn" class="btn small sketch-border" title="Manage friends">👥 Friends</button>
+          <button id="open-history-btn" class="btn small sketch-border" title="View match history">📜 History</button>
+          <button id="logout-btn" class="btn danger-small sketch-border">Log Out</button>
         </div>
       </div>
     </div>
 
     <!-- Lobby View -->
-    <div id="lobby-view" class="card frosted">
+    <div id="lobby-view" class="card frosted sketch-card">
       <div class="input-group">
         <label for="username">Player Nickname:</label>
-        <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="14" />
+        <input type="text" id="username" class="sketch-input" placeholder="e.g. MasterSolver" maxlength="14" />
       </div>
 
-      <div class="mode-select-wrap">
+      <div class="mode-select-wrap sketch-border">
         <label class="radio-label">
           <input type="radio" name="game-mode" value="multi" checked />
           <span>👥 Multiplayer Room</span>
@@ -69,7 +69,7 @@
       <div class="host-settings">
         <div class="setting-col" id="col-max-players">
           <label for="max-players">Room Size:</label>
-          <select id="max-players">
+          <select id="max-players" class="sketch-input">
             <option value="2" selected>2 Players</option>
             <option value="3">3 Players</option>
             <option value="4">4 Players</option>
@@ -78,7 +78,7 @@
 
         <div class="setting-col hidden" id="col-bot-speed">
           <label for="bot-speed">Bot Skill:</label>
-          <select id="bot-speed">
+          <select id="bot-speed" class="sketch-input">
             <option value="slow">Casual (Slow)</option>
             <option value="medium" selected>Balanced</option>
             <option value="fast">Master (Fast)</option>
@@ -87,21 +87,21 @@
 
         <div class="setting-col">
           <label for="custom-duration">Time Limit (Mins):</label>
-          <input type="number" id="custom-duration" min="1" max="60" value="10" />
+          <input type="number" id="custom-duration" class="sketch-input" min="1" max="60" value="10" />
         </div>
       </div>
 
-      <div class="lobby-meta-preview">
+      <div class="lobby-meta-preview sketch-border">
         <span>⚙️ Active: <strong id="active-diff-label">Level 4 (Medium)</strong> | <strong id="active-symbol-label">1-9 Numbers</strong></span>
       </div>
 
       <div class="actions">
-        <button id="create-btn" class="btn primary">Start Game</button>
+        <button id="create-btn" class="btn primary sketch-btn">Start Game</button>
         <div id="multi-join-container">
           <div class="divider">OR</div>
           <div class="join-group">
-            <input type="text" id="room-code-input" placeholder="5-Letter Room Code" maxlength="5" />
-            <button id="join-btn" class="btn secondary">Join Room</button>
+            <input type="text" id="room-code-input" class="sketch-input" placeholder="5-Letter Room Code" maxlength="5" />
+            <button id="join-btn" class="btn secondary sketch-btn">Join Room</button>
           </div>
         </div>
       </div>
@@ -111,35 +111,35 @@
     </div>
 
     <!-- Active Game Arena -->
-    <div id="game-view" class="card frosted hidden">
+    <div id="game-view" class="card frosted sketch-card hidden">
       <div class="hud">
         <div class="hud-top">
           <div class="room-tag">Match: <span id="current-room"></span></div>
           <div class="my-lives" id="my-lives">Lives: ❤️❤️❤️</div>
           <div class="timer-box">⏳ <span id="timer-display">10:00</span></div>
-          <button id="quit-btn" class="btn danger-small" title="Quit match">Resign 🏳️</button>
+          <button id="quit-btn" class="btn danger-small sketch-border" title="Quit match">Resign 🏳️</button>
         </div>
         <div class="scoreboard" id="scoreboard"></div>
       </div>
 
       <div class="board-wrapper">
-        <div id="sudoku-grid" class="sudoku-grid"></div>
+        <div id="sudoku-grid" class="sudoku-grid sketch-grid"></div>
       </div>
 
       <div class="symbol-pad-container">
-        <span class="symbol-pad-title">Tap a cell, then tap a symbol to place it:</span>
+        <span class="symbol-pad-title">Tap a cell, then sketch in a symbol:</span>
         <div id="symbol-pad" class="symbol-pad"></div>
       </div>
 
-      <div id="eliminated-banner" class="banner hidden">
+      <div id="eliminated-banner" class="banner sketch-border hidden">
         ❌ You were eliminated!
       </div>
     </div>
   </div>
 
-  <!-- Settings Modal (10 Realistic + 10 Creative Art Backdrops) -->
+  <!-- Settings Modal -->
   <div id="settings-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted settings-card">
+    <div class="modal-card frosted settings-card sketch-modal">
       <div class="modal-header">
         <h2>⚙️ Arena Settings</h2>
         <span class="close-x" id="settings-close-x">&times;</span>
@@ -149,7 +149,7 @@
         <div class="setting-row">
           <div class="slider-header">
             <label for="difficulty-slider">Difficulty Scale:</label>
-            <span id="slider-level-name" class="slider-badge">Level 4: Medium (38 blanks)</span>
+            <span id="slider-level-name" class="slider-badge sketch-border">Level 4: Medium (38 blanks)</span>
           </div>
           <input type="range" id="difficulty-slider" min="1" max="7" value="4" step="1" class="custom-range" />
           <div class="slider-ticks">
@@ -159,7 +159,7 @@
 
         <div class="setting-row">
           <label for="symbol-set-select">Symbol Set:</label>
-          <select id="symbol-set-select">
+          <select id="symbol-set-select" class="sketch-input">
             <option value="numbers" selected>1 - 9 (Standard Numbers)</option>
             <option value="letters">A - I (Alphabet)</option>
             <option value="roman">I - IX (Roman Numerals)</option>
@@ -168,39 +168,36 @@
           </select>
         </div>
 
+        <!-- 20 Single-Word Mixed Themes -->
         <div class="setting-row">
-          <label for="bg-select">Scenery Backdrop & Style:</label>
-          <select id="bg-select">
-            <optgroup label="📸 10 Realistic Sceneries">
-              <option value="milkyway" selected>🌌 1. Milky Way Galaxy (Midnight Dark)</option>
-              <option value="sunset">🌄 2. Mountain Sunset (Sunset Gold)</option>
-              <option value="forest">🌲 3. Misty Redwood Forest (Deep Emerald)</option>
-              <option value="city">🏙️ 4. Tokyo Night Skyline (Cyber Neon)</option>
-              <option value="ocean">🌊 5. Tropical Turquoise Ocean (Ocean Blue)</option>
-              <option value="mountains">🏔️ 6. Snowy Alpine Peak (Paper Frost)</option>
-              <option value="desert">🏜️ 7. Dense Pine Forest (Emerald Woods)</option>
-              <option value="aurora">🌌 8. Arctic Aurora Borealis (Neon Light)</option>
-              <option value="wheat">🌾 9. Golden Sunlit Wheat Field (Amber Harvest)</option>
-              <option value="lightning">⚡ 10. Night Lightning Storm (Electric Purple)</option>
-            </optgroup>
-            <optgroup label="🎨 10 Creative & 3D Artworks">
-              <option value="watercolor">🎨 11. Watercolor Dreamscape (Pastel Flow)</option>
-              <option value="oilpalette">🖌️ 12. Impasto Oil Paint Palette (Textured Gold)</option>
-              <option value="neon3d">🧊 13. 3D Glowing Cyber Geometry (Tron Neon)</option>
-              <option value="ghibli">☁️ 14. Anime Pastel Cloudscape (Sky Blue)</option>
-              <option value="hologram">🔮 15. Prism Holographic Waves (Iridescent)</option>
-              <option value="sumie">📜 16. Japanese Ink Wash Sumi-e (Monochrome)</option>
-              <option value="cosmicpaint">🌌 17. Swirling Cosmic Oil Swirl (Deep Violet)</option>
-              <option value="clay3d">🧸 18. Soft 3D Pastel Clay (Warm Peaches)</option>
-              <option value="fluidsilk">🌊 19. Chromatic Liquid Silk (Fluid Magenta)</option>
-              <option value="synthwave">🏎️ 20. Retro 3D Grid Synthwave (Outrun)</option>
-            </optgroup>
+          <label for="bg-select">Theme & Scenery:</label>
+          <select id="bg-select" class="sketch-input">
+            <option value="galaxy" selected>🌌 Galaxy</option>
+            <option value="sunset">🌄 Sunset</option>
+            <option value="redwood">🌲 Redwood</option>
+            <option value="tokyo">🏙️ Tokyo</option>
+            <option value="lagoon">🌊 Lagoon</option>
+            <option value="alpine">🏔️ Alpine</option>
+            <option value="dunes">🏜️ Dunes</option>
+            <option value="aurora">🌌 Aurora</option>
+            <option value="harvest">🌾 Harvest</option>
+            <option value="tempest">⚡ Tempest</option>
+            <option value="dreamscape">🎨 Dreamscape</option>
+            <option value="palette">🖌️ Palette</option>
+            <option value="prism">🧊 Prism</option>
+            <option value="ghibli">☁️ Ghibli</option>
+            <option value="hologram">🔮 Hologram</option>
+            <option value="sumi">📜 Sumi</option>
+            <option value="cosmic">🌌 Cosmic</option>
+            <option value="clay">🧸 Clay</option>
+            <option value="silk">🌊 Silk</option>
+            <option value="synthwave">🏎️ Synthwave</option>
           </select>
         </div>
 
         <div class="setting-row">
           <label for="font-select">Font Family:</label>
-          <select id="font-select">
+          <select id="font-select" class="sketch-input">
             <option value="default" selected>1. System Clean (Default)</option>
             <option value="fredoka">2. Fredoka (Fun / Rounded)</option>
             <option value="cinzel">3. Cinzel (Royal Serif)</option>
@@ -240,39 +237,39 @@
         </div>
       </div>
 
-      <button id="settings-save-btn" class="btn primary full-width">Save Settings</button>
+      <button id="settings-save-btn" class="btn primary full-width sketch-btn">Save Settings</button>
     </div>
   </div>
 
   <!-- Player Profile Modal -->
   <div id="profile-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted profile-card">
+    <div class="modal-card frosted profile-card sketch-modal">
       <div class="modal-header">
         <h2>📊 Player Profile & Career</h2>
         <span class="close-x" id="profile-close-x">&times;</span>
       </div>
       <div class="profile-details-grid">
-        <div class="profile-metric">
+        <div class="profile-metric sketch-border">
           <span class="metric-title">Player Name</span>
           <span class="metric-val" id="prof-username">-</span>
         </div>
-        <div class="profile-metric">
+        <div class="profile-metric sketch-border">
           <span class="metric-title">Account Tier</span>
           <span class="metric-val" id="prof-role">PLAYER</span>
         </div>
-        <div class="profile-metric">
+        <div class="profile-metric sketch-border">
           <span class="metric-title">Win Rate</span>
           <span class="metric-val highlight" id="prof-winrate">0%</span>
         </div>
-        <div class="profile-metric">
+        <div class="profile-metric sketch-border">
           <span class="metric-title">Victories</span>
           <span class="metric-val" id="prof-matches-won">0</span>
         </div>
-        <div class="profile-metric">
+        <div class="profile-metric sketch-border">
           <span class="metric-title">Matches Played</span>
           <span class="metric-val" id="prof-matches-played">0</span>
         </div>
-        <div class="profile-metric">
+        <div class="profile-metric sketch-border">
           <span class="metric-title">Cumulative Points</span>
           <span class="metric-val" id="prof-total-score">0</span>
         </div>
@@ -286,25 +283,25 @@
 
   <!-- Friends Hub Modal -->
   <div id="friends-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted friends-card">
+    <div class="modal-card frosted friends-card sketch-modal">
       <div class="modal-header">
         <h2>👥 Friends Hub</h2>
         <span class="close-x" id="friends-close-x">&times;</span>
       </div>
 
       <div class="friends-add-bar">
-        <input type="text" id="friend-target-input" placeholder="Search friend's username..." />
-        <button id="send-friend-req-btn" class="btn primary small">Send Request</button>
+        <input type="text" id="friend-target-input" class="sketch-input" placeholder="Search friend's username..." />
+        <button id="send-friend-req-btn" class="btn primary small sketch-btn">Send Request</button>
       </div>
       <p id="friend-feedback-msg" class="color-hint text-center hidden"></p>
 
-      <div id="pending-requests-sec" class="pending-requests-sec hidden">
+      <div id="pending-requests-sec" class="pending-requests-sec sketch-border hidden">
         <h4>Pending Friend Requests:</h4>
         <div id="pending-requests-list" class="requests-list"></div>
       </div>
 
       <h4>Your Friends List:</h4>
-      <div class="table-scroll friends-scroll">
+      <div class="table-scroll friends-scroll sketch-border">
         <table class="leaderboard-table">
           <thead>
             <tr>
@@ -320,14 +317,14 @@
     </div>
   </div>
 
-  <!-- Privacy Gate Modal (Must accept before registering) -->
+  <!-- Privacy Gate Modal (Pops Before Registering) -->
   <div id="privacy-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted privacy-modal-card">
+    <div class="modal-card frosted privacy-modal-card sketch-modal">
       <div class="modal-header">
         <h2>🛡️ Privacy & Terms Agreement</h2>
         <span class="close-x" id="privacy-close-x">&times;</span>
       </div>
-      <div class="privacy-content-scroll">
+      <div class="privacy-content-scroll sketch-border">
         <p class="privacy-intro">Before creating an account on Sudoku Arena, please review our privacy commitment:</p>
         
         <h3>1. Data We Store</h3>
@@ -344,19 +341,19 @@
       </div>
 
       <div class="privacy-modal-actions">
-        <button id="privacy-accept-btn" class="btn primary full-width">I Agree & Continue to Register</button>
+        <button id="privacy-accept-btn" class="btn primary full-width sketch-btn">I Agree & Continue to Register</button>
       </div>
     </div>
   </div>
 
   <!-- Player Personal History Modal -->
   <div id="history-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted history-card">
+    <div class="modal-card frosted history-card sketch-modal">
       <div class="modal-header">
         <h2>📜 My Match History</h2>
         <span class="close-x" id="history-close-x">&times;</span>
       </div>
-      <div class="table-scroll">
+      <div class="table-scroll sketch-border">
         <table class="leaderboard-table">
           <thead>
             <tr>
@@ -375,9 +372,9 @@
     </div>
   </div>
 
-  <!-- Register / Login Modal (With Password Eye Toggle) -->
+  <!-- Register / Login Modal with Password Visibility Eye -->
   <div id="auth-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted">
+    <div class="modal-card frosted sketch-modal">
       <div class="modal-header">
         <h2 id="auth-modal-title">🔑 Player Login</h2>
         <span class="close-x" id="auth-close-x">&times;</span>
@@ -385,19 +382,19 @@
       <form id="auth-form" class="auth-form">
         <div class="input-group">
           <label for="auth-username">Username:</label>
-          <input type="text" id="auth-username" required minlength="3" maxlength="15" placeholder="Enter username" />
+          <input type="text" id="auth-username" class="sketch-input" required minlength="3" maxlength="15" placeholder="Enter username" />
         </div>
 
         <div class="input-group">
           <label for="auth-password">Password:</label>
           <div class="password-field-wrap">
-            <input type="password" id="auth-password" required minlength="4" placeholder="Enter password" />
+            <input type="password" id="auth-password" class="sketch-input" required minlength="4" placeholder="Enter password" />
             <button type="button" id="toggle-password-visibility" class="password-toggle-btn" title="Show/Hide Password">👁️</button>
           </div>
         </div>
 
         <p id="auth-error-msg" class="error-text hidden"></p>
-        <button type="submit" id="auth-submit-btn" class="btn primary full-width">Log In</button>
+        <button type="submit" id="auth-submit-btn" class="btn primary full-width sketch-btn">Log In</button>
         <p class="auth-switch-text">
           <span id="auth-switch-msg">Don't have an account?</span>
           <a href="#" id="auth-toggle-link">Register here</a>
@@ -408,7 +405,7 @@
 
   <!-- Admin Dashboard Modal -->
   <div id="admin-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted admin-card">
+    <div class="modal-card frosted admin-card sketch-modal">
       <div class="modal-header">
         <h2>👑 Admin Portal - Registered Users</h2>
         <span class="close-x" id="admin-close-x">&times;</span>
@@ -417,18 +414,18 @@
       <div id="admin-login-sec">
         <p class="color-hint">Enter your Admin Secret Key to view and manage registered players:</p>
         <div class="input-group" style="margin-top:8px;">
-          <input type="password" id="admin-secret-input" placeholder="Admin Secret Key" />
+          <input type="password" id="admin-secret-input" class="sketch-input" placeholder="Admin Secret Key" />
         </div>
-        <button id="admin-unlock-btn" class="btn primary full-width" style="margin-top:10px;">Access Users List</button>
+        <button id="admin-unlock-btn" class="btn primary full-width sketch-btn" style="margin-top:10px;">Access Users List</button>
         <p id="admin-error-msg" class="error-text hidden" style="margin-top:8px;"></p>
       </div>
 
       <div id="admin-dashboard-sec" class="hidden">
         <div class="admin-top-controls">
           <span id="total-users-count">Total Players: 0</span>
-          <button id="admin-refresh-btn" class="btn small">🔄 Refresh</button>
+          <button id="admin-refresh-btn" class="btn small sketch-border">🔄 Refresh</button>
         </div>
-        <div class="table-scroll">
+        <div class="table-scroll sketch-border">
           <table class="leaderboard-table">
             <thead>
               <tr>
@@ -448,14 +445,14 @@
 
   <!-- Winner / End Game Modal -->
   <div id="winner-modal" class="modal-backdrop hidden">
-    <div class="modal-card frosted">
+    <div class="modal-card frosted sketch-modal">
       <div class="modal-header">
         <h2 id="winner-title">🏆 Match Over</h2>
         <span class="close-x" id="modal-close-x">&times;</span>
       </div>
       <p id="winner-reason" class="winner-reason"></p>
 
-      <table class="leaderboard-table">
+      <table class="leaderboard-table sketch-border">
         <thead>
           <tr>
             <th>Rank</th>
@@ -468,7 +465,7 @@
         <tbody id="leaderboard-body"></tbody>
       </table>
 
-      <button class="btn primary full-width" onclick="location.reload()">Back to Lobby</button>
+      <button class="btn primary full-width sketch-btn" onclick="location.reload()">Back to Lobby</button>
     </div>
   </div>
 

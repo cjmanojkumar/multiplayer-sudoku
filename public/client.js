@@ -13,111 +13,28 @@ document.addEventListener('DOMContentLoaded', () => {
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
 
-  // 10 REALISTIC + 10 CREATIVE & 3D ARTWORKS
+  // 20 MIXED ONE-WORD THEMES & BACKDROPS
   const BACKGROUND_THEMES = {
-    // 1-10: Photographic Realism
-    milkyway: {
-      url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dark',
-      style: 'realistic'
-    },
-    sunset: {
-      url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset',
-      style: 'realistic'
-    },
-    forest: {
-      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
-      theme: 'emerald',
-      style: 'realistic'
-    },
-    city: {
-      url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon',
-      style: 'realistic'
-    },
-    ocean: {
-      url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dark',
-      style: 'realistic'
-    },
-    mountains: {
-      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80',
-      theme: 'paper',
-      style: 'realistic'
-    },
-    desert: {
-      url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80',
-      theme: 'emerald',
-      style: 'realistic'
-    },
-    aurora: {
-      url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon',
-      style: 'realistic'
-    },
-    wheat: {
-      url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset',
-      style: 'realistic'
-    },
-    lightning: {
-      url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80',
-      theme: 'paper',
-      style: 'realistic'
-    },
-
-    // 11-20: Creative, Watercolor, 3D & Paints
-    watercolor: {
-      url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset',
-      style: 'watercolor'
-    },
-    oilpalette: {
-      url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80',
-      theme: 'emerald',
-      style: 'oil'
-    },
-    neon3d: {
-      url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon',
-      style: 'neon3d'
-    },
-    ghibli: {
-      url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&q=80',
-      theme: 'paper',
-      style: 'watercolor'
-    },
-    hologram: {
-      url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dracula',
-      style: 'neon3d'
-    },
-    sumie: {
-      url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dark',
-      style: 'ink'
-    },
-    cosmicpaint: {
-      url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dracula',
-      style: 'oil'
-    },
-    clay3d: {
-      url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset',
-      style: 'clay'
-    },
-    fluidsilk: {
-      url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon',
-      style: 'clay'
-    },
-    synthwave: {
-      url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon',
-      style: 'neon3d'
-    }
+    galaxy: { url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    sunset: { url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    redwood: { url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    tokyo: { url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    lagoon: { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    alpine: { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    dunes: { url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    aurora: { url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    harvest: { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    tempest: { url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    dreamscape: { url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    palette: { url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    prism: { url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    ghibli: { url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    hologram: { url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80', theme: 'dracula' },
+    sumi: { url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    cosmic: { url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80', theme: 'dracula' },
+    clay: { url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    silk: { url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    synthwave: { url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&q=80', theme: 'neon' }
   };
 
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
@@ -285,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settings = {
       difficultyLevel: activeDifficultyLevel,
       symbolSet: activeSymbolSet,
-      background: bgSelect?.value || 'milkyway',
+      background: bgSelect?.value || 'galaxy',
       font: fontSelect?.value || 'default',
       music: isMusicEnabled,
       sound: isSoundEnabled,
@@ -321,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = BACKGROUND_THEMES[s.background];
         if (scenicBg) scenicBg.style.backgroundImage = `url('${config.url}')`;
         document.documentElement.setAttribute('data-theme', config.theme);
-        document.documentElement.setAttribute('data-art-style', config.style || 'realistic');
       }
 
       if (s.font) {
@@ -366,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (scenicBg && config) {
       scenicBg.style.backgroundImage = `url('${config.url}')`;
       document.documentElement.setAttribute('data-theme', config.theme);
-      document.documentElement.setAttribute('data-art-style', config.style || 'realistic');
     }
     saveGameSettings();
   });
@@ -404,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   privacyAcceptBtn?.addEventListener('click', () => {
     privacyModal?.classList.add('hidden');
-    openAuth(true); // Open register modal immediately after accepting
+    openAuth(true);
   });
 
   // --- PLAYER PROFILE MODAL ---
@@ -450,8 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
           div.innerHTML = `
             <span><strong>${reqUser}</strong> sent you a request</span>
             <div class="request-actions">
-              <button class="btn primary small" onclick="respondFriendReq('${reqUser}', 'accept')">Accept</button>
-              <button class="btn danger-small" onclick="respondFriendReq('${reqUser}', 'decline')">Decline</button>
+              <button class="btn primary small sketch-btn" onclick="respondFriendReq('${reqUser}', 'accept')">Accept</button>
+              <button class="btn danger-small sketch-border" onclick="respondFriendReq('${reqUser}', 'decline')">Decline</button>
             </div>
           `;
           pendingRequestsList.appendChild(div);
@@ -473,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </span>
             </td>
             <td>
-              <button class="btn danger-small" onclick="respondFriendReq('${f.username}', 'decline')">Remove</button>
+              <button class="btn danger-small sketch-border" onclick="respondFriendReq('${f.username}', 'decline')">Remove</button>
             </td>
           `;
           friendsTableBody.appendChild(tr);
@@ -537,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshFriendsList();
   });
 
-  // --- AUTH STATE & REGISTRATION ---
+  // --- AUTH & REGISTRATION ---
   let isRegisterMode = false;
 
   function loadPersistedUser() {
@@ -594,7 +509,6 @@ document.addEventListener('DOMContentLoaded', () => {
   authToggleLink?.addEventListener('click', (e) => {
     e.preventDefault();
     if (!isRegisterMode) {
-      // If clicking Register from inside login modal, trigger privacy first
       authModal.classList.add('hidden');
       privacyModal?.classList.remove('hidden');
     } else {
@@ -784,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGlitter();
   }
 
-  // --- AUDIO SYNTHESIZERS ---
+  // --- PROCEDURAL AUDIO ---
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -865,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(1400, now + n.delay);
       gain.gain.setValueAtTime(0.0001, now + n.delay);
-      gain.gain.linearRampToValueAtTime(0.09, now + n.delay + 0.05);
+      gain.linearRampToValueAtTime?.(0.09, now + n.delay + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
       osc.connect(filter);
       filter.connect(gain);
@@ -892,10 +806,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const filter = ctx.createBiquadFilter();
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(n.freq, now + n.delay);
+      sub.type = 'sine';
+      sub.frequency.setValueAtTime(n.freq * 0.5, now + n.delay);
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(600, now + n.delay);
       gain.gain.setValueAtTime(0.0001, now + n.delay);
-      gain.gain.linearRampToValueAtTime(0.12, now + n.delay + 0.08);
+      gain.linearRampToValueAtTime?.(0.12, now + n.delay + 0.08);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
       osc.connect(filter);
       sub.connect(filter);
@@ -918,7 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(0.08, now + 0.1);
+      gain.linearRampToValueAtTime?.(0.08, now + 0.1);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
       osc.connect(gain);
       gain.connect(ctx.destination);
