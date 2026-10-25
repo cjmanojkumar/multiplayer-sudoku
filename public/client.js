@@ -6,35 +6,95 @@ document.addEventListener('DOMContentLoaded', () => {
   let isEliminated = false;
   let selectedCell = null;
   let activeSymbolSet = 'numbers';
+  let activeDifficultyLevel = 4;
   let currentUser = null;
 
-  // Audio & Animation Flags
   let isSoundEnabled = true;
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
 
-  // 20 High-Resolution Curated Photography Sceneries
-  const BACKGROUND_IMAGES = {
-    milkyway: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
-    sunset: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
-    forest: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
-    city: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
-    ocean: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
-    mountains: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80',
-    desert: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80',
-    aurora: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80',
-    autumn: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1920&q=80',
-    cyber: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80',
-    foglake: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80',
-    nebula: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80',
-    bamboo: 'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1920&q=80',
-    temple: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1920&q=80',
-    waterfall: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80',
-    cherry: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80',
-    rain: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80',
-    lightning: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80',
-    wheat: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
-    canyon: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80'
+  // 20 High-Res Backgrounds + Synchronized Themes
+  const BACKGROUND_THEMES = {
+    milkyway: {
+      url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dark'
+    },
+    sunset: {
+      url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset'
+    },
+    forest: {
+      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
+      theme: 'emerald'
+    },
+    city: {
+      url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon'
+    },
+    ocean: {
+      url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dark'
+    },
+    mountains: {
+      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80',
+      theme: 'paper'
+    },
+    desert: {
+      url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80',
+      theme: 'emerald'
+    },
+    aurora: {
+      url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon'
+    },
+    autumn: {
+      url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1920&q=80',
+      theme: 'paper'
+    },
+    cyber: {
+      url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon'
+    },
+    foglake: {
+      url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dracula'
+    },
+    nebula: {
+      url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dracula'
+    },
+    bamboo: {
+      url: 'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset'
+    },
+    temple: {
+      url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1920&q=80',
+      theme: 'emerald'
+    },
+    waterfall: {
+      url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80',
+      theme: 'emerald'
+    },
+    cherry: {
+      url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset'
+    },
+    rain: {
+      url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dark'
+    },
+    lightning: {
+      url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80',
+      theme: 'paper'
+    },
+    wheat: {
+      url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset'
+    },
+    canyon: {
+      url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset'
+    }
   };
 
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
@@ -55,6 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
     return list[num - 1] || num;
   }
 
+  const DIFFICULTY_TIERS = {
+    1: 'Level 1: Beginner (15 blanks)',
+    2: 'Level 2: Novice (22 blanks)',
+    3: 'Level 3: Easy (30 blanks)',
+    4: 'Level 4: Medium (38 blanks)',
+    5: 'Level 5: Hard (45 blanks)',
+    6: 'Level 6: Expert (50 blanks)',
+    7: 'Level 7: Master (55 blanks)'
+  };
+
   const completedRows = new Set();
   const completedCols = new Set();
   const completedBoxes = new Set();
@@ -63,9 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const scenicBg = document.getElementById('scenic-bg');
   const resultFlashScreen = document.getElementById('result-flash-screen');
   const bgSelect = document.getElementById('bg-select');
-  const themeSelect = document.getElementById('theme-select');
   const fontSelect = document.getElementById('font-select');
-  const customColorPicker = document.getElementById('custom-color-picker');
+  const difficultySlider = document.getElementById('difficulty-slider');
+  const sliderLevelName = document.getElementById('slider-level-name');
+  const activeDiffLabel = document.getElementById('active-diff-label');
+  const activeSymbolLabel = document.getElementById('active-symbol-label');
+  const symbolSetSelect = document.getElementById('symbol-set-select');
 
   const musicToggle = document.getElementById('music-toggle');
   const soundToggle = document.getElementById('sound-toggle');
@@ -76,7 +149,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsCloseX = document.getElementById('settings-close-x');
   const settingsSaveBtn = document.getElementById('settings-save-btn');
 
-  // Auth & Admin Elements
+  // History & Auth
+  const openHistoryBtn = document.getElementById('open-history-btn');
+  const historyModal = document.getElementById('history-modal');
+  const historyCloseX = document.getElementById('history-close-x');
+  const historyTableBody = document.getElementById('history-table-body');
+  const noHistoryMsg = document.getElementById('no-history-msg');
+
   const openLoginBtn = document.getElementById('open-login-btn');
   const openRegisterBtn = document.getElementById('open-register-btn');
   const logoutBtn = document.getElementById('logout-btn');
@@ -110,8 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const lobbyView = document.getElementById('lobby-view');
   const gameView = document.getElementById('game-view');
   const usernameInput = document.getElementById('username');
-  const symbolSetSelect = document.getElementById('symbol-set-select');
-  const difficultySelect = document.getElementById('difficulty');
   const maxPlayersSelect = document.getElementById('max-players');
   const botSpeedSelect = document.getElementById('bot-speed');
   const customDurationInput = document.getElementById('custom-duration');
@@ -139,7 +216,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
-  // --- AUTH STATE MANAGEMENT ---
+  // --- 7-TIER SLIDER & SETTINGS SYNC ---
+  difficultySlider?.addEventListener('input', (e) => {
+    activeDifficultyLevel = parseInt(e.target.value, 10);
+    const label = DIFFICULTY_TIERS[activeDifficultyLevel];
+    if (sliderLevelName) sliderLevelName.textContent = label;
+    if (activeDiffLabel) activeDiffLabel.textContent = label.split(' (')[0];
+  });
+
+  symbolSetSelect?.addEventListener('change', (e) => {
+    activeSymbolSet = e.target.value;
+    const readable = symbolSetSelect.options[symbolSetSelect.selectedIndex].text;
+    if (activeSymbolLabel) activeSymbolLabel.textContent = readable;
+  });
+
+  // --- UNIFIED BACKGROUND & THEME LOGIC ---
+  bgSelect?.addEventListener('change', (e) => {
+    const chosenKey = e.target.value;
+    const config = BACKGROUND_THEMES[chosenKey];
+    if (scenicBg && config) {
+      scenicBg.style.backgroundImage = `url('${config.url}')`;
+      document.documentElement.setAttribute('data-theme', config.theme);
+    }
+  });
+
+  // --- AUTH STATE & HISTORY ---
   let isRegisterMode = false;
 
   function loadPersistedUser() {
@@ -236,7 +337,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadPersistedUser();
 
-  // --- ADMIN PORTAL LOGIC ---
+  // Open Personal Match History
+  openHistoryBtn?.addEventListener('click', async () => {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`/api/user/history/${encodeURIComponent(currentUser.username)}`);
+      const data = await res.json();
+      historyTableBody.innerHTML = '';
+
+      if (data.success && data.history.length > 0) {
+        noHistoryMsg.classList.add('hidden');
+        data.history.forEach(item => {
+          const tr = document.createElement('tr');
+          const d = new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          tr.innerHTML = `
+            <td>${d}</td>
+            <td><strong>${item.outcome}</strong></td>
+            <td>${item.mode}</td>
+            <td>Level ${item.difficultyLevel}</td>
+            <td>${item.score}/${item.totalBlanks}</td>
+            <td>${item.mistakes}/3</td>
+          `;
+          historyTableBody.appendChild(tr);
+        });
+      } else {
+        noHistoryMsg.classList.remove('hidden');
+      }
+      historyModal.classList.remove('hidden');
+    } catch (e) {
+      alert('Unable to load history.');
+    }
+  });
+
+  historyCloseX?.addEventListener('click', () => historyModal.classList.add('hidden'));
+
+  // Admin Portal
   adminOpenBtn?.addEventListener('click', () => {
     adminSecretInput.value = '';
     adminErrorMsg.classList.add('hidden');
@@ -280,15 +415,14 @@ document.addEventListener('DOMContentLoaded', () => {
         adminUsersTableBody.appendChild(tr);
       });
     } catch (err) {
-      adminErrorMsg.textContent = 'Failed to load user list.';
+      adminErrorMsg.textContent = 'Failed to load users.';
       adminErrorMsg.classList.remove('hidden');
     }
   }
 
   adminUnlockBtn?.addEventListener('click', () => {
     const key = adminSecretInput.value.trim();
-    if (!key) return;
-    fetchAdminUsers(key);
+    if (key) fetchAdminUsers(key);
   });
 
   adminRefreshBtn?.addEventListener('click', () => {
@@ -296,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (key) fetchAdminUsers(key);
   });
 
-  // --- WHITE GLITTER ENGINE ---
+  // --- WHITE GLITTER PARTICLES ---
   const glitterCanvas = document.getElementById('glitter-canvas');
   if (glitterCanvas) {
     const gCtx = glitterCanvas.getContext('2d');
@@ -344,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGlitter();
   }
 
-  // --- SOUND SYNTHESIS ---
+  // --- PROCEDURAL AUDIO ---
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -500,36 +634,16 @@ document.addEventListener('DOMContentLoaded', () => {
   settingsCloseX?.addEventListener('click', closeSettings);
   settingsSaveBtn?.addEventListener('click', closeSettings);
 
-  bgSelect?.addEventListener('change', (e) => {
-    const chosenKey = e.target.value;
-    const imageUrl = BACKGROUND_IMAGES[chosenKey];
-    if (scenicBg && imageUrl) {
-      scenicBg.style.backgroundImage = `url('${imageUrl}')`;
-    }
-  });
-
   fontSelect?.addEventListener('change', (e) => {
     document.documentElement.setAttribute('data-font', e.target.value);
-  });
-
-  themeSelect?.addEventListener('change', (e) => {
-    document.documentElement.setAttribute('data-theme', e.target.value);
-    document.documentElement.style.removeProperty('--accent');
-  });
-
-  customColorPicker?.addEventListener('input', (e) => {
-    document.documentElement.style.setProperty('--accent', e.target.value);
   });
 
   soundToggle?.addEventListener('change', (e) => isSoundEnabled = e.target.checked);
   emojiToggle?.addEventListener('change', (e) => isEmojiEnabled = e.target.checked);
   musicToggle?.addEventListener('change', (e) => {
     isMusicEnabled = e.target.checked;
-    if (isMusicEnabled) {
-      bgAudio.play().catch(() => {});
-    } else {
-      bgAudio.pause();
-    }
+    if (isMusicEnabled) bgAudio.play().catch(() => {});
+    else bgAudio.pause();
   });
 
   modalCloseX?.addEventListener('click', () => winnerModal?.classList.add('hidden'));
@@ -573,17 +687,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isMusicEnabled) bgAudio.play().catch(() => {});
 
     const username = usernameInput?.value.trim() || currentUser?.username || 'Player 1';
-    const difficulty = difficultySelect?.value || 'medium';
     const durationMinutes = parseInt(customDurationInput?.value, 10) || 10;
-    const symbolSet = symbolSetSelect?.value || 'numbers';
     const selectedMode = document.querySelector('input[name="game-mode"]:checked')?.value || 'multi';
 
     if (selectedMode === 'bot') {
       const botSpeed = botSpeedSelect?.value || 'medium';
-      socket.emit('createSoloBotRoom', { username, difficulty, botSpeed, durationMinutes, symbolSet });
+      socket.emit('createSoloBotRoom', { 
+        username, 
+        difficultyLevel: activeDifficultyLevel, 
+        botSpeed, 
+        durationMinutes, 
+        symbolSet: activeSymbolSet 
+      });
     } else {
       const maxPlayers = maxPlayersSelect?.value || 2;
-      socket.emit('createRoom', { username, difficulty, maxPlayers, durationMinutes, symbolSet });
+      socket.emit('createRoom', { 
+        username, 
+        difficultyLevel: activeDifficultyLevel, 
+        maxPlayers, 
+        durationMinutes, 
+        symbolSet: activeSymbolSet 
+      });
     }
   });
 
@@ -593,10 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const username = usernameInput?.value.trim() || currentUser?.username || 'Player';
     const roomCode = roomCodeInput?.value.trim();
-    if (!roomCode) {
-      alert('Please enter a room code');
-      return;
-    }
+    if (!roomCode) return alert('Please enter a room code');
     socket.emit('joinRoom', { roomCode, username });
   });
 
@@ -607,9 +728,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  socket.on('roomCreated', ({ roomCode, maxPlayers, difficulty, durationMinutes, symbolSet }) => {
+  socket.on('roomCreated', ({ roomCode, maxPlayers, difficultyLevel, durationMinutes, symbolSet }) => {
     currentRoomCode = roomCode;
-    if (roomStatus) roomStatus.textContent = `Room: ${roomCode} | Mode: ${symbolSet.toUpperCase()} | Waiting (1/${maxPlayers})...`;
+    if (roomStatus) roomStatus.textContent = `Room: ${roomCode} | Level: ${difficultyLevel} | Waiting (1/${maxPlayers})...`;
   });
 
   socket.on('joinedRoomSuccess', ({ roomCode }) => {
@@ -696,11 +817,8 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let num = 1; num <= 9; num++) {
       const btn = document.querySelector(`.symbol-btn[data-val="${num}"]`);
       if (btn) {
-        if (counts[num] >= 9) {
-          btn.classList.add('exhausted');
-        } else {
-          btn.classList.remove('exhausted');
-        }
+        if (counts[num] >= 9) btn.classList.add('exhausted');
+        else btn.classList.remove('exhausted');
       }
     }
   }
@@ -769,12 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function makeMove(row, col, value) {
-    socket.emit('submitMove', {
-      roomCode: currentRoomCode,
-      row,
-      col,
-      value
-    });
+    socket.emit('submitMove', { roomCode: currentRoomCode, row, col, value });
   }
 
   socket.on('moveResult', ({ row, col, value, correct, mistakes, eliminated }) => {
@@ -865,14 +978,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    if (anyCompleted) {
-      playSectionCompleteSound();
-    }
+    if (anyCompleted) playSectionCompleteSound();
   }
 
   function isCellSolved(cell) {
-    if (!cell) return false;
-    return cell.classList.contains('prefilled') || cell.classList.contains('correct');
+    return cell && (cell.classList.contains('prefilled') || cell.classList.contains('correct'));
   }
 
   function animateCompletedSection(cells, emojiSet) {
@@ -908,7 +1018,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const livesLeft = Math.max(0, 3 - mistakes);
       mistakesSpan.textContent = eliminated ? '💀 OUT' : `❤️ ${livesLeft}`;
-
       if (eliminated && card) card.classList.add('eliminated');
     }
   });

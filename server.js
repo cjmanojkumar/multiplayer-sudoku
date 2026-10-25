@@ -12,15 +12,13 @@ const io = new Server(server);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- PERSISTENT USER & MATCH DATABASE ---
 const DB_FILE = path.join(__dirname, 'database.json');
 
 function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      // Default Admin Account (Username: admin, Password: adminpassword123)
-      adminSecretKey: '22Harinishree C J Pallavishree15'
+      adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
@@ -36,12 +34,10 @@ function saveDB(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// Ensure initial database exists
 loadDB();
 
-// --- AUTHENTICATION & ADMIN API ---
+// --- AUTHENTICATION & HISTORY API ---
 
-// 1. Register New Player
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password || username.trim().length < 3 || password.length < 4) {
@@ -52,7 +48,7 @@ app.post('/api/register', async (req, res) => {
   const db = loadDB();
 
   if (db.users.some(u => u.username.toLowerCase() === cleanUser.toLowerCase())) {
-    return res.status(400).json({ error: 'Username already taken. Please choose another.' });
+    return res.status(400).json({ error: 'Username already taken.' });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -64,6 +60,7 @@ app.post('/api/register', async (req, res) => {
     matchesPlayed: 0,
     matchesWon: 0,
     totalScore: 0,
+    history: [],
     registeredAt: new Date().toISOString(),
     lastLoginAt: new Date().toISOString()
   };
@@ -73,11 +70,10 @@ app.post('/api/register', async (req, res) => {
 
   res.json({
     success: true,
-    user: { id: newUser.id, username: newUser.username, role: newUser.role }
+    user: { id: newUser.id, username: newUser.username, role: newUser.role, history: [] }
   });
 });
 
-// 2. Player Login
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -87,12 +83,7 @@ app.post('/api/login', async (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
 
-  if (!user) {
-    return res.status(400).json({ error: 'Invalid username or password.' });
-  }
-
-  const match = await bcrypt.compare(password, user.passwordHash);
-  if (!match) {
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return res.status(400).json({ error: 'Invalid username or password.' });
   }
 
@@ -105,13 +96,20 @@ app.post('/api/login', async (req, res) => {
       id: user.id,
       username: user.username,
       role: user.role,
-      matchesPlayed: user.matchesPlayed,
-      matchesWon: user.matchesWon
+      matchesPlayed: user.matchesPlayed || 0,
+      matchesWon: user.matchesWon || 0,
+      history: user.history || []
     }
   });
 });
 
-// 3. Admin User List & Match Stats (Protected by admin password or role)
+app.get('/api/user/history/:username', (req, res) => {
+  const db = loadDB();
+  const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json({ success: true, history: user.history || [] });
+});
+
 app.post('/api/admin/users', (req, res) => {
   const { adminKey } = req.body;
   const db = loadDB();
@@ -120,29 +118,50 @@ app.post('/api/admin/users', (req, res) => {
     return res.status(403).json({ error: 'Access denied: Invalid Admin Key.' });
   }
 
-  // Return player list without password hashes
   const safeUsers = db.users.map(({ passwordHash, ...rest }) => rest);
   res.json({ success: true, users: safeUsers });
 });
 
-// Update stats helper when games conclude
-function recordMatchStats(leaderboard, outcome) {
+function recordMatchStats(leaderboard, outcome, room) {
   const db = loadDB();
   leaderboard.forEach((p, idx) => {
     const user = db.users.find(u => u.username.toLowerCase() === p.name.toLowerCase());
     if (user) {
       user.matchesPlayed = (user.matchesPlayed || 0) + 1;
       user.totalScore = (user.totalScore || 0) + p.score;
-      if (idx === 0 && outcome === 'win' && !p.eliminated) {
-        user.matchesWon = (user.matchesWon || 0) + 1;
-      }
+      const won = idx === 0 && outcome === 'win' && !p.eliminated;
+      if (won) user.matchesWon = (user.matchesWon || 0) + 1;
+
+      if (!user.history) user.history = [];
+      user.history.unshift({
+        date: new Date().toISOString(),
+        outcome: won ? 'Won' : p.eliminated ? 'Eliminated' : outcome === 'draw' ? 'Draw' : 'Finished',
+        score: p.score,
+        totalBlanks: room.totalBlanks,
+        mistakes: p.mistakes,
+        difficultyLevel: room.difficultyLevel || 3,
+        mode: room.isBotGame ? 'Solo vs Bot' : 'Multiplayer'
+      });
+
+      if (user.history.length > 30) user.history.pop();
     }
   });
   saveDB(db);
 }
 
-// --- SUDOKU GAME ENGINE ---
-const rooms = {};
+// --- 7-TIER BLANKS GENERATOR ---
+function getBlanksForLevel(level) {
+  const scale = {
+    1: 15, // Level 1 - Beginner
+    2: 22, // Level 2 - Novice
+    3: 30, // Level 3 - Easy
+    4: 38, // Level 4 - Medium
+    5: 45, // Level 5 - Hard
+    6: 50, // Level 6 - Expert
+    7: 55  // Level 7 - Master
+  };
+  return scale[level] || 38;
+}
 
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
@@ -177,10 +196,8 @@ function solveSudoku(board) {
   return true;
 }
 
-function generatePuzzle(difficulty = 'medium') {
-  const blanksMap = { easy: 20, medium: 35, hard: 50 };
-  const blanks = blanksMap[difficulty] || 35;
-
+function generatePuzzle(level = 4) {
+  const blanks = getBlanksForLevel(parseInt(level, 10) || 4);
   const board = Array.from({ length: 9 }, () => Array(9).fill(0));
   solveSudoku(board);
   const solution = board.map(row => [...row]);
@@ -197,6 +214,8 @@ function generatePuzzle(difficulty = 'medium') {
   }
   return { puzzle, solution, totalBlanks: blanks };
 }
+
+const rooms = {};
 
 function getLeaderboard(room) {
   return [...room.players].sort((a, b) => {
@@ -215,19 +234,16 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
   room.started = false;
 
   const leaderboard = getLeaderboard(room);
-  recordMatchStats(leaderboard, matchOutcome);
+  recordMatchStats(leaderboard, matchOutcome, room);
 
-  io.to(code).emit('gameOver', { 
-    reason, 
-    leaderboard,
-    outcome: matchOutcome 
-  });
+  io.to(code).emit('gameOver', { reason, leaderboard, outcome: matchOutcome });
 }
 
 io.on('connection', (socket) => {
-  socket.on('createRoom', ({ username, difficulty, maxPlayers, durationMinutes, symbolSet }) => {
+  socket.on('createRoom', ({ username, difficultyLevel, maxPlayers, durationMinutes, symbolSet }) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
+    const lvl = parseInt(difficultyLevel, 10) || 4;
+    const { puzzle, solution, totalBlanks } = generatePuzzle(lvl);
 
     const validMinutes = Math.max(1, Math.min(60, parseInt(durationMinutes, 10) || 10));
     const totalSeconds = validMinutes * 60;
@@ -244,6 +260,7 @@ io.on('connection', (socket) => {
       puzzle,
       solution,
       totalBlanks,
+      difficultyLevel: lvl,
       symbolSet: symbolSet || 'numbers',
       maxPlayers: parseInt(maxPlayers, 10) || 2,
       duration: totalSeconds,
@@ -256,35 +273,23 @@ io.on('connection', (socket) => {
     socket.emit('roomCreated', { 
       roomCode, 
       maxPlayers: rooms[roomCode].maxPlayers,
-      difficulty,
+      difficultyLevel: lvl,
       durationMinutes: validMinutes,
       symbolSet: rooms[roomCode].symbolSet
     });
     io.to(roomCode).emit('playerListUpdate', rooms[roomCode].players);
   });
 
-  socket.on('createSoloBotRoom', ({ username, difficulty, botSpeed, durationMinutes, symbolSet }) => {
+  socket.on('createSoloBotRoom', ({ username, difficultyLevel, botSpeed, durationMinutes, symbolSet }) => {
     const roomCode = 'BOT-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-    const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
+    const lvl = parseInt(difficultyLevel, 10) || 4;
+    const { puzzle, solution, totalBlanks } = generatePuzzle(lvl);
 
     const validMinutes = Math.max(1, Math.min(60, parseInt(durationMinutes, 10) || 10));
     const totalSeconds = validMinutes * 60;
 
-    const botPlayer = {
-      id: 'bot_ai',
-      name: '🤖 AI Bot',
-      score: 0,
-      mistakes: 0,
-      eliminated: false
-    };
-
-    const humanPlayer = {
-      id: socket.id,
-      name: username || 'Player 1',
-      score: 0,
-      mistakes: 0,
-      eliminated: false
-    };
+    const botPlayer = { id: 'bot_ai', name: '🤖 AI Bot', score: 0, mistakes: 0, eliminated: false };
+    const humanPlayer = { id: socket.id, name: username || 'Player 1', score: 0, mistakes: 0, eliminated: false };
 
     rooms[roomCode] = {
       isBotGame: true,
@@ -293,6 +298,7 @@ io.on('connection', (socket) => {
       puzzle,
       solution,
       totalBlanks,
+      difficultyLevel: lvl,
       symbolSet: symbolSet || 'numbers',
       maxPlayers: 2,
       duration: totalSeconds,
@@ -303,7 +309,6 @@ io.on('connection', (socket) => {
     };
 
     socket.join(roomCode);
-
     socket.emit('startGame', {
       puzzle,
       players: rooms[roomCode].players,
@@ -316,7 +321,6 @@ io.on('connection', (socket) => {
     rooms[roomCode].timerInterval = setInterval(() => {
       rooms[roomCode].timeLeft -= 1;
       io.to(roomCode).emit('timerTick', { timeLeft: rooms[roomCode].timeLeft });
-
       if (rooms[roomCode].timeLeft <= 0) {
         terminateMatch(roomCode, '⏰ Time ran out!', 'draw');
       }
@@ -332,8 +336,7 @@ io.on('connection', (socket) => {
       const bot = room.players.find(p => p.id === 'bot_ai');
       if (!bot || bot.eliminated) return;
 
-      const mistakeChance = Math.random();
-      if (mistakeChance < 0.08) {
+      if (Math.random() < 0.08) {
         bot.mistakes += 1;
         if (bot.mistakes >= 3) {
           bot.eliminated = true;
@@ -369,18 +372,9 @@ io.on('connection', (socket) => {
     const code = roomCode.toUpperCase();
     const room = rooms[code];
 
-    if (!room) {
-      socket.emit('errorMessage', 'Room code not found.');
-      return;
-    }
-    if (room.started) {
-      socket.emit('errorMessage', 'Match is already in progress.');
-      return;
-    }
-    if (room.players.length >= room.maxPlayers) {
-      socket.emit('errorMessage', `Room is full (max ${room.maxPlayers} players).`);
-      return;
-    }
+    if (!room) return socket.emit('errorMessage', 'Room code not found.');
+    if (room.started) return socket.emit('errorMessage', 'Match is already in progress.');
+    if (room.players.length >= room.maxPlayers) return socket.emit('errorMessage', `Room is full.`);
 
     room.players.push({ 
       id: socket.id, 
@@ -408,10 +402,7 @@ io.on('connection', (socket) => {
       room.timerInterval = setInterval(() => {
         room.timeLeft -= 1;
         io.to(code).emit('timerTick', { timeLeft: room.timeLeft });
-
-        if (room.timeLeft <= 0) {
-          terminateMatch(code, '⏰ Time ran out!', 'draw');
-        }
+        if (room.timeLeft <= 0) terminateMatch(code, '⏰ Time ran out!', 'draw');
       }, 1000);
     }
   });
@@ -480,7 +471,6 @@ io.on('connection', (socket) => {
     if (!player || player.eliminated) return;
 
     player.eliminated = true;
-
     io.to(code).emit('progressUpdate', {
       playerId: socket.id,
       score: player.score,
