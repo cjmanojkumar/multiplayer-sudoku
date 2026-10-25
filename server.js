@@ -18,7 +18,7 @@ function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      adminSecretKey: '22Harinishree C J Pallavishree15'
+      adminSecretKey: '22Harinishree C J Pallavishree'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
@@ -36,8 +36,10 @@ function saveDB(data) {
 
 loadDB();
 
-// --- AUTHENTICATION & HISTORY API ---
+// Track online players
+const onlineUsers = new Map(); // username -> socketId
 
+// --- AUTHENTICATION API ---
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password || username.trim().length < 3 || password.length < 4) {
@@ -60,6 +62,8 @@ app.post('/api/register', async (req, res) => {
     matchesPlayed: 0,
     matchesWon: 0,
     totalScore: 0,
+    friends: [], // array of usernames
+    friendRequests: [], // array of incoming usernames
     history: [],
     registeredAt: new Date().toISOString(),
     lastLoginAt: new Date().toISOString()
@@ -70,7 +74,17 @@ app.post('/api/register', async (req, res) => {
 
   res.json({
     success: true,
-    user: { id: newUser.id, username: newUser.username, role: newUser.role, history: [] }
+    user: {
+      id: newUser.id,
+      username: newUser.username,
+      role: newUser.role,
+      matchesPlayed: 0,
+      matchesWon: 0,
+      totalScore: 0,
+      friends: [],
+      friendRequests: [],
+      history: []
+    }
   });
 });
 
@@ -98,8 +112,111 @@ app.post('/api/login', async (req, res) => {
       role: user.role,
       matchesPlayed: user.matchesPlayed || 0,
       matchesWon: user.matchesWon || 0,
+      totalScore: user.totalScore || 0,
+      friends: user.friends || [],
+      friendRequests: user.friendRequests || [],
       history: user.history || []
     }
+  });
+});
+
+// --- PROFILE & STATS API ---
+app.get('/api/user/profile/:username', (req, res) => {
+  const db = loadDB();
+  const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
+  if (!user) return res.status(404).json({ error: 'Player profile not found.' });
+
+  const winRate = user.matchesPlayed > 0 ? Math.round((user.matchesWon / user.matchesPlayed) * 100) : 0;
+  
+  res.json({
+    success: true,
+    profile: {
+      username: user.username,
+      role: user.role,
+      matchesPlayed: user.matchesPlayed || 0,
+      matchesWon: user.matchesWon || 0,
+      winRate: `${winRate}%`,
+      totalScore: user.totalScore || 0,
+      registeredAt: user.registeredAt,
+      lastLoginAt: user.lastLoginAt,
+      friendsCount: (user.friends || []).length
+    }
+  });
+});
+
+// --- FRIENDS SYSTEM API ---
+app.post('/api/friends/send-request', (req, res) => {
+  const { fromUser, targetUser } = req.body;
+  if (!fromUser || !targetUser || fromUser.toLowerCase() === targetUser.toLowerCase()) {
+    return res.status(400).json({ error: 'Invalid friend request.' });
+  }
+
+  const db = loadDB();
+  const target = db.users.find(u => u.username.toLowerCase() === targetUser.trim().toLowerCase());
+  const sender = db.users.find(u => u.username.toLowerCase() === fromUser.trim().toLowerCase());
+
+  if (!target || !sender) return res.status(404).json({ error: 'User does not exist.' });
+
+  if (!target.friendRequests) target.friendRequests = [];
+  if (!target.friends) target.friends = [];
+  if (!sender.friends) sender.friends = [];
+
+  if (target.friends.includes(sender.username)) {
+    return res.status(400).json({ error: 'You are already friends with this player.' });
+  }
+
+  if (target.friendRequests.includes(sender.username)) {
+    return res.status(400).json({ error: 'Friend request already pending.' });
+  }
+
+  target.friendRequests.push(sender.username);
+  saveDB(db);
+
+  // Notify target user if currently online
+  const targetSocketId = onlineUsers.get(target.username.toLowerCase());
+  if (targetSocketId) {
+    io.to(targetSocketId).emit('friendRequestReceived', { from: sender.username });
+  }
+
+  res.json({ success: true, message: `Friend request sent to ${target.username}!` });
+});
+
+app.post('/api/friends/respond-request', (req, res) => {
+  const { username, fromUser, action } = req.body; // action: 'accept' | 'decline'
+  const db = loadDB();
+  const user = db.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+  const requester = db.users.find(u => u.username.toLowerCase() === fromUser.trim().toLowerCase());
+
+  if (!user || !requester) return res.status(404).json({ error: 'Player not found.' });
+
+  user.friendRequests = (user.friendRequests || []).filter(u => u.toLowerCase() !== fromUser.toLowerCase());
+
+  if (action === 'accept') {
+    if (!user.friends) user.friends = [];
+    if (!requester.friends) requester.friends = [];
+
+    if (!user.friends.includes(requester.username)) user.friends.push(requester.username);
+    if (!requester.friends.includes(user.username)) requester.friends.push(user.username);
+  }
+
+  saveDB(db);
+  res.json({ success: true, friends: user.friends, friendRequests: user.friendRequests });
+});
+
+app.get('/api/friends/list/:username', (req, res) => {
+  const db = loadDB();
+  const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
+  if (!user) return res.status(404).json({ error: 'User not found.' });
+
+  const friendsList = (user.friends || []).map(friendName => ({
+    username: friendName,
+    online: onlineUsers.has(friendName.toLowerCase())
+  }));
+
+  res.json({
+    success: true,
+    friends: friendsList,
+    requests: user.friendRequests || []
   });
 });
 
@@ -139,7 +256,7 @@ function recordMatchStats(leaderboard, outcome, room) {
         score: p.score,
         totalBlanks: room.totalBlanks,
         mistakes: p.mistakes,
-        difficultyLevel: room.difficultyLevel || 3,
+        difficultyLevel: room.difficultyLevel || 4,
         mode: room.isBotGame ? 'Solo vs Bot' : 'Multiplayer'
       });
 
@@ -151,15 +268,7 @@ function recordMatchStats(leaderboard, outcome, room) {
 
 // --- 7-TIER BLANKS GENERATOR ---
 function getBlanksForLevel(level) {
-  const scale = {
-    1: 15, // Level 1 - Beginner
-    2: 22, // Level 2 - Novice
-    3: 30, // Level 3 - Easy
-    4: 38, // Level 4 - Medium
-    5: 45, // Level 5 - Hard
-    6: 50, // Level 6 - Expert
-    7: 55  // Level 7 - Master
-  };
+  const scale = { 1: 15, 2: 22, 3: 30, 4: 38, 5: 45, 6: 50, 7: 55 };
   return scale[level] || 38;
 }
 
@@ -240,6 +349,14 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
 }
 
 io.on('connection', (socket) => {
+  // Track online status for logged players
+  socket.on('registerOnlineUser', ({ username }) => {
+    if (username) {
+      onlineUsers.set(username.toLowerCase(), socket.id);
+      socket.broadcast.emit('friendStatusChanged', { username, online: true });
+    }
+  });
+
   socket.on('createRoom', ({ username, difficultyLevel, maxPlayers, durationMinutes, symbolSet }) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const lvl = parseInt(difficultyLevel, 10) || 4;
@@ -488,6 +605,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    // Clean up online map
+    for (const [user, sId] of onlineUsers.entries()) {
+      if (sId === socket.id) {
+        onlineUsers.delete(user);
+        socket.broadcast.emit('friendStatusChanged', { username: user, online: false });
+        break;
+      }
+    }
+
     for (const code in rooms) {
       const room = rooms[code];
       const index = room.players.findIndex(p => p.id === socket.id);

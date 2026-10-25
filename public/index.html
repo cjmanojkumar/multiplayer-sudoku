@@ -11,7 +11,6 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <!-- Full-Screen Realistic Scenery -->
   <div id="scenic-bg" class="scenic-bg">
     <div class="scenic-overlay"></div>
   </div>
@@ -40,13 +39,15 @@
       <div id="logged-auth-controls" class="auth-row hidden">
         <span>Welcome, <strong id="logged-username">Player</strong> (<span id="user-stats">0W / 0P</span>)</span>
         <div class="auth-btn-group">
-          <button id="open-history-btn" class="btn small" title="View my match history">📜 History</button>
+          <button id="open-profile-btn" class="btn small" title="View player statistics">📊 Profile</button>
+          <button id="open-friends-btn" class="btn small" title="Manage friends">👥 Friends</button>
+          <button id="open-history-btn" class="btn small" title="View match history">📜 History</button>
           <button id="logout-btn" class="btn danger-small">Log Out</button>
         </div>
       </div>
     </div>
 
-    <!-- Lobby View (Cleaned: Symbols & Difficulty moved to Settings) -->
+    <!-- Lobby View -->
     <div id="lobby-view" class="card frosted">
       <div class="input-group">
         <label for="username">Player Nickname:</label>
@@ -135,7 +136,7 @@
     </div>
   </div>
 
-  <!-- Settings Modal (Now houses 7-Tier Slider, Symbols, and Unified Theme/Backdrop) -->
+  <!-- Settings Modal (With Privacy Checkbox & Link) -->
   <div id="settings-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted settings-card">
       <div class="modal-header">
@@ -144,7 +145,6 @@
       </div>
 
       <div class="settings-grid">
-        <!-- 7-Level Sliding Difficulty Level -->
         <div class="setting-row">
           <div class="slider-header">
             <label for="difficulty-slider">Difficulty Scale:</label>
@@ -156,7 +156,6 @@
           </div>
         </div>
 
-        <!-- Symbol Selection -->
         <div class="setting-row">
           <label for="symbol-set-select">Symbol Set:</label>
           <select id="symbol-set-select">
@@ -168,7 +167,6 @@
           </select>
         </div>
 
-        <!-- Unified Backdrop & Theme -->
         <div class="setting-row">
           <label for="bg-select">Scenery Backdrop & Theme:</label>
           <select id="bg-select">
@@ -235,9 +233,120 @@
           <label for="emoji-toggle">✨ Completion Emojis</label>
           <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
         </div>
+
+        <!-- Privacy Policy Consent & View -->
+        <div class="privacy-consent-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="privacy-consent-checkbox" checked />
+            <span>I accept the <a href="#" id="open-privacy-link">Privacy Statement & Data Handling</a></span>
+          </label>
+        </div>
       </div>
 
       <button id="settings-save-btn" class="btn primary full-width">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- Player Profile Modal -->
+  <div id="profile-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted profile-card">
+      <div class="modal-header">
+        <h2>📊 Player Profile & Career</h2>
+        <span class="close-x" id="profile-close-x">&times;</span>
+      </div>
+      <div class="profile-details-grid">
+        <div class="profile-metric">
+          <span class="metric-title">Player Name</span>
+          <span class="metric-val" id="prof-username">-</span>
+        </div>
+        <div class="profile-metric">
+          <span class="metric-title">Account Tier</span>
+          <span class="metric-val" id="prof-role">PLAYER</span>
+        </div>
+        <div class="profile-metric">
+          <span class="metric-title">Win Rate</span>
+          <span class="metric-val highlight" id="prof-winrate">0%</span>
+        </div>
+        <div class="profile-metric">
+          <span class="metric-title">Victories</span>
+          <span class="metric-val" id="prof-matches-won">0</span>
+        </div>
+        <div class="profile-metric">
+          <span class="metric-title">Matches Played</span>
+          <span class="metric-val" id="prof-matches-played">0</span>
+        </div>
+        <div class="profile-metric">
+          <span class="metric-title">Cumulative Points</span>
+          <span class="metric-val" id="prof-total-score">0</span>
+        </div>
+      </div>
+      <div class="profile-footer-stats">
+        <span>Friends on Arena: <strong id="prof-friends-count">0</strong></span>
+        <span>Member Since: <strong id="prof-member-since">-</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Friends Hub Modal -->
+  <div id="friends-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted friends-card">
+      <div class="modal-header">
+        <h2>👥 Friends Hub</h2>
+        <span class="close-x" id="friends-close-x">&times;</span>
+      </div>
+
+      <!-- Send Request Form -->
+      <div class="friends-add-bar">
+        <input type="text" id="friend-target-input" placeholder="Search friend's username..." />
+        <button id="send-friend-req-btn" class="btn primary small">Send Request</button>
+      </div>
+      <p id="friend-feedback-msg" class="color-hint text-center hidden"></p>
+
+      <!-- Pending Incoming Requests -->
+      <div id="pending-requests-sec" class="pending-requests-sec hidden">
+        <h4>Pending Friend Requests:</h4>
+        <div id="pending-requests-list" class="requests-list"></div>
+      </div>
+
+      <!-- Current Friends List -->
+      <h4>Your Friends List:</h4>
+      <div class="table-scroll friends-scroll">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="friends-table-body"></tbody>
+        </table>
+      </div>
+      <p id="no-friends-msg" class="color-hint text-center hidden">No friends added yet. Enter a username above to connect!</p>
+    </div>
+  </div>
+
+  <!-- Privacy Statement Modal -->
+  <div id="privacy-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted privacy-modal-card">
+      <div class="modal-header">
+        <h2>🛡️ Privacy & Data Protection Statement</h2>
+        <span class="close-x" id="privacy-close-x">&times;</span>
+      </div>
+      <div class="privacy-content-scroll">
+        <h3>1. Information We Store</h3>
+        <p>Sudoku Arena collects only the information necessary to provide authentication, save career metrics, and facilitate multiplayer connections. This includes your self-chosen username, match history outcomes, and friends lists.</p>
+
+        <h3>2. Password Security & Cryptography</h3>
+        <p>We do not store plain-text passwords. All credentials are encrypted using industry-standard <strong>bcryptjs salt-hashing</strong> before writing to the database file.</p>
+
+        <h3>3. Real-Time Gameplay & Presence</h3>
+        <p>Your online status is communicated via encrypted WebSocket sessions exclusively to confirmed friends to enable multiplayer invites. No location, biometric, or contact data is tracked or requested.</p>
+
+        <h3>4. Persistent Storage & Control</h3>
+        <p>Account data is stored within your private arena instance. You may request account or statistics deletion through the administrator at any time.</p>
+      </div>
+      <button id="privacy-agree-btn" class="btn primary full-width">I Understand & Agree</button>
     </div>
   </div>
 

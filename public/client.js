@@ -15,86 +15,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 20 High-Res Backgrounds + Synchronized Themes
   const BACKGROUND_THEMES = {
-    milkyway: {
-      url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dark'
-    },
-    sunset: {
-      url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset'
-    },
-    forest: {
-      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
-      theme: 'emerald'
-    },
-    city: {
-      url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon'
-    },
-    ocean: {
-      url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dark'
-    },
-    mountains: {
-      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80',
-      theme: 'paper'
-    },
-    desert: {
-      url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80',
-      theme: 'emerald'
-    },
-    aurora: {
-      url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon'
-    },
-    autumn: {
-      url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1920&q=80',
-      theme: 'paper'
-    },
-    cyber: {
-      url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80',
-      theme: 'neon'
-    },
-    foglake: {
-      url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dracula'
-    },
-    nebula: {
-      url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dracula'
-    },
-    bamboo: {
-      url: 'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset'
-    },
-    temple: {
-      url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1920&q=80',
-      theme: 'emerald'
-    },
-    waterfall: {
-      url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80',
-      theme: 'emerald'
-    },
-    cherry: {
-      url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset'
-    },
-    rain: {
-      url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80',
-      theme: 'dark'
-    },
-    lightning: {
-      url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80',
-      theme: 'paper'
-    },
-    wheat: {
-      url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset'
-    },
-    canyon: {
-      url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80',
-      theme: 'sunset'
-    }
+    milkyway: { url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    sunset: { url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    forest: { url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    city: { url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    ocean: { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    mountains: { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    desert: { url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    aurora: { url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    autumn: { url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    cyber: { url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    foglake: { url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80', theme: 'dracula' },
+    nebula: { url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80', theme: 'dracula' },
+    bamboo: { url: 'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    temple: { url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    waterfall: { url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    cherry: { url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    rain: { url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    lightning: { url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    wheat: { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    canyon: { url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' }
   };
 
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
@@ -148,6 +88,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsModal = document.getElementById('settings-modal');
   const settingsCloseX = document.getElementById('settings-close-x');
   const settingsSaveBtn = document.getElementById('settings-save-btn');
+
+  // Profile Elements
+  const openProfileBtn = document.getElementById('open-profile-btn');
+  const profileModal = document.getElementById('profile-modal');
+  const profileCloseX = document.getElementById('profile-close-x');
+  const profUsername = document.getElementById('prof-username');
+  const profRole = document.getElementById('prof-role');
+  const profWinRate = document.getElementById('prof-winrate');
+  const profMatchesWon = document.getElementById('prof-matches-won');
+  const profMatchesPlayed = document.getElementById('prof-matches-played');
+  const profTotalScore = document.getElementById('prof-total-score');
+  const profFriendsCount = document.getElementById('prof-friends-count');
+  const profMemberSince = document.getElementById('prof-member-since');
+
+  // Friends Elements
+  const openFriendsBtn = document.getElementById('open-friends-btn');
+  const friendsModal = document.getElementById('friends-modal');
+  const friendsCloseX = document.getElementById('friends-close-x');
+  const friendTargetInput = document.getElementById('friend-target-input');
+  const sendFriendReqBtn = document.getElementById('send-friend-req-btn');
+  const friendFeedbackMsg = document.getElementById('friend-feedback-msg');
+  const pendingRequestsSec = document.getElementById('pending-requests-sec');
+  const pendingRequestsList = document.getElementById('pending-requests-list');
+  const friendsTableBody = document.getElementById('friends-table-body');
+  const noFriendsMsg = document.getElementById('no-friends-msg');
+
+  // Privacy Elements
+  const openPrivacyLink = document.getElementById('open-privacy-link');
+  const privacyModal = document.getElementById('privacy-modal');
+  const privacyCloseX = document.getElementById('privacy-close-x');
+  const privacyAgreeBtn = document.getElementById('privacy-agree-btn');
+  const privacyConsentCheckbox = document.getElementById('privacy-consent-checkbox');
 
   // History & Auth
   const openHistoryBtn = document.getElementById('open-history-btn');
@@ -216,9 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
-  // =========================================================================
-  // PERSISTENT SETTINGS SYSTEM (LocalStorage)
-  // =========================================================================
+  // --- PERSISTENT SETTINGS ---
   function saveGameSettings() {
     const settings = {
       difficultyLevel: activeDifficultyLevel,
@@ -238,8 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const s = JSON.parse(raw);
-
-      // 1. Restore Difficulty
       if (s.difficultyLevel) {
         activeDifficultyLevel = parseInt(s.difficultyLevel, 10);
         if (difficultySlider) difficultySlider.value = activeDifficultyLevel;
@@ -248,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeDiffLabel) activeDiffLabel.textContent = label.split(' (')[0];
       }
 
-      // 2. Restore Symbol Set
       if (s.symbolSet && SYMBOL_SETS[s.symbolSet]) {
         activeSymbolSet = s.symbolSet;
         if (symbolSetSelect) symbolSetSelect.value = s.symbolSet;
@@ -257,7 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 3. Restore Background & Theme
       if (s.background && BACKGROUND_THEMES[s.background]) {
         if (bgSelect) bgSelect.value = s.background;
         const config = BACKGROUND_THEMES[s.background];
@@ -265,13 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.setAttribute('data-theme', config.theme);
       }
 
-      // 4. Restore Font
       if (s.font) {
         if (fontSelect) fontSelect.value = s.font;
         document.documentElement.setAttribute('data-font', s.font);
       }
 
-      // 5. Restore Audio & Visual Toggles
       if (typeof s.sound === 'boolean') {
         isSoundEnabled = s.sound;
         if (soundToggle) soundToggle.checked = isSoundEnabled;
@@ -284,12 +248,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isEmojiEnabled = s.emoji;
         if (emojiToggle) emojiToggle.checked = isEmojiEnabled;
       }
-    } catch (e) {
-      console.warn('Could not parse saved settings', e);
-    }
+    } catch (e) {}
   }
 
-  // --- 7-TIER SLIDER & SETTINGS SYNC ---
+  // --- SETTINGS CONTROLS ---
   difficultySlider?.addEventListener('input', (e) => {
     activeDifficultyLevel = parseInt(e.target.value, 10);
     const label = DIFFICULTY_TIERS[activeDifficultyLevel];
@@ -305,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
     saveGameSettings();
   });
 
-  // --- UNIFIED BACKGROUND & THEME LOGIC ---
   bgSelect?.addEventListener('change', (e) => {
     const chosenKey = e.target.value;
     const config = BACKGROUND_THEMES[chosenKey];
@@ -338,10 +299,153 @@ document.addEventListener('DOMContentLoaded', () => {
     saveGameSettings();
   });
 
-  // Load persisted user & settings immediately on page boot
   loadGameSettings();
 
-  // --- AUTH STATE & HISTORY ---
+  // --- PRIVACY STATEMENT MODAL ---
+  openPrivacyLink?.addEventListener('click', (e) => {
+    e.preventDefault();
+    privacyModal?.classList.remove('hidden');
+  });
+
+  privacyCloseX?.addEventListener('click', () => privacyModal?.classList.add('hidden'));
+  privacyAgreeBtn?.addEventListener('click', () => {
+    if (privacyConsentCheckbox) privacyConsentCheckbox.checked = true;
+    privacyModal?.classList.add('hidden');
+  });
+
+  // --- PLAYER PROFILE MODAL ---
+  openProfileBtn?.addEventListener('click', async () => {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`);
+      const data = await res.json();
+      if (!data.success) return alert(data.error || 'Failed to load profile.');
+
+      const p = data.profile;
+      profUsername.textContent = p.username;
+      profRole.textContent = p.role.toUpperCase();
+      profWinRate.textContent = p.winRate;
+      profMatchesWon.textContent = p.matchesWon;
+      profMatchesPlayed.textContent = p.matchesPlayed;
+      profTotalScore.textContent = p.totalScore;
+      profFriendsCount.textContent = p.friendsCount;
+      profMemberSince.textContent = new Date(p.registeredAt).toLocaleDateString([], { month: 'short', year: 'numeric' });
+
+      profileModal?.classList.remove('hidden');
+    } catch (err) {
+      alert('Could not retrieve player profile.');
+    }
+  });
+
+  profileCloseX?.addEventListener('click', () => profileModal?.classList.add('hidden'));
+
+  // --- FRIENDS HUB ---
+  async function refreshFriendsList() {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`/api/friends/list/${encodeURIComponent(currentUser.username)}`);
+      const data = await res.json();
+      if (!data.success) return;
+
+      // Pending requests
+      if (data.requests && data.requests.length > 0) {
+        pendingRequestsSec.classList.remove('hidden');
+        pendingRequestsList.innerHTML = '';
+        data.requests.forEach(reqUser => {
+          const div = document.createElement('div');
+          div.className = 'request-item';
+          div.innerHTML = `
+            <span><strong>${reqUser}</strong> sent you a request</span>
+            <div class="request-actions">
+              <button class="btn primary small" onclick="respondFriendReq('${reqUser}', 'accept')">Accept</button>
+              <button class="btn danger-small" onclick="respondFriendReq('${reqUser}', 'decline')">Decline</button>
+            </div>
+          `;
+          pendingRequestsList.appendChild(div);
+        });
+      } else {
+        pendingRequestsSec.classList.add('hidden');
+      }
+
+      // Friends list
+      friendsTableBody.innerHTML = '';
+      if (data.friends && data.friends.length > 0) {
+        noFriendsMsg.classList.add('hidden');
+        data.friends.forEach(f => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${f.username}</strong></td>
+            <td>
+              <span class="status-badge ${f.online ? 'online' : 'offline'}">
+                <span class="status-dot"></span> ${f.online ? 'Online' : 'Offline'}
+              </span>
+            </td>
+            <td>
+              <button class="btn danger-small" onclick="respondFriendReq('${f.username}', 'decline')">Remove</button>
+            </td>
+          `;
+          friendsTableBody.appendChild(tr);
+        });
+      } else {
+        noFriendsMsg.classList.remove('hidden');
+      }
+    } catch (e) {}
+  }
+
+  window.respondFriendReq = async function(fromUser, action) {
+    if (!currentUser) return;
+    try {
+      await fetch('/api/friends/respond-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser.username, fromUser, action })
+      });
+      refreshFriendsList();
+    } catch (e) {}
+  };
+
+  openFriendsBtn?.addEventListener('click', () => {
+    friendFeedbackMsg.classList.add('hidden');
+    friendTargetInput.value = '';
+    refreshFriendsList();
+    friendsModal?.classList.remove('hidden');
+  });
+
+  friendsCloseX?.addEventListener('click', () => friendsModal?.classList.add('hidden'));
+
+  sendFriendReqBtn?.addEventListener('click', async () => {
+    const target = friendTargetInput.value.trim();
+    if (!target || !currentUser) return;
+
+    try {
+      const res = await fetch('/api/friends/send-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fromUser: currentUser.username, targetUser: target })
+      });
+      const data = await res.json();
+      friendFeedbackMsg.textContent = data.message || data.error;
+      friendFeedbackMsg.classList.remove('hidden');
+      if (data.success) {
+        friendTargetInput.value = '';
+        refreshFriendsList();
+      }
+    } catch (err) {
+      friendFeedbackMsg.textContent = 'Failed to send request.';
+      friendFeedbackMsg.classList.remove('hidden');
+    }
+  });
+
+  socket.on('friendRequestReceived', ({ from }) => {
+    alert(`👥 New friend request received from ${from}!`);
+    refreshFriendsList();
+  });
+
+  socket.on('friendStatusChanged', () => {
+    refreshFriendsList();
+  });
+
+  // --- AUTH STATE & REGISTRATION ---
   let isRegisterMode = false;
 
   function loadPersistedUser() {
@@ -350,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         currentUser = JSON.parse(saved);
         updateAuthUI();
+        socket.emit('registerOnlineUser', { username: currentUser.username });
       } catch (e) {
         currentUser = null;
       }
@@ -423,6 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currentUser = data.user;
       localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
       updateAuthUI();
+      socket.emit('registerOnlineUser', { username: currentUser.username });
       authModal.classList.add('hidden');
     } catch (err) {
       authErrorMsg.textContent = 'Server connection failed.';
@@ -687,8 +793,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const filter = ctx.createBiquadFilter();
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(n.freq, now + n.delay);
-      sub.type = 'sine';
-      sub.frequency.setValueAtTime(n.freq * 0.5, now + n.delay);
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(600, now + n.delay);
       gain.gain.setValueAtTime(0.0001, now + n.delay);
