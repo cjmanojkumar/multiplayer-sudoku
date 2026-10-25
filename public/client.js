@@ -1281,3 +1281,9 @@ document.addEventListener('DOMContentLoaded', () => {
     winnerModal?.classList.remove('hidden');
   });
 });
+const fontColorPicker = document.getElementById('font-color-picker');
+
+fontColorPicker?.addEventListener('input', (e) => {
+  document.documentElement.style.setProperty('--text', e.target.value);
+  document.documentElement.style.setProperty('--number-color', e.target.value);
+});

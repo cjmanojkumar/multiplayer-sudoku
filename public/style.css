@@ -121,6 +121,54 @@
   --cell-focus: rgba(37, 99, 235, 0.12);
 }
 
+/* Dark Galaxy: Crisp ice-white text with cyan highlights */
+[data-theme="dark"] {
+  --text: #f8fafc;
+  --text-heading: #38bdf8;
+  --muted: #94a3b8;
+  --number-color: #e2e8f0;
+}
+
+/* Cyber Neon: Soft electric violet text with hot pink headings */
+[data-theme="neon"] {
+  --text: #fdf4ff;
+  --text-heading: #f472b6;
+  --muted: #d8b4fe;
+  --number-color: #fae8ff;
+}
+
+/* Emerald Forest: Minty pale-green text with gold headings */
+[data-theme="emerald"] {
+  --text: #ecfdf5;
+  --text-heading: #6ee7b7;
+  --muted: #a7f3d0;
+  --number-color: #d1fae5;
+}
+
+/* Sunset / Amber: Warm cream text with golden headings */
+[data-theme="sunset"] {
+  --text: #fffbeb;
+  --text-heading: #fcd34d;
+  --muted: #fde68a;
+  --number-color: #fef3c7;
+}
+
+/* Dracula: Pale lavender-grey text with neon purple headings */
+[data-theme="dracula"] {
+  --text: #f8f8f2;
+  --text-heading: #c084fc;
+  --muted: #d6acff;
+  --number-color: #f1f5f9;
+}
+
+/* Paper Frost (Light): Deep charcoal text for high contrast */
+[data-theme="paper"] {
+  --text: #0f172a;
+  --text-heading: #1e3a8a;
+  --muted: #475569;
+  --number-color: #1e293b;
+}
+
 /* =======================================================
    ARCHITECTURAL PENCIL SKETCH LINEWORK WITH HIGH CLARITY
    ======================================================= */
@@ -251,6 +299,50 @@
   pointer-events: none;
   filter: grayscale(1);
   border-color: transparent !important;
+}
+
+/* Headings */
+.top-bar h1,
+.modal-header h2,
+.privacy-intro,
+.privacy-content-scroll h3 {
+  color: var(--text-heading) !important;
+}
+
+/* Form Labels & Status Text */
+.input-group label,
+.host-settings label,
+.setting-row label,
+.setting-toggle-row {
+  color: var(--text) !important;
+}
+
+/* Input Fields & Dropdowns */
+.sketch-input,
+.auth-form input[type="text"],
+.auth-form input[type="password"] {
+  color: var(--text) !important;
+}
+
+/* Sudoku Numbers (Grid & Keypad) */
+.cell.prefilled {
+  color: var(--number-color) !important;
+}
+
+.symbol-btn {
+  color: var(--text) !important;
+}
+
+/* Profile Modal Metrics */
+.metric-val {
+  color: var(--text) !important;
+}
+
+/* Radio Mode & Secondary Buttons */
+.radio-label,
+.btn.secondary,
+.icon-btn {
+  color: var(--text) !important;
 }
 
 /* Base Layout & Dynamic Scenery */
