@@ -13,28 +13,111 @@ document.addEventListener('DOMContentLoaded', () => {
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
 
-  // 20 High-Res Backgrounds + Synchronized Themes
+  // 10 REALISTIC + 10 CREATIVE & 3D ARTWORKS
   const BACKGROUND_THEMES = {
-    milkyway: { url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    sunset: { url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    forest: { url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    city: { url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
-    ocean: { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    mountains: { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
-    desert: { url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    aurora: { url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
-    autumn: { url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
-    cyber: { url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
-    foglake: { url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80', theme: 'dracula' },
-    nebula: { url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80', theme: 'dracula' },
-    bamboo: { url: 'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    temple: { url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    waterfall: { url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    cherry: { url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    rain: { url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    lightning: { url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
-    wheat: { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    canyon: { url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' }
+    // 1-10: Photographic Realism
+    milkyway: {
+      url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dark',
+      style: 'realistic'
+    },
+    sunset: {
+      url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset',
+      style: 'realistic'
+    },
+    forest: {
+      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80',
+      theme: 'emerald',
+      style: 'realistic'
+    },
+    city: {
+      url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon',
+      style: 'realistic'
+    },
+    ocean: {
+      url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dark',
+      style: 'realistic'
+    },
+    mountains: {
+      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80',
+      theme: 'paper',
+      style: 'realistic'
+    },
+    desert: {
+      url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80',
+      theme: 'emerald',
+      style: 'realistic'
+    },
+    aurora: {
+      url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon',
+      style: 'realistic'
+    },
+    wheat: {
+      url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset',
+      style: 'realistic'
+    },
+    lightning: {
+      url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=1920&q=80',
+      theme: 'paper',
+      style: 'realistic'
+    },
+
+    // 11-20: Creative, Watercolor, 3D & Paints
+    watercolor: {
+      url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset',
+      style: 'watercolor'
+    },
+    oilpalette: {
+      url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80',
+      theme: 'emerald',
+      style: 'oil'
+    },
+    neon3d: {
+      url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon',
+      style: 'neon3d'
+    },
+    ghibli: {
+      url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&q=80',
+      theme: 'paper',
+      style: 'watercolor'
+    },
+    hologram: {
+      url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dracula',
+      style: 'neon3d'
+    },
+    sumie: {
+      url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dark',
+      style: 'ink'
+    },
+    cosmicpaint: {
+      url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80',
+      theme: 'dracula',
+      style: 'oil'
+    },
+    clay3d: {
+      url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80',
+      theme: 'sunset',
+      style: 'clay'
+    },
+    fluidsilk: {
+      url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon',
+      style: 'clay'
+    },
+    synthwave: {
+      url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&q=80',
+      theme: 'neon',
+      style: 'neon3d'
+    }
   };
 
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
@@ -89,6 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsCloseX = document.getElementById('settings-close-x');
   const settingsSaveBtn = document.getElementById('settings-save-btn');
 
+  // Password Visibility Toggle
+  const authPasswordInput = document.getElementById('auth-password');
+  const togglePasswordVisibilityBtn = document.getElementById('toggle-password-visibility');
+
   // Profile Elements
   const openProfileBtn = document.getElementById('open-profile-btn');
   const profileModal = document.getElementById('profile-modal');
@@ -115,11 +202,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const noFriendsMsg = document.getElementById('no-friends-msg');
 
   // Privacy Elements
-  const openPrivacyLink = document.getElementById('open-privacy-link');
   const privacyModal = document.getElementById('privacy-modal');
   const privacyCloseX = document.getElementById('privacy-close-x');
-  const privacyAgreeBtn = document.getElementById('privacy-agree-btn');
-  const privacyConsentCheckbox = document.getElementById('privacy-consent-checkbox');
+  const privacyAcceptBtn = document.getElementById('privacy-accept-btn');
 
   // History & Auth
   const openHistoryBtn = document.getElementById('open-history-btn');
@@ -136,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const authForm = document.getElementById('auth-form');
   const authModalTitle = document.getElementById('auth-modal-title');
   const authUsernameInput = document.getElementById('auth-username');
-  const authPasswordInput = document.getElementById('auth-password');
   const authSubmitBtn = document.getElementById('auth-submit-btn');
   const authSwitchMsg = document.getElementById('auth-switch-msg');
   const authToggleLink = document.getElementById('auth-toggle-link');
@@ -188,6 +272,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
+  // --- PASSWORD VISIBILITY TOGGLE ---
+  togglePasswordVisibilityBtn?.addEventListener('click', () => {
+    if (!authPasswordInput) return;
+    const isPass = authPasswordInput.type === 'password';
+    authPasswordInput.type = isPass ? 'text' : 'password';
+    togglePasswordVisibilityBtn.textContent = isPass ? '🙈' : '👁️';
+  });
+
   // --- PERSISTENT SETTINGS ---
   function saveGameSettings() {
     const settings = {
@@ -229,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = BACKGROUND_THEMES[s.background];
         if (scenicBg) scenicBg.style.backgroundImage = `url('${config.url}')`;
         document.documentElement.setAttribute('data-theme', config.theme);
+        document.documentElement.setAttribute('data-art-style', config.style || 'realistic');
       }
 
       if (s.font) {
@@ -273,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (scenicBg && config) {
       scenicBg.style.backgroundImage = `url('${config.url}')`;
       document.documentElement.setAttribute('data-theme', config.theme);
+      document.documentElement.setAttribute('data-art-style', config.style || 'realistic');
     }
     saveGameSettings();
   });
@@ -301,16 +395,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadGameSettings();
 
-  // --- PRIVACY STATEMENT MODAL ---
-  openPrivacyLink?.addEventListener('click', (e) => {
-    e.preventDefault();
+  // --- PRIVACY GATE (Pops BEFORE Registering) ---
+  openRegisterBtn?.addEventListener('click', () => {
     privacyModal?.classList.remove('hidden');
   });
 
   privacyCloseX?.addEventListener('click', () => privacyModal?.classList.add('hidden'));
-  privacyAgreeBtn?.addEventListener('click', () => {
-    if (privacyConsentCheckbox) privacyConsentCheckbox.checked = true;
+
+  privacyAcceptBtn?.addEventListener('click', () => {
     privacyModal?.classList.add('hidden');
+    openAuth(true); // Open register modal immediately after accepting
   });
 
   // --- PLAYER PROFILE MODAL ---
@@ -347,7 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (!data.success) return;
 
-      // Pending requests
       if (data.requests && data.requests.length > 0) {
         pendingRequestsSec.classList.remove('hidden');
         pendingRequestsList.innerHTML = '';
@@ -367,7 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
         pendingRequestsSec.classList.add('hidden');
       }
 
-      // Friends list
       friendsTableBody.innerHTML = '';
       if (data.friends && data.friends.length > 0) {
         noFriendsMsg.classList.add('hidden');
@@ -479,6 +571,8 @@ document.addEventListener('DOMContentLoaded', () => {
     authErrorMsg.classList.add('hidden');
     authUsernameInput.value = '';
     authPasswordInput.value = '';
+    authPasswordInput.type = 'password';
+    if (togglePasswordVisibilityBtn) togglePasswordVisibilityBtn.textContent = '👁️';
 
     if (isRegisterMode) {
       authModalTitle.textContent = '📝 Register Player';
@@ -495,12 +589,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   openLoginBtn?.addEventListener('click', () => openAuth(false));
-  openRegisterBtn?.addEventListener('click', () => openAuth(true));
   authCloseX?.addEventListener('click', () => authModal.classList.add('hidden'));
 
   authToggleLink?.addEventListener('click', (e) => {
     e.preventDefault();
-    openAuth(!isRegisterMode);
+    if (!isRegisterMode) {
+      // If clicking Register from inside login modal, trigger privacy first
+      authModal.classList.add('hidden');
+      privacyModal?.classList.remove('hidden');
+    } else {
+      openAuth(false);
+    }
   });
 
   authForm?.addEventListener('submit', async (e) => {
@@ -544,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadPersistedUser();
 
-  // Open Personal Match History
+  // Personal Match History
   openHistoryBtn?.addEventListener('click', async () => {
     if (!currentUser) return;
     try {
@@ -685,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGlitter();
   }
 
-  // --- PROCEDURAL AUDIO ---
+  // --- AUDIO SYNTHESIZERS ---
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {

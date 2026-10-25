@@ -22,7 +22,7 @@
 [data-font="pacifico"] * { font-family: 'Pacifico', cursive !important; }
 [data-font="dancing"] * { font-family: 'Dancing Script', cursive !important; }
 
-/* Color Themes */
+/* Color & Art Themes */
 [data-theme="dark"] {
   --bg: #0f172a;
   --card: rgba(15, 23, 42, 0.32);
@@ -113,6 +113,55 @@
   --cell-focus: rgba(37, 99, 235, 0.15);
 }
 
+/* =========================================
+   CREATIVE & ARTISTIC BORDER STYLING
+   ========================================= */
+/* 1. Watercolor Style: Organic undulating borders & soft washes */
+[data-art-style="watercolor"] .card,
+[data-art-style="watercolor"] .modal-card {
+  border-radius: 28px 12px 30px 14px !important;
+  border: 2px dashed rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 15px 35px rgba(236, 72, 153, 0.25), inset 0 0 15px rgba(255, 255, 255, 0.3) !important;
+}
+[data-art-style="watercolor"] .cell {
+  border-radius: 4px;
+}
+
+/* 2. Oil Painting: Textured borders & layered bevel */
+[data-art-style="oil"] .card,
+[data-art-style="oil"] .modal-card {
+  border-radius: 14px 24px 16px 26px !important;
+  border: 3px double rgba(251, 191, 36, 0.6) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 3. 3D Clay & Pastel: Plump, cushion rounded curves */
+[data-art-style="clay"] .card,
+[data-art-style="clay"] .modal-card {
+  border-radius: 32px !important;
+  border: 2px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 8px 12px 28px rgba(0, 0, 0, 0.35), inset -4px -4px 10px rgba(0, 0, 0, 0.2), inset 4px 4px 10px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 4. Sumi-e Japanese Ink: Calligraphic brush stroke feel */
+[data-art-style="ink"] .card,
+[data-art-style="ink"] .modal-card {
+  border-radius: 20px 4px 22px 5px !important;
+  border: 2px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* 5. 3D Neon / Holographic / Synthwave: Glowing beveled frames */
+[data-art-style="neon3d"] .card,
+[data-art-style="neon3d"] .modal-card {
+  border-radius: 12px !important;
+  border: 1.5px solid var(--accent) !important;
+  box-shadow: 0 0 20px var(--accent), inset 0 0 12px rgba(247, 37, 133, 0.3) !important;
+}
+[data-art-style="neon3d"] .cell.selected {
+  box-shadow: 0 0 12px var(--accent);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -145,7 +194,7 @@ body {
 .scenic-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.72) 100%);
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.72) 100%);
   pointer-events: none;
 }
 
@@ -287,7 +336,34 @@ body {
   gap: 12px;
 }
 
-.auth-form input[type="password"] {
+/* Password Field with Eye Toggle */
+.password-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field-wrap input {
+  width: 100%;
+  padding-right: 42px !important;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.15rem;
+  user-select: none;
+  opacity: 0.75;
+}
+.password-toggle-btn:hover {
+  opacity: 1;
+}
+
+.auth-form input[type="password"],
+.auth-form input[type="text"] {
   width: 100%;
   padding: 9px 12px;
   border-radius: 8px;
@@ -666,7 +742,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   75% { transform: translateX(4px); }
 }
 
-/* Keypad & Vanishing Exhausted Numbers */
+/* Keypad & Vanishing Numbers */
 .symbol-pad-container {
   margin-top: 14px;
   display: flex;
@@ -765,6 +841,9 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 .settings-card { text-align: left; }
 .admin-card { max-width: 620px !important; }
 .history-card { max-width: 580px !important; }
+.profile-card { max-width: 520px !important; }
+.friends-card { max-width: 540px !important; }
+.privacy-modal-card { max-width: 520px !important; }
 
 .modal-header {
   display: flex;
@@ -874,11 +953,8 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 
 .text-center { text-align: center; }
 .color-hint { font-size: 0.8rem; color: var(--muted); }
-/* --- PROFILE, FRIENDS & PRIVACY STYLING --- */
-.profile-card {
-  max-width: 520px !important;
-}
 
+/* Profile Grid */
 .profile-details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -923,10 +999,6 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 }
 
 /* Friends Hub */
-.friends-card {
-  max-width: 540px !important;
-}
-
 .friends-add-bar {
   display: flex;
   gap: 8px;
@@ -985,35 +1057,18 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 .status-badge.offline .status-dot { background: #64748b; }
 
 /* Privacy Statement */
-.privacy-modal-card {
-  max-width: 520px !important;
-}
-
-.privacy-consent-row {
-  margin-top: 6px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.checkbox-label a {
-  color: var(--accent);
-  text-decoration: underline;
+.privacy-intro {
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .privacy-content-scroll {
-  max-height: 320px;
+  max-height: 280px;
   overflow-y: auto;
   padding-right: 6px;
-  margin: 10px 0;
+  margin: 6px 0 12px 0;
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--muted);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-font="default">
+<html lang="en" data-theme="dark" data-font="default" data-art-style="realistic">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,6 +11,7 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+  <!-- Full-Screen Backdrop -->
   <div id="scenic-bg" class="scenic-bg">
     <div class="scenic-overlay"></div>
   </div>
@@ -136,7 +137,7 @@
     </div>
   </div>
 
-  <!-- Settings Modal (With Privacy Checkbox & Link) -->
+  <!-- Settings Modal (10 Realistic + 10 Creative Art Backdrops) -->
   <div id="settings-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted settings-card">
       <div class="modal-header">
@@ -168,28 +169,32 @@
         </div>
 
         <div class="setting-row">
-          <label for="bg-select">Scenery Backdrop & Theme:</label>
+          <label for="bg-select">Scenery Backdrop & Style:</label>
           <select id="bg-select">
-            <option value="milkyway" selected>🌌 1. Milky Way Galaxy (Midnight Dark)</option>
-            <option value="sunset">🌄 2. Mountain Sunset (Amber Sunset)</option>
-            <option value="forest">🌲 3. Misty Redwood Forest (Emerald)</option>
-            <option value="city">🏙️ 4. Tokyo Night Skyline (Cyber Neon)</option>
-            <option value="ocean">🌊 5. Tropical Turquoise Ocean (Ocean Blue)</option>
-            <option value="mountains">🏔️ 6. Snowy Alpine Peak (Paper Frost)</option>
-            <option value="desert">🏜️ 7. Dense Pine Forest (Emerald)</option>
-            <option value="aurora">🌌 8. Arctic Aurora Borealis (Cyber Neon)</option>
-            <option value="autumn">🍁 9. Peace Grey Gradient (Paper Frost)</option>
-            <option value="cyber">🌆 10. Neon Cyber City (Cyber Neon)</option>
-            <option value="foglake">🛶 11. Foggy Mountain Lake (Dracula)</option>
-            <option value="nebula">✨ 12. Deep Space Cosmos (Dracula)</option>
-            <option value="bamboo">🎋 13. Work Tools (Amber Sunset)</option>
-            <option value="temple">⛩️ 14. Ancient Mist Temple (Emerald)</option>
-            <option value="waterfall">💦 15. Forest Cascading Waterfall (Emerald)</option>
-            <option value="cherry">🌸 16. Cherry Blossom Garden (Sunset Rose)</option>
-            <option value="rain">🌧️ 17. Rain on Window Glass (Midnight Dark)</option>
-            <option value="lightning">⚡ 18. Floating on the Clouds (Paper Frost)</option>
-            <option value="wheat">🌾 19. Golden Sunlit Wheat Field (Amber Sunset)</option>
-            <option value="canyon">🏜️ 20. Grand Canyon Sunset (Amber Sunset)</option>
+            <optgroup label="📸 10 Realistic Sceneries">
+              <option value="milkyway" selected>🌌 1. Milky Way Galaxy (Midnight Dark)</option>
+              <option value="sunset">🌄 2. Mountain Sunset (Sunset Gold)</option>
+              <option value="forest">🌲 3. Misty Redwood Forest (Deep Emerald)</option>
+              <option value="city">🏙️ 4. Tokyo Night Skyline (Cyber Neon)</option>
+              <option value="ocean">🌊 5. Tropical Turquoise Ocean (Ocean Blue)</option>
+              <option value="mountains">🏔️ 6. Snowy Alpine Peak (Paper Frost)</option>
+              <option value="desert">🏜️ 7. Dense Pine Forest (Emerald Woods)</option>
+              <option value="aurora">🌌 8. Arctic Aurora Borealis (Neon Light)</option>
+              <option value="wheat">🌾 9. Golden Sunlit Wheat Field (Amber Harvest)</option>
+              <option value="lightning">⚡ 10. Night Lightning Storm (Electric Purple)</option>
+            </optgroup>
+            <optgroup label="🎨 10 Creative & 3D Artworks">
+              <option value="watercolor">🎨 11. Watercolor Dreamscape (Pastel Flow)</option>
+              <option value="oilpalette">🖌️ 12. Impasto Oil Paint Palette (Textured Gold)</option>
+              <option value="neon3d">🧊 13. 3D Glowing Cyber Geometry (Tron Neon)</option>
+              <option value="ghibli">☁️ 14. Anime Pastel Cloudscape (Sky Blue)</option>
+              <option value="hologram">🔮 15. Prism Holographic Waves (Iridescent)</option>
+              <option value="sumie">📜 16. Japanese Ink Wash Sumi-e (Monochrome)</option>
+              <option value="cosmicpaint">🌌 17. Swirling Cosmic Oil Swirl (Deep Violet)</option>
+              <option value="clay3d">🧸 18. Soft 3D Pastel Clay (Warm Peaches)</option>
+              <option value="fluidsilk">🌊 19. Chromatic Liquid Silk (Fluid Magenta)</option>
+              <option value="synthwave">🏎️ 20. Retro 3D Grid Synthwave (Outrun)</option>
+            </optgroup>
           </select>
         </div>
 
@@ -232,14 +237,6 @@
         <div class="setting-toggle-row">
           <label for="emoji-toggle">✨ Completion Emojis</label>
           <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
-        </div>
-
-        <!-- Privacy Policy Consent & View -->
-        <div class="privacy-consent-row">
-          <label class="checkbox-label">
-            <input type="checkbox" id="privacy-consent-checkbox" checked />
-            <span>I accept the <a href="#" id="open-privacy-link">Privacy Statement & Data Handling</a></span>
-          </label>
         </div>
       </div>
 
@@ -295,20 +292,17 @@
         <span class="close-x" id="friends-close-x">&times;</span>
       </div>
 
-      <!-- Send Request Form -->
       <div class="friends-add-bar">
         <input type="text" id="friend-target-input" placeholder="Search friend's username..." />
         <button id="send-friend-req-btn" class="btn primary small">Send Request</button>
       </div>
       <p id="friend-feedback-msg" class="color-hint text-center hidden"></p>
 
-      <!-- Pending Incoming Requests -->
       <div id="pending-requests-sec" class="pending-requests-sec hidden">
         <h4>Pending Friend Requests:</h4>
         <div id="pending-requests-list" class="requests-list"></div>
       </div>
 
-      <!-- Current Friends List -->
       <h4>Your Friends List:</h4>
       <div class="table-scroll friends-scroll">
         <table class="leaderboard-table">
@@ -326,27 +320,32 @@
     </div>
   </div>
 
-  <!-- Privacy Statement Modal -->
+  <!-- Privacy Gate Modal (Must accept before registering) -->
   <div id="privacy-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted privacy-modal-card">
       <div class="modal-header">
-        <h2>🛡️ Privacy & Data Protection Statement</h2>
+        <h2>🛡️ Privacy & Terms Agreement</h2>
         <span class="close-x" id="privacy-close-x">&times;</span>
       </div>
       <div class="privacy-content-scroll">
-        <h3>1. Information We Store</h3>
-        <p>Sudoku Arena collects only the information necessary to provide authentication, save career metrics, and facilitate multiplayer connections. This includes your self-chosen username, match history outcomes, and friends lists.</p>
+        <p class="privacy-intro">Before creating an account on Sudoku Arena, please review our privacy commitment:</p>
+        
+        <h3>1. Data We Store</h3>
+        <p>We store only your unique username, match career statistics, and approved friendships. No personal identifiers or emails are collected.</p>
 
-        <h3>2. Password Security & Cryptography</h3>
-        <p>We do not store plain-text passwords. All credentials are encrypted using industry-standard <strong>bcryptjs salt-hashing</strong> before writing to the database file.</p>
+        <h3>2. Cryptographic Protection</h3>
+        <p>Passwords are never saved in plain text. Every password is salt-hashed using <strong>bcryptjs (10 rounds)</strong> before storage.</p>
 
-        <h3>3. Real-Time Gameplay & Presence</h3>
-        <p>Your online status is communicated via encrypted WebSocket sessions exclusively to confirmed friends to enable multiplayer invites. No location, biometric, or contact data is tracked or requested.</p>
+        <h3>3. Friend Presence</h3>
+        <p>Your online presence is shared strictly with confirmed friends on your list via real-time WebSocket sessions to facilitate games.</p>
 
-        <h3>4. Persistent Storage & Control</h3>
-        <p>Account data is stored within your private arena instance. You may request account or statistics deletion through the administrator at any time.</p>
+        <h3>4. Account Ownership</h3>
+        <p>You can request data reset or account removal by reaching out to the game administrator at any time.</p>
       </div>
-      <button id="privacy-agree-btn" class="btn primary full-width">I Understand & Agree</button>
+
+      <div class="privacy-modal-actions">
+        <button id="privacy-accept-btn" class="btn primary full-width">I Agree & Continue to Register</button>
+      </div>
     </div>
   </div>
 
@@ -376,7 +375,7 @@
     </div>
   </div>
 
-  <!-- Register / Login Modal -->
+  <!-- Register / Login Modal (With Password Eye Toggle) -->
   <div id="auth-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted">
       <div class="modal-header">
@@ -388,10 +387,15 @@
           <label for="auth-username">Username:</label>
           <input type="text" id="auth-username" required minlength="3" maxlength="15" placeholder="Enter username" />
         </div>
+
         <div class="input-group">
           <label for="auth-password">Password:</label>
-          <input type="password" id="auth-password" required minlength="4" placeholder="Enter password" />
+          <div class="password-field-wrap">
+            <input type="password" id="auth-password" required minlength="4" placeholder="Enter password" />
+            <button type="button" id="toggle-password-visibility" class="password-toggle-btn" title="Show/Hide Password">👁️</button>
+          </div>
         </div>
+
         <p id="auth-error-msg" class="error-text hidden"></p>
         <button type="submit" id="auth-submit-btn" class="btn primary full-width">Log In</button>
         <p class="auth-switch-text">
