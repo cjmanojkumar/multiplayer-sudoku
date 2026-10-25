@@ -216,18 +216,93 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
+  // =========================================================================
+  // PERSISTENT SETTINGS SYSTEM (LocalStorage)
+  // =========================================================================
+  function saveGameSettings() {
+    const settings = {
+      difficultyLevel: activeDifficultyLevel,
+      symbolSet: activeSymbolSet,
+      background: bgSelect?.value || 'milkyway',
+      font: fontSelect?.value || 'default',
+      music: isMusicEnabled,
+      sound: isSoundEnabled,
+      emoji: isEmojiEnabled
+    };
+    localStorage.setItem('sudoku_arena_settings', JSON.stringify(settings));
+  }
+
+  function loadGameSettings() {
+    const raw = localStorage.getItem('sudoku_arena_settings');
+    if (!raw) return;
+
+    try {
+      const s = JSON.parse(raw);
+
+      // 1. Restore Difficulty
+      if (s.difficultyLevel) {
+        activeDifficultyLevel = parseInt(s.difficultyLevel, 10);
+        if (difficultySlider) difficultySlider.value = activeDifficultyLevel;
+        const label = DIFFICULTY_TIERS[activeDifficultyLevel] || DIFFICULTY_TIERS[4];
+        if (sliderLevelName) sliderLevelName.textContent = label;
+        if (activeDiffLabel) activeDiffLabel.textContent = label.split(' (')[0];
+      }
+
+      // 2. Restore Symbol Set
+      if (s.symbolSet && SYMBOL_SETS[s.symbolSet]) {
+        activeSymbolSet = s.symbolSet;
+        if (symbolSetSelect) symbolSetSelect.value = s.symbolSet;
+        if (activeSymbolLabel && symbolSetSelect) {
+          activeSymbolLabel.textContent = symbolSetSelect.options[symbolSetSelect.selectedIndex]?.text || '1-9 Numbers';
+        }
+      }
+
+      // 3. Restore Background & Theme
+      if (s.background && BACKGROUND_THEMES[s.background]) {
+        if (bgSelect) bgSelect.value = s.background;
+        const config = BACKGROUND_THEMES[s.background];
+        if (scenicBg) scenicBg.style.backgroundImage = `url('${config.url}')`;
+        document.documentElement.setAttribute('data-theme', config.theme);
+      }
+
+      // 4. Restore Font
+      if (s.font) {
+        if (fontSelect) fontSelect.value = s.font;
+        document.documentElement.setAttribute('data-font', s.font);
+      }
+
+      // 5. Restore Audio & Visual Toggles
+      if (typeof s.sound === 'boolean') {
+        isSoundEnabled = s.sound;
+        if (soundToggle) soundToggle.checked = isSoundEnabled;
+      }
+      if (typeof s.music === 'boolean') {
+        isMusicEnabled = s.music;
+        if (musicToggle) musicToggle.checked = isMusicEnabled;
+      }
+      if (typeof s.emoji === 'boolean') {
+        isEmojiEnabled = s.emoji;
+        if (emojiToggle) emojiToggle.checked = isEmojiEnabled;
+      }
+    } catch (e) {
+      console.warn('Could not parse saved settings', e);
+    }
+  }
+
   // --- 7-TIER SLIDER & SETTINGS SYNC ---
   difficultySlider?.addEventListener('input', (e) => {
     activeDifficultyLevel = parseInt(e.target.value, 10);
     const label = DIFFICULTY_TIERS[activeDifficultyLevel];
     if (sliderLevelName) sliderLevelName.textContent = label;
     if (activeDiffLabel) activeDiffLabel.textContent = label.split(' (')[0];
+    saveGameSettings();
   });
 
   symbolSetSelect?.addEventListener('change', (e) => {
     activeSymbolSet = e.target.value;
     const readable = symbolSetSelect.options[symbolSetSelect.selectedIndex].text;
     if (activeSymbolLabel) activeSymbolLabel.textContent = readable;
+    saveGameSettings();
   });
 
   // --- UNIFIED BACKGROUND & THEME LOGIC ---
@@ -238,7 +313,33 @@ document.addEventListener('DOMContentLoaded', () => {
       scenicBg.style.backgroundImage = `url('${config.url}')`;
       document.documentElement.setAttribute('data-theme', config.theme);
     }
+    saveGameSettings();
   });
+
+  fontSelect?.addEventListener('change', (e) => {
+    document.documentElement.setAttribute('data-font', e.target.value);
+    saveGameSettings();
+  });
+
+  soundToggle?.addEventListener('change', (e) => {
+    isSoundEnabled = e.target.checked;
+    saveGameSettings();
+  });
+
+  emojiToggle?.addEventListener('change', (e) => {
+    isEmojiEnabled = e.target.checked;
+    saveGameSettings();
+  });
+
+  musicToggle?.addEventListener('change', (e) => {
+    isMusicEnabled = e.target.checked;
+    if (isMusicEnabled) bgAudio.play().catch(() => {});
+    else bgAudio.pause();
+    saveGameSettings();
+  });
+
+  // Load persisted user & settings immediately on page boot
+  loadGameSettings();
 
   // --- AUTH STATE & HISTORY ---
   let isRegisterMode = false;
@@ -632,18 +733,9 @@ document.addEventListener('DOMContentLoaded', () => {
   settingsOpenBtn?.addEventListener('click', () => settingsModal?.classList.remove('hidden'));
   const closeSettings = () => settingsModal?.classList.add('hidden');
   settingsCloseX?.addEventListener('click', closeSettings);
-  settingsSaveBtn?.addEventListener('click', closeSettings);
-
-  fontSelect?.addEventListener('change', (e) => {
-    document.documentElement.setAttribute('data-font', e.target.value);
-  });
-
-  soundToggle?.addEventListener('change', (e) => isSoundEnabled = e.target.checked);
-  emojiToggle?.addEventListener('change', (e) => isEmojiEnabled = e.target.checked);
-  musicToggle?.addEventListener('change', (e) => {
-    isMusicEnabled = e.target.checked;
-    if (isMusicEnabled) bgAudio.play().catch(() => {});
-    else bgAudio.pause();
+  settingsSaveBtn?.addEventListener('click', () => {
+    saveGameSettings();
+    closeSettings();
   });
 
   modalCloseX?.addEventListener('click', () => winnerModal?.classList.add('hidden'));
