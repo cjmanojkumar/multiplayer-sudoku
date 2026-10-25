@@ -23,106 +23,184 @@
 [data-font="dancing"] * { font-family: 'Dancing Script', cursive !important; }
 
 /* =========================================
-   PALETTES (HIGH TRANSLUCENCY)
+   HIGH-CONTRAST PALETTES (THEME-SPECIFIC TEXT COLORS)
    ========================================= */
+
+/* 1. Dark (Milkyway / Lagoon / Sumi / Silk) - Crisp Ice Blue & White */
 [data-theme="dark"] {
-  --bg: #0f172a;
-  --card: rgba(15, 23, 42, 0.18);
-  --card-hover: rgba(15, 23, 42, 0.28);
+  --bg: #0b1120;
+  --card: rgba(11, 17, 32, 0.22);
   --accent: #38bdf8;
-  --success: #22c55e;
-  --error: #ef4444;
-  --text: #f8fafc;
-  --muted: #cbd5e1;
-  --border: rgba(255, 255, 255, 0.45);
-  --grid-line: rgba(255, 255, 255, 0.7);
-  --cell-fixed: rgba(0, 0, 0, 0.22);
-  --highlight-row: rgba(56, 189, 248, 0.28);
-  --cell-focus: rgba(56, 189, 248, 0.2);
+  --success: #34d399;
+  --error: #f87171;
+  --text: #f0f9ff;                    /* Glacial white-cyan */
+  --text-heading: #7dd3fc;            /* Bright sky blue */
+  --muted: #bae6fd;                   /* Soft pastel ice blue */
+  --border: rgba(125, 211, 252, 0.45);
+  --grid-line: rgba(56, 189, 248, 0.7);
+  --cell-fixed: rgba(0, 0, 0, 0.25);
+  --highlight-row: rgba(56, 189, 248, 0.3);
+  --cell-focus: rgba(56, 189, 248, 0.22);
 }
 
+/* 2. Neon (Tokyo / Aurora / Prism / Cosmic / Synthwave) - Electric Magenta & Neon White */
 [data-theme="neon"] {
-  --bg: #11052C;
-  --card: rgba(20, 8, 45, 0.2);
-  --card-hover: rgba(20, 8, 45, 0.32);
+  --bg: #130026;
+  --card: rgba(22, 2, 43, 0.24);
   --accent: #f72585;
   --success: #4cc9f0;
   --error: #ff4d6d;
-  --text: #ffffff;
-  --muted: #f3c4fb;
+  --text: #fff0f7;                    /* Luminous neon white */
+  --text-heading: #ff70a6;            /* Neon pop pink */
+  --muted: #fbcfe8;                   /* Soft lilac rose */
   --border: rgba(247, 37, 133, 0.55);
   --grid-line: #f72585;
-  --cell-fixed: rgba(10, 2, 28, 0.25);
-  --highlight-row: rgba(247, 37, 133, 0.28);
-  --cell-focus: rgba(247, 37, 133, 0.2);
+  --cell-fixed: rgba(15, 0, 30, 0.28);
+  --highlight-row: rgba(247, 37, 133, 0.32);
+  --cell-focus: rgba(247, 37, 133, 0.22);
 }
 
+/* 3. Emerald (Redwood / Dunes / Palette) - Luminous Mint & Gold Accent */
 [data-theme="emerald"] {
-  --bg: #064e3b;
-  --card: rgba(4, 70, 53, 0.2);
-  --card-hover: rgba(4, 70, 53, 0.3);
+  --bg: #032b1f;
+  --card: rgba(3, 43, 31, 0.22);
   --accent: #34d399;
   --success: #fbbf24;
   --error: #f87171;
-  --text: #f0fdf4;
-  --muted: #d1fae5;
+  --text: #ecfdf5;                    /* Crystal mint white */
+  --text-heading: #6ee7b7;            /* Bright seafoam jade */
+  --muted: #a7f3d0;                   /* Pale pistachio green */
   --border: rgba(52, 211, 153, 0.5);
   --grid-line: #34d399;
-  --cell-fixed: rgba(2, 35, 27, 0.25);
-  --highlight-row: rgba(52, 211, 153, 0.28);
+  --cell-fixed: rgba(1, 26, 18, 0.28);
+  --highlight-row: rgba(52, 211, 153, 0.3);
   --cell-focus: rgba(52, 211, 153, 0.2);
 }
 
+/* 4. Sunset (Sunset / Harvest / Dreamscape / Clay) - Radiant Warm Amber & Peach */
 [data-theme="sunset"] {
-  --bg: #2b0938;
-  --card: rgba(55, 15, 72, 0.2);
-  --card-hover: rgba(55, 15, 72, 0.32);
-  --accent: #ff7a00;
-  --success: #ffd166;
-  --error: #ff3366;
-  --text: #fff5eb;
-  --muted: #fbcfe8;
-  --border: rgba(255, 122, 0, 0.5);
-  --grid-line: #ff7a00;
-  --cell-fixed: rgba(26, 3, 36, 0.25);
-  --highlight-row: rgba(255, 122, 0, 0.28);
-  --cell-focus: rgba(255, 122, 0, 0.2);
+  --bg: #270724;
+  --card: rgba(46, 10, 43, 0.24);
+  --accent: #fb923c;
+  --success: #facc15;
+  --error: #f43f5e;
+  --text: #fffbeb;                    /* Warm champagne vanilla */
+  --text-heading: #fdba74;            /* Golden sunset peach */
+  --muted: #fed7aa;                   /* Soft peach amber */
+  --border: rgba(251, 146, 60, 0.52);
+  --grid-line: #fb923c;
+  --cell-fixed: rgba(30, 5, 27, 0.28);
+  --highlight-row: rgba(251, 146, 60, 0.32);
+  --cell-focus: rgba(251, 146, 60, 0.22);
 }
 
+/* 5. Dracula (Tempest / Hologram) - Vivid Lavender & Orchid White */
 [data-theme="dracula"] {
-  --bg: #282a36;
-  --card: rgba(40, 42, 54, 0.22);
-  --card-hover: rgba(40, 42, 54, 0.32);
+  --bg: #1e1f29;
+  --card: rgba(35, 37, 49, 0.25);
   --accent: #bd93f9;
   --success: #50fa7b;
   --error: #ff5555;
-  --text: #f8f8f2;
-  --muted: #d6acff;
+  --text: #faf5ff;                    /* Pure moonlit lilac */
+  --text-heading: #d8b4fe;            /* Bright pastel amethyst */
+  --muted: #e9d5ff;                   /* Soft lavender mist */
   --border: rgba(189, 147, 249, 0.5);
-  --grid-line: #ff79c6;
-  --cell-fixed: rgba(20, 21, 28, 0.25);
-  --highlight-row: rgba(189, 147, 249, 0.28);
+  --grid-line: #bd93f9;
+  --cell-fixed: rgba(17, 18, 25, 0.3);
+  --highlight-row: rgba(189, 147, 249, 0.3);
   --cell-focus: rgba(189, 147, 249, 0.2);
 }
 
+/* 6. Paper (Alpine / Ghibli) - Deep Charcoal Slate on Bright White */
 [data-theme="paper"] {
   --bg: #f8fafc;
-  --card: rgba(255, 255, 255, 0.35);
-  --card-hover: rgba(255, 255, 255, 0.5);
-  --accent: #2563eb;
-  --success: #16a34a;
+  --card: rgba(255, 255, 255, 0.55);
+  --accent: #0284c7;
+  --success: #059669;
   --error: #dc2626;
-  --text: #0f172a;
-  --muted: #334155;
-  --border: rgba(30, 41, 59, 0.5);
-  --grid-line: #1e293b;
-  --cell-fixed: rgba(255, 255, 255, 0.45);
-  --highlight-row: rgba(37, 99, 235, 0.2);
-  --cell-focus: rgba(37, 99, 235, 0.12);
+  --text: #0f172a;                    /* Deep obsidian slate */
+  --text-heading: #0369a1;            /* Deep cerulean navy */
+  --muted: #334155;                   /* Charcoal graphite */
+  --border: rgba(15, 23, 42, 0.55);
+  --grid-line: #0f172a;
+  --cell-fixed: rgba(255, 255, 255, 0.65);
+  --highlight-row: rgba(2, 132, 199, 0.2);
+  --cell-focus: rgba(2, 132, 199, 0.14);
 }
 
 /* =======================================================
-   ARCHITECTURAL PENCIL SKETCH LINEWORK WITH HIGH CLARITY
+   UNIVERSAL TYPOGRAPHY & CONTRAST RULES
+   ======================================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  transition: background-color 0.2s, color 0.25s, border-color 0.2s;
+}
+
+body {
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Headings use the theme's bright key tone */
+h1, h2, h3, h4 {
+  color: var(--text-heading) !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="paper"] h1,
+[data-theme="paper"] h2,
+[data-theme="paper"] h3,
+[data-theme="paper"] h4 {
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9);
+}
+
+/* Labels, hints, and secondary meta inherit muted contrast */
+label,
+.color-hint,
+.score-text,
+.slider-ticks,
+.roster-list,
+.auth-switch-text,
+.privacy-content-scroll,
+.hud-top,
+.symbol-pad-title,
+.metric-title {
+  color: var(--muted) !important;
+  font-weight: 600;
+}
+
+/* Inputs & Dropdowns contrast to the theme */
+input[type="text"],
+input[type="number"],
+input[type="password"],
+select {
+  color: var(--text) !important;
+}
+
+/* Grid prefilled and user entries contrast */
+.cell.prefilled {
+  color: var(--text) !important;
+}
+.cell.user-filled {
+  color: var(--accent) !important;
+}
+
+/* Top Action Buttons text */
+.icon-btn {
+  color: var(--text) !important;
+}
+
+/* =======================================================
+   ARCHITECTURAL PENCIL SKETCH LINEWORK
    ======================================================= */
 .sketch-card,
 .sketch-modal {
@@ -143,7 +221,6 @@
   border: 1.4px solid var(--border) !important;
   background: rgba(0, 0, 0, 0.22) !important;
   backdrop-filter: blur(12px) !important;
-  color: #fff !important;
   outline: none;
 }
 .sketch-input:focus {
@@ -161,7 +238,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Sudoku 9x9 Grid (Pencil-ruled translucent glass) */
+/* 9x9 Grid (Pencil-ruled translucent glass) */
 .sketch-grid {
   border-radius: 3px 2px 2px 3px / 2px 3px 3px 2px !important;
   border: 2.4px solid var(--grid-line) !important;
@@ -205,17 +282,9 @@
   z-index: 2;
 }
 
-.cell.prefilled {
-  background: var(--cell-fixed);
-  color: var(--text);
-  cursor: default;
-}
-
-.cell.user-filled { color: var(--accent); }
-.cell.correct { color: var(--success); pointer-events: none; }
-
+.cell.correct { color: var(--success) !important; pointer-events: none; }
 .cell.wrong {
-  color: var(--error);
+  color: var(--error) !important;
   animation: shake 0.25s ease;
 }
 
@@ -231,7 +300,7 @@
   backdrop-filter: blur(10px);
   border: 1.5px solid var(--border);
   border-radius: 3px 2px 2px 3px / 2px 3px 1px 2px;
-  color: var(--text);
+  color: var(--text) !important;
   padding: 8px 0;
   font-size: 1.2rem;
   font-weight: bold;
@@ -241,7 +310,7 @@
 
 .symbol-btn:hover {
   background: var(--accent);
-  color: #000;
+  color: #000 !important;
   transform: translateY(-1px);
 }
 
@@ -253,25 +322,7 @@
   border-color: transparent !important;
 }
 
-/* Base Layout & Dynamic Scenery */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-}
-
-body {
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-  overflow-x: hidden;
-  position: relative;
-}
-
+/* Background Layers */
 .scenic-bg {
   position: fixed;
   inset: 0;
@@ -328,7 +379,7 @@ body {
   background: radial-gradient(circle at center, rgba(148, 163, 184, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
 }
 
-/* Enhanced Translucency Glass Filter */
+/* Translucent Glass Filter */
 .frosted {
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
@@ -351,34 +402,9 @@ body {
   align-items: center;
 }
 
-.top-bar h1 {
-  font-size: 1.45rem;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
-}
-
 .top-buttons {
   display: flex;
   gap: 8px;
-}
-
-.icon-btn {
-  background: rgba(0, 0, 0, 0.22);
-  border: 1.5px solid var(--border);
-  color: #fff;
-  border-radius: 4px;
-  padding: 6px 14px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.icon-btn:hover {
-  background: var(--accent);
-  color: #000;
 }
 
 .admin-btn {
@@ -447,31 +473,15 @@ body {
 }
 .password-toggle-btn:hover { opacity: 1; }
 
-.auth-form input[type="password"],
-.auth-form input[type="text"] {
-  width: 100%;
-  padding: 9px 12px;
-  color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.auth-switch-text {
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
 .auth-switch-text a {
-  color: var(--accent);
+  color: var(--accent) !important;
   text-decoration: underline;
   cursor: pointer;
   margin-left: 4px;
 }
 
 .error-text {
-  color: var(--error);
+  color: var(--error) !important;
   font-size: 0.8rem;
   font-weight: bold;
   text-align: center;
@@ -498,32 +508,19 @@ body {
   cursor: pointer;
   border-radius: 3px;
   transition: background 0.2s;
-  color: #fff;
+  color: var(--text);
   user-select: none;
 }
 
 .radio-label:has(input:checked) {
   background: var(--accent);
-  color: #000;
+  color: #000 !important;
+}
+.radio-label:has(input:checked) span {
+  color: #000 !important;
 }
 
 .radio-label input { display: none; }
-
-.input-group label, .host-settings label {
-  display: block;
-  font-size: 0.85rem;
-  color: #ffffff;
-  margin-bottom: 6px;
-  font-weight: 700;
-}
-
-input[type="text"], input[type="number"], select {
-  width: 100%;
-  padding: 9px 12px;
-  color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
 
 .host-settings {
   display: grid;
@@ -537,12 +534,11 @@ input[type="text"], input[type="number"], select {
   padding: 8px 12px;
   background: rgba(0, 0, 0, 0.18);
   font-size: 0.82rem;
-  color: var(--muted);
   text-align: center;
 }
 
 .lobby-meta-preview strong {
-  color: var(--accent);
+  color: var(--accent) !important;
 }
 
 .actions {
@@ -561,8 +557,8 @@ input[type="text"], input[type="number"], select {
   cursor: pointer;
 }
 
-.btn.primary { background: var(--accent); color: #000; }
-.btn.secondary { background: rgba(255, 255, 255, 0.15); color: #fff; }
+.btn.primary { background: var(--accent); color: #000 !important; }
+.btn.secondary { background: rgba(255, 255, 255, 0.15); color: var(--text) !important; }
 .btn.full-width { width: 100%; }
 
 .btn.small {
@@ -572,18 +568,17 @@ input[type="text"], input[type="number"], select {
 
 .btn.danger-small {
   background: transparent;
-  color: var(--error);
+  color: var(--error) !important;
   border: 1px solid var(--error);
   padding: 4px 8px;
   font-size: 0.75rem;
   cursor: pointer;
 }
 
-.btn.danger-small:hover { background: var(--error); color: #fff; }
+.btn.danger-small:hover { background: var(--error); color: #fff !important; }
 
 .divider {
   text-align: center;
-  color: var(--muted);
   font-size: 0.8rem;
   font-weight: bold;
 }
@@ -592,7 +587,7 @@ input[type="text"], input[type="number"], select {
   margin-top: 12px;
   font-size: 0.9rem;
   text-align: center;
-  color: var(--success);
+  color: var(--success) !important;
 }
 
 .roster-list {
@@ -601,7 +596,6 @@ input[type="text"], input[type="number"], select {
   gap: 4px;
   margin-top: 8px;
   font-size: 0.85rem;
-  color: var(--muted);
 }
 
 /* 7-Tier Slider UI */
@@ -616,7 +610,7 @@ input[type="text"], input[type="number"], select {
   font-size: 0.8rem;
   padding: 2px 8px;
   background: var(--accent);
-  color: #000;
+  color: #000 !important;
   font-weight: bold;
 }
 
@@ -643,14 +637,6 @@ input[type="text"], input[type="number"], select {
   cursor: pointer;
 }
 
-.slider-ticks {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--muted);
-  padding: 0 4px;
-}
-
 /* HUD */
 .hud {
   display: flex;
@@ -664,7 +650,6 @@ input[type="text"], input[type="number"], select {
   justify-content: space-between;
   align-items: center;
   font-size: 0.85rem;
-  color: var(--muted);
 }
 
 .my-lives {
@@ -673,7 +658,7 @@ input[type="text"], input[type="number"], select {
 }
 
 .timer-box span {
-  color: var(--accent);
+  color: var(--accent) !important;
   font-weight: bold;
 }
 
@@ -703,6 +688,7 @@ input[type="text"], input[type="number"], select {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text) !important;
 }
 
 .progress-bar {
@@ -723,14 +709,13 @@ input[type="text"], input[type="number"], select {
 
 .score-text {
   font-size: 0.7rem;
-  color: var(--muted);
   display: flex;
   justify-content: space-between;
 }
 
 .banner {
   background: var(--error);
-  color: #fff;
+  color: #fff !important;
   padding: 8px;
   text-align: center;
   font-size: 0.85rem;
@@ -760,11 +745,6 @@ input[type="text"], input[type="number"], select {
   align-items: center;
 }
 
-.symbol-pad-title {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
 .symbol-pad {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -778,7 +758,7 @@ input[type="text"], input[type="number"], select {
 
 @keyframes flashPulse {
   0% { background-color: var(--highlight-row); transform: scale(1.05); z-index: 5; }
-  50% { background-color: var(--success); color: #000; }
+  50% { background-color: var(--success); color: #000 !important; }
   100% { transform: scale(1); z-index: 1; }
 }
 
@@ -836,7 +816,6 @@ input[type="text"], input[type="number"], select {
 
 .close-x {
   font-size: 1.6rem;
-  color: var(--muted);
   cursor: pointer;
   line-height: 1;
 }
@@ -845,14 +824,6 @@ input[type="text"], input[type="number"], select {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.setting-row label {
-  display: block;
-  font-size: 0.85rem;
-  color: #fff;
-  font-weight: 700;
-  margin-bottom: 4px;
 }
 
 .setting-toggle-row {
@@ -878,7 +849,7 @@ input[type="text"], input[type="number"], select {
 }
 
 .winner-reason {
-  color: var(--accent);
+  color: var(--accent) !important;
   font-size: 0.95rem;
   font-weight: 700;
   text-align: center;
@@ -895,7 +866,6 @@ input[type="text"], input[type="number"], select {
 .leaderboard-table th {
   border-bottom: 1.5px solid var(--border);
   padding: 8px 4px;
-  color: var(--muted);
 }
 
 .leaderboard-table td {
@@ -904,7 +874,7 @@ input[type="text"], input[type="number"], select {
 }
 
 .leaderboard-table tr:first-child td {
-  color: var(--accent);
+  color: var(--accent) !important;
   font-weight: bold;
   font-size: 0.95rem;
 }
@@ -915,7 +885,6 @@ input[type="text"], input[type="number"], select {
   align-items: center;
   margin-bottom: 10px;
   font-size: 0.85rem;
-  color: var(--muted);
 }
 
 .table-scroll {
@@ -929,11 +898,10 @@ input[type="text"], input[type="number"], select {
   font-size: 0.75rem;
   font-weight: bold;
 }
-.role-badge.admin { background: #eab308; color: #000; }
-.role-badge.player { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.role-badge.admin { background: #eab308; color: #000 !important; }
+.role-badge.player { background: rgba(255, 255, 255, 0.2); color: var(--text) !important; }
 
 .text-center { text-align: center; }
-.color-hint { font-size: 0.8rem; color: var(--muted); }
 
 /* Profile Grid */
 .profile-details-grid {
@@ -952,21 +920,14 @@ input[type="text"], input[type="number"], select {
   backdrop-filter: blur(8px);
 }
 
-.metric-title {
-  font-size: 0.75rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
 .metric-val {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text) !important;
 }
 
 .metric-val.highlight {
-  color: var(--accent);
+  color: var(--accent) !important;
 }
 
 .profile-footer-stats {
@@ -975,7 +936,6 @@ input[type="text"], input[type="number"], select {
   padding-top: 10px;
   border-top: 1px dashed rgba(255, 255, 255, 0.2);
   font-size: 0.8rem;
-  color: var(--muted);
 }
 
 /* Friends Hub */
@@ -994,7 +954,7 @@ input[type="text"], input[type="number"], select {
 
 .pending-requests-sec h4 {
   font-size: 0.82rem;
-  color: var(--accent);
+  color: var(--accent) !important;
   margin-bottom: 6px;
 }
 
@@ -1023,8 +983,8 @@ input[type="text"], input[type="number"], select {
   font-size: 0.78rem;
   font-weight: bold;
 }
-.status-badge.online { color: var(--success); }
-.status-badge.offline { color: var(--muted); }
+.status-badge.online { color: var(--success) !important; }
+.status-badge.offline { color: var(--muted) !important; }
 
 .status-dot {
   width: 8px;
@@ -1038,7 +998,7 @@ input[type="text"], input[type="number"], select {
 /* Privacy Statement */
 .privacy-intro {
   font-size: 0.85rem;
-  color: #fff;
+  color: var(--text);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -1051,275 +1011,5 @@ input[type="text"], input[type="number"], select {
   margin: 6px 0 12px 0;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: var(--muted);
   backdrop-filter: blur(8px);
 }
-
-.privacy-content-scroll h3 {
-  font-size: 0.95rem;
-  color: #fff;
-  margin: 12px 0 4px 0;
-}
-
-.privacy-content-scroll h3:first-child {
-  margin-top: 0;
-}
-/* =========================================
-   20 CURATED FONT FAMILIES
-   ========================================= */
-[data-font="default"] * { font-family: system-ui, -apple-system, sans-serif !important; }
-[data-font="fredoka"] * { font-family: 'Fredoka', cursive, sans-serif !important; }
-[data-font="cinzel"] * { font-family: 'Cinzel', serif !important; }
-[data-font="jetbrains"] * { font-family: 'JetBrains Mono', monospace !important; }
-[data-font="arcade"] * { font-family: 'Press Start 2P', monospace !important; font-size: 0.92em; }
-[data-font="inter"] * { font-family: 'Inter', sans-serif !important; }
-[data-font="montserrat"] * { font-family: 'Montserrat', sans-serif !important; }
-[data-font="orbitron"] * { font-family: 'Orbitron', sans-serif !important; }
-[data-font="righteous"] * { font-family: 'Righteous', cursive !important; }
-[data-font="space"] * { font-family: 'Space Grotesk', sans-serif !important; }
-[data-font="playfair"] * { font-family: 'Playfair Display', serif !important; }
-[data-font="cormorant"] * { font-family: 'Cormorant Garamond', serif !important; }
-[data-font="oswald"] * { font-family: 'Oswald', sans-serif !important; }
-[data-font="russo"] * { font-family: 'Russo One', sans-serif !important; }
-[data-font="comfortaa"] * { font-family: 'Comfortaa', cursive !important; }
-[data-font="fira"] * { font-family: 'Fira Code', monospace !important; }
-[data-font="silkscreen"] * { font-family: 'Silkscreen', monospace !important; }
-[data-font="lobster"] * { font-family: 'Lobster', cursive !important; }
-[data-font="pacifico"] * { font-family: 'Pacifico', cursive !important; }
-[data-font="dancing"] * { font-family: 'Dancing Script', cursive !important; }
-
-/* =========================================================
-   DYNAMIC CONTRAST THEMES (ADAPTIVE FOREGROUND & READABILITY)
-   ========================================================= */
-
-/* 1. Midnight Dark: Crisp pure white text with soft electric cyan accents */
-[data-theme="dark"] {
-  --bg: #0b1120;
-  --card: rgba(15, 23, 42, 0.28);
-  --card-solid: #0f172a;
-  --accent: #38bdf8;
-  --accent-contrast: #031525;
-  --success: #22c55e;
-  --error: #ef4444;
-  --text: #ffffff;
-  --text-dim: #e2e8f0;
-  --muted: #cbd5e1;
-  --border: rgba(255, 255, 255, 0.45);
-  --grid-line: rgba(255, 255, 255, 0.85);
-  --cell-fixed: rgba(0, 0, 0, 0.35);
-  --cell-text-fixed: #ffffff;
-  --cell-text-user: #38bdf8;
-  --highlight-row: rgba(56, 189, 248, 0.3);
-  --cell-focus: rgba(56, 189, 248, 0.22);
-  --text-halo: 0 1px 4px rgba(0, 0, 0, 0.9);
-}
-
-/* 2. Cyber Neon: Bright stark white & radiant magenta glow contrast */
-[data-theme="neon"] {
-  --bg: #0d021f;
-  --card: rgba(20, 8, 45, 0.3);
-  --card-solid: #1b073b;
-  --accent: #f72585;
-  --accent-contrast: #ffffff;
-  --success: #4cc9f0;
-  --error: #ff4d6d;
-  --text: #ffffff;
-  --text-dim: #fce7f3;
-  --muted: #f5d0fe;
-  --border: rgba(247, 37, 133, 0.65);
-  --grid-line: #f72585;
-  --cell-fixed: rgba(10, 2, 28, 0.35);
-  --cell-text-fixed: #ffffff;
-  --cell-text-user: #4cc9f0;
-  --highlight-row: rgba(247, 37, 133, 0.35);
-  --cell-focus: rgba(247, 37, 133, 0.25);
-  --text-halo: 0 1px 5px rgba(0, 0, 0, 0.95);
-}
-
-/* 3. Deep Emerald: High-visibility mint & warm amber contrast */
-[data-theme="emerald"] {
-  --bg: #032b21;
-  --card: rgba(4, 70, 53, 0.28);
-  --card-solid: #064e3b;
-  --accent: #34d399;
-  --accent-contrast: #012219;
-  --success: #fbbf24;
-  --error: #f87171;
-  --text: #f0fdf4;
-  --text-dim: #dcfce7;
-  --muted: #bbf7d0;
-  --border: rgba(52, 211, 153, 0.55);
-  --grid-line: #34d399;
-  --cell-fixed: rgba(2, 35, 27, 0.35);
-  --cell-text-fixed: #f0fdf4;
-  --cell-text-user: #fbbf24;
-  --highlight-row: rgba(52, 211, 153, 0.35);
-  --cell-focus: rgba(52, 211, 153, 0.22);
-  --text-halo: 0 1px 4px rgba(0, 0, 0, 0.9);
-}
-
-/* 4. Sunset Gold: Golden peach & intense flame orange contrast */
-[data-theme="sunset"] {
-  --bg: #20052b;
-  --card: rgba(55, 15, 72, 0.3);
-  --card-solid: #3b0a4e;
-  --accent: #ff7a00;
-  --accent-contrast: #000000;
-  --success: #ffd166;
-  --error: #ff3366;
-  --text: #fff7ed;
-  --text-dim: #fed7aa;
-  --muted: #fdba74;
-  --border: rgba(255, 122, 0, 0.55);
-  --grid-line: #ff7a00;
-  --cell-fixed: rgba(26, 3, 36, 0.35);
-  --cell-text-fixed: #fff7ed;
-  --cell-text-user: #ffd166;
-  --highlight-row: rgba(255, 122, 0, 0.35);
-  --cell-focus: rgba(255, 122, 0, 0.22);
-  --text-halo: 0 1px 5px rgba(0, 0, 0, 0.95);
-}
-
-/* 5. Dracula Violet: Luminous lavender & lime accent contrast */
-[data-theme="dracula"] {
-  --bg: #1e1f29;
-  --card: rgba(40, 42, 54, 0.32);
-  --card-solid: #282a36;
-  --accent: #bd93f9;
-  --accent-contrast: #181124;
-  --success: #50fa7b;
-  --error: #ff5555;
-  --text: #f8f8f2;
-  --text-dim: #e9d5ff;
-  --muted: #d8b4fe;
-  --border: rgba(189, 147, 249, 0.55);
-  --grid-line: #bd93f9;
-  --cell-fixed: rgba(20, 21, 28, 0.35);
-  --cell-text-fixed: #f8f8f2;
-  --cell-text-user: #50fa7b;
-  --highlight-row: rgba(189, 147, 249, 0.35);
-  --cell-focus: rgba(189, 147, 249, 0.22);
-  --text-halo: 0 1px 5px rgba(0, 0, 0, 0.95);
-}
-
-/* 6. Paper Light: Deep ink black & rich cobalt contrast against bright backdrops */
-[data-theme="paper"] {
-  --bg: #f1f5f9;
-  --card: rgba(255, 255, 255, 0.45);
-  --card-solid: #ffffff;
-  --accent: #1d4ed8;
-  --accent-contrast: #ffffff;
-  --success: #15803d;
-  --error: #b91c1c;
-  --text: #050811;
-  --text-dim: #1e293b;
-  --muted: #334155;
-  --border: rgba(15, 23, 42, 0.65);
-  --grid-line: #0f172a;
-  --cell-fixed: rgba(255, 255, 255, 0.6);
-  --cell-text-fixed: #050811;
-  --cell-text-user: #1d4ed8;
-  --highlight-row: rgba(29, 78, 216, 0.25);
-  --cell-focus: rgba(29, 78, 216, 0.16);
-  --text-halo: 0 1px 2px rgba(255, 255, 255, 0.8);
-}
-
-/* =======================================================
-   ARCHITECTURAL PENCIL SKETCH LINEWORK
-   ======================================================= */
-.sketch-card,
-.sketch-modal {
-  border-radius: 4px 2px 3px 2px / 2px 4px 2px 3px !important;
-  border: 1.6px solid var(--border) !important;
-  box-shadow: 
-    0 12px 36px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
-}
-
-.sketch-border {
-  border-radius: 3px 2px 4px 2px / 2px 3px 2px 4px !important;
-  border: 1.4px solid var(--border) !important;
-}
-
-.sketch-input {
-  border-radius: 3px 1px 2px 2px / 2px 3px 1px 2px !important;
-  border: 1.4px solid var(--border) !important;
-  background: var(--card) !important;
-  backdrop-filter: blur(14px) !important;
-  color: var(--text) !important;
-  outline: none;
-}
-.sketch-input:focus {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 10px var(--accent) !important;
-}
-
-.sketch-btn {
-  border-radius: 3px 2px 3px 1px / 2px 3px 1px 3px !important;
-  border: 1.5px solid var(--border) !important;
-  transition: transform 0.1s ease, box-shadow 0.15s ease !important;
-}
-.sketch-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Sudoku 9x9 Grid (Pencil-ruled translucent glass) */
-.sketch-grid {
-  border-radius: 3px 2px 2px 3px / 2px 3px 3px 2px !important;
-  border: 2.6px solid var(--grid-line) !important;
-  background: var(--card) !important;
-  backdrop-filter: blur(16px);
-}
-
-.cell {
-  width: 100%;
-  height: 100%;
-  border-top: 1px solid var(--border);
-  border-left: 1px solid var(--border);
-  border-right: none;
-  border-bottom: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  font-weight: 800;
-  position: relative;
-  user-select: none;
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--text);
-  text-shadow: var(--text-halo);
-}
-
-.cell:nth-child(3n) { 
-  border-right: 2.4px solid var(--grid-line) !important; 
-}
-.cell:nth-child(9n) { 
-  border-right: none !important; 
-}
-.cell:nth-child(n+19):nth-child(-n+27),
-.cell:nth-child(n+46):nth-child(-n+54) {
-  border-bottom: 2.4px solid var(--grid-line) !important;
-}
-
-.cell.selected {
-  outline: 2.5px solid var(--accent);
-  outline-offset: -1px;
-  background: var(--cell-focus) !important;
-  z-index: 2;
-}
-
-.cell.prefilled {
-  background: var(--cell-fixed);
-  color: var(--cell-text-fixed) !important;
-  font-weight: 900;
-  cursor: default;
-}
-
-.cell.user-filled { 
-  color: var(--cell-text-user) !important; 
-}
-.cell.correct { 
-  color: var(--success) !important; 
-  pointer-events: none;}
