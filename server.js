@@ -20,7 +20,7 @@ function loadDB() {
     const initialData = {
       users: [],
       // Default Admin Account (Username: admin, Password: adminpassword123)
-      adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026'
+      adminSecretKey: '22Harinishree C J Pallavishree15'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
