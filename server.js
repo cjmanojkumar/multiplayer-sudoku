@@ -18,7 +18,7 @@ function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      adminSecretKey: '22Harinishree C J Pallavishree'
+      adminSecretKey: '22Harinishree C J Pallavishree15'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
