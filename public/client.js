@@ -6,13 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let isEliminated = false;
   let selectedCell = null;
   let activeSymbolSet = 'numbers';
+  let currentUser = null;
 
   // Audio & Animation Flags
   let isSoundEnabled = true;
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
 
-  // 20 Unique, Verified High-Resolution Realistic Sceneries
+  // 20 High-Resolution Curated Photography Sceneries
   const BACKGROUND_IMAGES = {
     milkyway: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80',
     sunset: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80',
@@ -36,12 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     canyon: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80'
   };
 
-  // Continuous Instrumental Soundtrack
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
   bgAudio.loop = true;
   bgAudio.volume = 0.25;
 
-  // Symbol sets
   const SYMBOL_SETS = {
     numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
     letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
@@ -77,6 +76,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsCloseX = document.getElementById('settings-close-x');
   const settingsSaveBtn = document.getElementById('settings-save-btn');
 
+  // Auth & Admin Elements
+  const openLoginBtn = document.getElementById('open-login-btn');
+  const openRegisterBtn = document.getElementById('open-register-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const authModal = document.getElementById('auth-modal');
+  const authCloseX = document.getElementById('auth-close-x');
+  const authForm = document.getElementById('auth-form');
+  const authModalTitle = document.getElementById('auth-modal-title');
+  const authUsernameInput = document.getElementById('auth-username');
+  const authPasswordInput = document.getElementById('auth-password');
+  const authSubmitBtn = document.getElementById('auth-submit-btn');
+  const authSwitchMsg = document.getElementById('auth-switch-msg');
+  const authToggleLink = document.getElementById('auth-toggle-link');
+  const authErrorMsg = document.getElementById('auth-error-msg');
+  const guestAuthControls = document.getElementById('guest-auth-controls');
+  const loggedAuthControls = document.getElementById('logged-auth-controls');
+  const loggedUsernameSpan = document.getElementById('logged-username');
+  const userStatsSpan = document.getElementById('user-stats');
+
+  const adminOpenBtn = document.getElementById('admin-open-btn');
+  const adminModal = document.getElementById('admin-modal');
+  const adminCloseX = document.getElementById('admin-close-x');
+  const adminLoginSec = document.getElementById('admin-login-sec');
+  const adminDashboardSec = document.getElementById('admin-dashboard-sec');
+  const adminSecretInput = document.getElementById('admin-secret-input');
+  const adminUnlockBtn = document.getElementById('admin-unlock-btn');
+  const adminErrorMsg = document.getElementById('admin-error-msg');
+  const adminUsersTableBody = document.getElementById('admin-users-table-body');
+  const totalUsersCount = document.getElementById('total-users-count');
+  const adminRefreshBtn = document.getElementById('admin-refresh-btn');
+
   const lobbyView = document.getElementById('lobby-view');
   const gameView = document.getElementById('game-view');
   const usernameInput = document.getElementById('username');
@@ -109,7 +139,164 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
-  // --- WHITE GLITTER PARTICLE CANVAS ---
+  // --- AUTH STATE MANAGEMENT ---
+  let isRegisterMode = false;
+
+  function loadPersistedUser() {
+    const saved = localStorage.getItem('sudoku_active_user');
+    if (saved) {
+      try {
+        currentUser = JSON.parse(saved);
+        updateAuthUI();
+      } catch (e) {
+        currentUser = null;
+      }
+    }
+  }
+
+  function updateAuthUI() {
+    if (currentUser) {
+      guestAuthControls.classList.add('hidden');
+      loggedAuthControls.classList.remove('hidden');
+      loggedUsernameSpan.textContent = currentUser.username;
+      userStatsSpan.textContent = `${currentUser.matchesWon || 0}W / ${currentUser.matchesPlayed || 0}P`;
+      if (usernameInput) usernameInput.value = currentUser.username;
+    } else {
+      guestAuthControls.classList.remove('hidden');
+      loggedAuthControls.classList.add('hidden');
+    }
+  }
+
+  function openAuth(isRegister) {
+    isRegisterMode = isRegister;
+    authErrorMsg.classList.add('hidden');
+    authUsernameInput.value = '';
+    authPasswordInput.value = '';
+
+    if (isRegisterMode) {
+      authModalTitle.textContent = '📝 Register Player';
+      authSubmitBtn.textContent = 'Create Account';
+      authSwitchMsg.textContent = 'Already have an account?';
+      authToggleLink.textContent = 'Log In here';
+    } else {
+      authModalTitle.textContent = '🔑 Player Login';
+      authSubmitBtn.textContent = 'Log In';
+      authSwitchMsg.textContent = "Don't have an account?";
+      authToggleLink.textContent = 'Register here';
+    }
+    authModal.classList.remove('hidden');
+  }
+
+  openLoginBtn?.addEventListener('click', () => openAuth(false));
+  openRegisterBtn?.addEventListener('click', () => openAuth(true));
+  authCloseX?.addEventListener('click', () => authModal.classList.add('hidden'));
+
+  authToggleLink?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAuth(!isRegisterMode);
+  });
+
+  authForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    authErrorMsg.classList.add('hidden');
+
+    const username = authUsernameInput.value.trim();
+    const password = authPasswordInput.value;
+    const endpoint = isRegisterMode ? '/api/register' : '/api/login';
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        authErrorMsg.textContent = data.error || 'Authentication error';
+        authErrorMsg.classList.remove('hidden');
+        return;
+      }
+
+      currentUser = data.user;
+      localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
+      updateAuthUI();
+      authModal.classList.add('hidden');
+    } catch (err) {
+      authErrorMsg.textContent = 'Server connection failed.';
+      authErrorMsg.classList.remove('hidden');
+    }
+  });
+
+  logoutBtn?.addEventListener('click', () => {
+    localStorage.removeItem('sudoku_active_user');
+    currentUser = null;
+    updateAuthUI();
+  });
+
+  loadPersistedUser();
+
+  // --- ADMIN PORTAL LOGIC ---
+  adminOpenBtn?.addEventListener('click', () => {
+    adminSecretInput.value = '';
+    adminErrorMsg.classList.add('hidden');
+    adminLoginSec.classList.remove('hidden');
+    adminDashboardSec.classList.add('hidden');
+    adminModal.classList.remove('hidden');
+  });
+
+  adminCloseX?.addEventListener('click', () => adminModal.classList.add('hidden'));
+
+  async function fetchAdminUsers(key) {
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: key })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        adminErrorMsg.textContent = data.error || 'Access denied';
+        adminErrorMsg.classList.remove('hidden');
+        return;
+      }
+
+      adminLoginSec.classList.add('hidden');
+      adminDashboardSec.classList.remove('hidden');
+      totalUsersCount.textContent = `Total Registered Players: ${data.users.length}`;
+
+      adminUsersTableBody.innerHTML = '';
+      data.users.forEach(u => {
+        const tr = document.createElement('tr');
+        const regDate = new Date(u.registeredAt).toLocaleDateString();
+        tr.innerHTML = `
+          <td><strong>${u.username}</strong></td>
+          <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
+          <td>${u.matchesPlayed || 0}</td>
+          <td>${u.matchesWon || 0}</td>
+          <td>${regDate}</td>
+        `;
+        adminUsersTableBody.appendChild(tr);
+      });
+    } catch (err) {
+      adminErrorMsg.textContent = 'Failed to load user list.';
+      adminErrorMsg.classList.remove('hidden');
+    }
+  }
+
+  adminUnlockBtn?.addEventListener('click', () => {
+    const key = adminSecretInput.value.trim();
+    if (!key) return;
+    fetchAdminUsers(key);
+  });
+
+  adminRefreshBtn?.addEventListener('click', () => {
+    const key = adminSecretInput.value.trim();
+    if (key) fetchAdminUsers(key);
+  });
+
+  // --- WHITE GLITTER ENGINE ---
   const glitterCanvas = document.getElementById('glitter-canvas');
   if (glitterCanvas) {
     const gCtx = glitterCanvas.getContext('2d');
@@ -121,8 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
       height = glitterCanvas.height = window.innerHeight;
     });
 
-    const PARTICLE_COUNT = 75;
-    const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
+    const particles = Array.from({ length: 75 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
       radius: Math.random() * 2 + 0.8,
@@ -139,10 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         p.x += p.speedX;
         p.alpha += p.alphaSpeed;
 
-        if (p.alpha <= 0.1 || p.alpha >= 0.95) {
-          p.alphaSpeed = -p.alphaSpeed;
-        }
-
+        if (p.alpha <= 0.1 || p.alpha >= 0.95) p.alphaSpeed = -p.alphaSpeed;
         if (p.y < -5) p.y = height + 5;
         if (p.x < -5) p.x = width + 5;
         if (p.x > width + 5) p.x = -5;
@@ -161,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGlitter();
   }
 
-  // --- AUDIO SYNTHESIZERS ---
+  // --- SOUND SYNTHESIS ---
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -235,26 +418,20 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     brassNotes.forEach(n => {
       const osc = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(n.freq, now + n.delay);
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(n.freq * 0.5, now + n.delay);
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(1400, now + n.delay);
       gain.gain.setValueAtTime(0.0001, now + n.delay);
       gain.gain.linearRampToValueAtTime(0.09, now + n.delay + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
       osc.connect(filter);
-      osc2.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now + n.delay);
-      osc2.start(now + n.delay);
       osc.stop(now + n.delay + n.dur);
-      osc2.stop(now + n.delay + n.dur);
     });
   }
 
@@ -317,30 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => playTone(330, 'sine', 0.40, 0.08), 120);
   }
 
-  // Radio button mode selector
-  document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      if (e.target.value === 'bot') {
-        colMaxPlayers?.classList.add('hidden');
-        colBotSpeed?.classList.remove('hidden');
-        multiJoinContainer?.classList.add('hidden');
-        if (createBtn) createBtn.textContent = 'Start vs Bot 🤖';
-      } else {
-        colMaxPlayers?.classList.remove('hidden');
-        colBotSpeed?.classList.add('hidden');
-        multiJoinContainer?.classList.remove('hidden');
-        if (createBtn) createBtn.textContent = 'Create Room';
-      }
-    });
-  });
-
-  // Settings Modal Handlers
+  // Settings Handlers
   settingsOpenBtn?.addEventListener('click', () => settingsModal?.classList.remove('hidden'));
   const closeSettings = () => settingsModal?.classList.add('hidden');
   settingsCloseX?.addEventListener('click', closeSettings);
   settingsSaveBtn?.addEventListener('click', closeSettings);
 
-  // Background Image Selector: Dynamically assigns high-res URL
   bgSelect?.addEventListener('change', (e) => {
     const chosenKey = e.target.value;
     const imageUrl = BACKGROUND_IMAGES[chosenKey];
@@ -349,7 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Font Family Selector: Switches data-font on <html>
   fontSelect?.addEventListener('change', (e) => {
     document.documentElement.setAttribute('data-font', e.target.value);
   });
@@ -376,6 +534,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   modalCloseX?.addEventListener('click', () => winnerModal?.classList.add('hidden'));
 
+  document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      if (e.target.value === 'bot') {
+        colMaxPlayers?.classList.add('hidden');
+        colBotSpeed?.classList.remove('hidden');
+        multiJoinContainer?.classList.add('hidden');
+        if (createBtn) createBtn.textContent = 'Start vs Bot 🤖';
+      } else {
+        colMaxPlayers?.classList.remove('hidden');
+        colBotSpeed?.classList.add('hidden');
+        multiJoinContainer?.classList.remove('hidden');
+        if (createBtn) createBtn.textContent = 'Create Room';
+      }
+    });
+  });
+
   function spawnFloatingEmoji(cellElement, emojiList = ['✨', '🔥', '⭐', '🎯', '🚀']) {
     if (!isEmojiEnabled || !cellElement) return;
     const randomEmoji = emojiList[Math.floor(Math.random() * emojiList.length)];
@@ -398,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
     getAudioContext();
     if (isMusicEnabled) bgAudio.play().catch(() => {});
 
-    const username = usernameInput?.value.trim() || 'Player 1';
+    const username = usernameInput?.value.trim() || currentUser?.username || 'Player 1';
     const difficulty = difficultySelect?.value || 'medium';
     const durationMinutes = parseInt(customDurationInput?.value, 10) || 10;
     const symbolSet = symbolSetSelect?.value || 'numbers';
@@ -417,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
     getAudioContext();
     if (isMusicEnabled) bgAudio.play().catch(() => {});
 
-    const username = usernameInput?.value.trim() || 'Player';
+    const username = usernameInput?.value.trim() || currentUser?.username || 'Player';
     const roomCode = roomCodeInput?.value.trim();
     if (!roomCode) {
       alert('Please enter a room code');
@@ -739,7 +913,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Match Finish: Dynamic Audio and Background Wash
   socket.on('gameOver', ({ reason, leaderboard, outcome }) => {
     gameView?.classList.add('game-locked');
     if (quitBtn) quitBtn.disabled = true;

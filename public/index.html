@@ -6,7 +6,6 @@
   <title>Sudoku Arena</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- 20 Curated Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Comfortaa:wght@600;700&family=Cormorant+Garamond:wght@600;700&family=Dancing+Script:wght@700&family=Fira+Code:wght@600&family=Fredoka:wght@600;700&family=Inter:wght@600;800&family=JetBrains+Mono:wght@700&family=Lobster&family=Montserrat:wght@600;800&family=Orbitron:wght@700&family=Oswald:wght@600&family=Pacifico&family=Playfair+Display:ital,wght@0,700;1,600&family=Poiret+One&family=Press+Start+2P&family=Righteous&family=Russo+One&family=Silkscreen&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <script src="/socket.io/socket.io.js"></script>
@@ -26,16 +25,32 @@
   <div class="arena-container">
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
-      <button id="settings-open-btn" class="icon-btn" title="Game Settings">
-        ⚙️ Settings
-      </button>
+      <div class="top-buttons">
+        <button id="admin-open-btn" class="icon-btn admin-btn" title="Admin Portal">👑 Admin</button>
+        <button id="settings-open-btn" class="icon-btn" title="Game Settings">⚙️ Settings</button>
+      </div>
+    </div>
+
+    <!-- User Account Status Bar -->
+    <div id="auth-status-bar" class="card frosted auth-bar">
+      <div id="guest-auth-controls" class="auth-row">
+        <span>👤 Playing as Guest</span>
+        <div class="auth-btn-group">
+          <button id="open-login-btn" class="btn small">Log In</button>
+          <button id="open-register-btn" class="btn primary small">Register</button>
+        </div>
+      </div>
+      <div id="logged-auth-controls" class="auth-row hidden">
+        <span>Welcome, <strong id="logged-username">Player</strong> (<span id="user-stats">0W / 0P</span>)</span>
+        <button id="logout-btn" class="btn danger-small">Log Out</button>
+      </div>
     </div>
 
     <!-- Lobby View -->
     <div id="lobby-view" class="card frosted">
       <div class="input-group">
-        <label for="username">Nickname:</label>
-        <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="12" />
+        <label for="username">Player Nickname:</label>
+        <input type="text" id="username" placeholder="e.g. MasterSolver" maxlength="14" />
       </div>
 
       <div class="mode-select-wrap">
@@ -136,6 +151,72 @@
     </div>
   </div>
 
+  <!-- Register / Login Modal -->
+  <div id="auth-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted">
+      <div class="modal-header">
+        <h2 id="auth-modal-title">🔑 Player Login</h2>
+        <span class="close-x" id="auth-close-x">&times;</span>
+      </div>
+      <form id="auth-form" class="auth-form">
+        <div class="input-group">
+          <label for="auth-username">Username:</label>
+          <input type="text" id="auth-username" required minlength="3" maxlength="15" placeholder="Enter username" />
+        </div>
+        <div class="input-group">
+          <label for="auth-password">Password:</label>
+          <input type="password" id="auth-password" required minlength="4" placeholder="Enter password" />
+        </div>
+        <p id="auth-error-msg" class="error-text hidden"></p>
+        <button type="submit" id="auth-submit-btn" class="btn primary full-width">Log In</button>
+        <p class="auth-switch-text">
+          <span id="auth-switch-msg">Don't have an account?</span>
+          <a href="#" id="auth-toggle-link">Register here</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Users & Players Dashboard Modal -->
+  <div id="admin-modal" class="modal-backdrop hidden">
+    <div class="modal-card frosted admin-card">
+      <div class="modal-header">
+        <h2>👑 Admin Portal - Registered Users</h2>
+        <span class="close-x" id="admin-close-x">&times;</span>
+      </div>
+
+      <div id="admin-login-sec">
+        <p class="color-hint">Enter your Admin Secret Key to view and manage registered players:</p>
+        <div class="input-group" style="margin-top:8px;">
+          <input type="password" id="admin-secret-input" placeholder="Admin Secret Key" />
+        </div>
+        <button id="admin-unlock-btn" class="btn primary full-width" style="margin-top:10px;">Access Users List</button>
+        <p id="admin-error-msg" class="error-text hidden" style="margin-top:8px;"></p>
+      </div>
+
+      <div id="admin-dashboard-sec" class="hidden">
+        <div class="admin-top-controls">
+          <span id="total-users-count">Total Players: 0</span>
+          <button id="admin-refresh-btn" class="btn small">🔄 Refresh</button>
+        </div>
+        <div class="table-scroll">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Matches</th>
+                <th>Wins</th>
+                <th>Registered</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Settings Modal Popup -->
   <div id="settings-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted settings-card">
@@ -145,7 +226,6 @@
       </div>
 
       <div class="settings-grid">
-        <!-- 2<!-- 20 Cleanly Labeled Sceneries -->
         <div class="setting-row">
           <label for="bg-select">Scenery Backdrop:</label>
           <select id="bg-select">
@@ -172,7 +252,6 @@
           </select>
         </div>
 
-        <!-- 20 Typography Options -->
         <div class="setting-row">
           <label for="font-select">Font Family:</label>
           <select id="font-select">

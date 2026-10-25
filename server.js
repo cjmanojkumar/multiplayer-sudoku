@@ -2,16 +2,148 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- PERSISTENT USER & MATCH DATABASE ---
+const DB_FILE = path.join(__dirname, 'database.json');
+
+function loadDB() {
+  if (!fs.existsSync(DB_FILE)) {
+    const initialData = {
+      users: [],
+      // Default Admin Account (Username: admin, Password: adminpassword123)
+      adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026'
+    };
+    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
+    return initialData;
+  }
+  try {
+    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+  } catch (err) {
+    return { users: [], adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026' };
+  }
+}
+
+function saveDB(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
+
+// Ensure initial database exists
+loadDB();
+
+// --- AUTHENTICATION & ADMIN API ---
+
+// 1. Register New Player
+app.post('/api/register', async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || username.trim().length < 3 || password.length < 4) {
+    return res.status(400).json({ error: 'Username (min 3 chars) and password (min 4 chars) required.' });
+  }
+
+  const cleanUser = username.trim();
+  const db = loadDB();
+
+  if (db.users.some(u => u.username.toLowerCase() === cleanUser.toLowerCase())) {
+    return res.status(400).json({ error: 'Username already taken. Please choose another.' });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const newUser = {
+    id: 'user_' + Date.now(),
+    username: cleanUser,
+    passwordHash,
+    role: cleanUser.toLowerCase() === 'admin' ? 'admin' : 'player',
+    matchesPlayed: 0,
+    matchesWon: 0,
+    totalScore: 0,
+    registeredAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString()
+  };
+
+  db.users.push(newUser);
+  saveDB(db);
+
+  res.json({
+    success: true,
+    user: { id: newUser.id, username: newUser.username, role: newUser.role }
+  });
+});
+
+// 2. Player Login
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required.' });
+  }
+
+  const db = loadDB();
+  const user = db.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+
+  if (!user) {
+    return res.status(400).json({ error: 'Invalid username or password.' });
+  }
+
+  const match = await bcrypt.compare(password, user.passwordHash);
+  if (!match) {
+    return res.status(400).json({ error: 'Invalid username or password.' });
+  }
+
+  user.lastLoginAt = new Date().toISOString();
+  saveDB(db);
+
+  res.json({
+    success: true,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      matchesPlayed: user.matchesPlayed,
+      matchesWon: user.matchesWon
+    }
+  });
+});
+
+// 3. Admin User List & Match Stats (Protected by admin password or role)
+app.post('/api/admin/users', (req, res) => {
+  const { adminKey } = req.body;
+  const db = loadDB();
+
+  if (adminKey !== db.adminSecretKey) {
+    return res.status(403).json({ error: 'Access denied: Invalid Admin Key.' });
+  }
+
+  // Return player list without password hashes
+  const safeUsers = db.users.map(({ passwordHash, ...rest }) => rest);
+  res.json({ success: true, users: safeUsers });
+});
+
+// Update stats helper when games conclude
+function recordMatchStats(leaderboard, outcome) {
+  const db = loadDB();
+  leaderboard.forEach((p, idx) => {
+    const user = db.users.find(u => u.username.toLowerCase() === p.name.toLowerCase());
+    if (user) {
+      user.matchesPlayed = (user.matchesPlayed || 0) + 1;
+      user.totalScore = (user.totalScore || 0) + p.score;
+      if (idx === 0 && outcome === 'win' && !p.eliminated) {
+        user.matchesWon = (user.matchesWon || 0) + 1;
+      }
+    }
+  });
+  saveDB(db);
+}
+
+// --- SUDOKU GAME ENGINE ---
 const rooms = {};
 
-// --- SUDOKU GENERATION & VALIDATION ---
 function isValid(board, row, col, num) {
   for (let i = 0; i < 9; i++) {
     if (board[row][i] === num || board[i][col] === num) return false;
@@ -83,6 +215,8 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
   room.started = false;
 
   const leaderboard = getLeaderboard(room);
+  recordMatchStats(leaderboard, matchOutcome);
+
   io.to(code).emit('gameOver', { 
     reason, 
     leaderboard,
@@ -91,7 +225,6 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
 }
 
 io.on('connection', (socket) => {
-  // Multiplayer Room
   socket.on('createRoom', ({ username, difficulty, maxPlayers, durationMinutes, symbolSet }) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
@@ -130,7 +263,6 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('playerListUpdate', rooms[roomCode].players);
   });
 
-  // Solo vs Bot Room
   socket.on('createSoloBotRoom', ({ username, difficulty, botSpeed, durationMinutes, symbolSet }) => {
     const roomCode = 'BOT-' + Math.random().toString(36).substring(2, 6).toUpperCase();
     const { puzzle, solution, totalBlanks } = generatePuzzle(difficulty);
@@ -296,7 +428,6 @@ io.on('connection', (socket) => {
 
     if (isCorrect) {
       player.score += 1;
-
       io.to(code).emit('progressUpdate', {
         playerId: socket.id,
         score: player.score,
@@ -312,10 +443,7 @@ io.on('connection', (socket) => {
       }
     } else {
       player.mistakes += 1;
-
-      if (player.mistakes >= 3) {
-        player.eliminated = true;
-      }
+      if (player.mistakes >= 3) player.eliminated = true;
 
       io.to(code).emit('progressUpdate', {
         playerId: socket.id,

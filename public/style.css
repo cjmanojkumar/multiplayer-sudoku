@@ -248,6 +248,11 @@ body {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
+.top-buttons {
+  display: flex;
+  gap: 8px;
+}
+
 .icon-btn {
   background: rgba(0, 0, 0, 0.45);
   border: 1.5px solid var(--border);
@@ -270,6 +275,12 @@ body {
   text-shadow: none;
 }
 
+.admin-btn {
+  background: rgba(234, 179, 8, 0.25) !important;
+  border-color: #eab308 !important;
+  color: #fef08a !important;
+}
+
 .card {
   background: var(--card);
   border-radius: 16px;
@@ -283,6 +294,64 @@ body {
 }
 
 .hidden { display: none !important; }
+
+/* Auth Bar */
+.auth-bar {
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+}
+
+.auth-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.auth-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form input[type="password"] {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+  backdrop-filter: blur(8px);
+}
+
+.auth-switch-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.auth-switch-text a {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-align: center;
+}
 
 /* Mode Switcher */
 .mode-select-wrap {
@@ -372,6 +441,12 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 .btn.primary { background: var(--accent); color: #000; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4); }
 .btn.secondary { background: rgba(255, 255, 255, 0.15); border: 1.5px solid var(--border); color: #fff; }
 .btn.full-width { width: 100%; }
+
+.btn.small {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+}
 
 .btn.danger-small {
   background: transparent;
@@ -656,6 +731,7 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
 }
 
 .settings-card { text-align: left; }
+.admin-card { max-width: 620px !important; }
 
 .modal-header {
   display: flex;
@@ -760,3 +836,29 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus {
   font-weight: bold;
   font-size: 0.95rem;
 }
+
+/* Admin Dashboard Specific */
+.admin-top-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.table-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.role-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.role-badge.admin { background: #eab308; color: #000; }
+.role-badge.player { background: rgba(255, 255, 255, 0.2); color: #fff; }
