@@ -22,7 +22,9 @@
 [data-font="pacifico"] * { font-family: 'Pacifico', cursive !important; }
 [data-font="dancing"] * { font-family: 'Dancing Script', cursive !important; }
 
-/* Themes */
+/* =========================================
+   COLOR PALETTES
+   ========================================= */
 [data-theme="dark"] {
   --bg: #0f172a;
   --card: rgba(15, 23, 42, 0.45);
@@ -31,8 +33,8 @@
   --error: #ef4444;
   --text: #f8fafc;
   --muted: #cbd5e1;
-  --border: rgba(255, 255, 255, 0.5);
-  --grid-line: rgba(255, 255, 255, 0.65);
+  --border: rgba(255, 255, 255, 0.55);
+  --grid-line: rgba(255, 255, 255, 0.7);
   --cell-fixed: rgba(0, 0, 0, 0.45);
   --highlight-row: rgba(56, 189, 248, 0.35);
   --cell-focus: rgba(56, 189, 248, 0.25);
@@ -46,7 +48,7 @@
   --error: #ff4d6d;
   --text: #ffffff;
   --muted: #f3c4fb;
-  --border: rgba(247, 37, 133, 0.6);
+  --border: rgba(247, 37, 133, 0.65);
   --grid-line: #b5179e;
   --cell-fixed: rgba(10, 2, 28, 0.5);
   --highlight-row: rgba(247, 37, 133, 0.35);
@@ -61,7 +63,7 @@
   --error: #f87171;
   --text: #f0fdf4;
   --muted: #d1fae5;
-  --border: rgba(52, 211, 153, 0.55);
+  --border: rgba(52, 211, 153, 0.6);
   --grid-line: #34d399;
   --cell-fixed: rgba(2, 35, 27, 0.5);
   --highlight-row: rgba(52, 211, 153, 0.35);
@@ -76,7 +78,7 @@
   --error: #ff3366;
   --text: #fff5eb;
   --muted: #fbcfe8;
-  --border: rgba(255, 122, 0, 0.55);
+  --border: rgba(255, 122, 0, 0.6);
   --grid-line: #d896ff;
   --cell-fixed: rgba(26, 3, 36, 0.5);
   --highlight-row: rgba(255, 122, 0, 0.35);
@@ -91,7 +93,7 @@
   --error: #ff5555;
   --text: #f8f8f2;
   --muted: #d6acff;
-  --border: rgba(189, 147, 249, 0.55);
+  --border: rgba(189, 147, 249, 0.6);
   --grid-line: #ff79c6;
   --cell-fixed: rgba(20, 21, 28, 0.5);
   --highlight-row: rgba(189, 147, 249, 0.35);
@@ -106,7 +108,7 @@
   --error: #dc2626;
   --text: #0f172a;
   --muted: #475569;
-  --border: rgba(0, 0, 0, 0.45);
+  --border: rgba(30, 41, 59, 0.6);
   --grid-line: #334155;
   --cell-fixed: rgba(241, 245, 249, 0.85);
   --highlight-row: rgba(37, 99, 235, 0.25);
@@ -114,53 +116,61 @@
 }
 
 /* =======================================================
-   HAND-DRAWN & SKETCHED AESTHETIC (APPLIED ACROSS ALL ELEMENTS)
+   ARCHITECTURAL PENCIL SKETCH LINEWORK
+   (Straight, crisp, ruled by hand with micro-variations)
    ======================================================= */
+
 .sketch-card,
 .sketch-modal {
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-  border: 2px solid var(--border) !important;
-  box-shadow: 2px 8px 4px -2px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px 2px 3px 2px / 2px 4px 2px 3px !important;
+  border: 1.8px solid var(--border) !important;
+  box-shadow: 
+    0 0 0 0.5px rgba(0, 0, 0, 0.15),
+    0 10px 30px rgba(0, 0, 0, 0.45) !important;
+  position: relative;
 }
 
 .sketch-border {
-  border-radius: 185px 25px 195px 15px / 15px 195px 20px 185px !important;
-  border: 1.8px solid var(--border) !important;
+  border-radius: 3px 2px 4px 2px / 2px 3px 2px 4px !important;
+  border: 1.5px solid var(--border) !important;
 }
 
 .sketch-input {
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-  border: 2px solid var(--border) !important;
+  border-radius: 3px 1px 2px 2px / 2px 3px 1px 2px !important;
+  border: 1.5px solid var(--border) !important;
   background: rgba(0, 0, 0, 0.45) !important;
   outline: none;
 }
 .sketch-input:focus {
   border-color: var(--accent) !important;
-  box-shadow: 0 0 12px var(--accent) !important;
+  box-shadow: 0 0 8px var(--accent) !important;
 }
 
 .sketch-btn {
-  border-radius: 255px 25px 225px 25px / 25px 225px 25px 255px !important;
-  border: 2px solid var(--border) !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  border-radius: 3px 2px 3px 1px / 2px 3px 1px 3px !important;
+  border: 1.6px solid var(--border) !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease !important;
 }
 .sketch-btn:hover {
-  transform: scale(1.02) rotate(-0.5deg);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* 9x9 Grid with Hand-Drawn Cells and Linework */
+/* Sudoku 9x9 Grid (Pencil-ruled borders) */
 .sketch-grid {
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
-  border: 3.5px solid var(--grid-line) !important;
-  background: rgba(0, 0, 0, 0.4) !important;
-  overflow: hidden;
+  border-radius: 3px 2px 2px 3px / 2px 3px 3px 2px !important;
+  border: 2.5px solid var(--grid-line) !important;
+  background: rgba(0, 0, 0, 0.38) !important;
 }
 
 .cell {
   width: 100%;
   height: 100%;
-  border: 1.5px solid var(--border);
-  border-radius: 4px 6px 3px 5px / 5px 3px 6px 4px;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  border-right: none;
+  border-bottom: none;
+  border-radius: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -169,21 +179,24 @@
   position: relative;
   user-select: none;
   cursor: pointer;
-  margin: 1px;
 }
 
-.cell:nth-child(3n) { border-right: 3px solid var(--grid-line); }
-.cell:nth-child(9n) { border-right: none; }
+.cell:nth-child(3n) { 
+  border-right: 2.2px solid var(--grid-line) !important; 
+}
+.cell:nth-child(9n) { 
+  border-right: none !important; 
+}
 .cell:nth-child(n+19):nth-child(-n+27),
 .cell:nth-child(n+46):nth-child(-n+54) {
-  border-bottom: 3px solid var(--grid-line);
+  border-bottom: 2.2px solid var(--grid-line) !important;
 }
 
 .cell.selected {
-  outline: 2.5px dashed var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
   background: var(--cell-focus) !important;
   z-index: 2;
-  transform: scale(1.04);
 }
 
 .cell.prefilled {
@@ -206,34 +219,34 @@
   75% { transform: translateX(4px); }
 }
 
-/* Hand-Drawn Keypad Buttons */
+/* Pencil-drawn Keypad Buttons */
 .symbol-btn {
   background: rgba(0, 0, 0, 0.45);
-  border: 2px solid var(--border);
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  border: 1.6px solid var(--border);
+  border-radius: 3px 2px 2px 3px / 2px 3px 1px 2px;
   color: var(--text);
   padding: 8px 0;
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.4s ease;
+  transition: transform 0.1s ease, background 0.15s ease;
 }
 
 .symbol-btn:hover {
   background: var(--accent);
   color: #000;
-  transform: scale(1.08) rotate(1deg);
+  transform: translateY(-1px);
 }
 
 .symbol-btn.exhausted {
   opacity: 0.15;
-  transform: scale(0.85);
+  transform: scale(0.9);
   pointer-events: none;
   filter: grayscale(1);
   border-color: transparent !important;
 }
 
-/* Base Layout */
+/* Base Layout & Layers */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -344,7 +357,7 @@ body {
   background: rgba(0, 0, 0, 0.45);
   border: 1.5px solid var(--border);
   color: #fff;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  border-radius: 4px;
   padding: 6px 14px;
   font-size: 0.9rem;
   font-weight: 700;
@@ -474,7 +487,7 @@ body {
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
-  border-radius: 185px 25px 195px 15px / 15px 195px 20px 185px;
+  border-radius: 3px;
   transition: background 0.2s;
   color: #fff;
   user-select: none;
@@ -602,9 +615,9 @@ input[type="text"], input[type="number"], select {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 8px;
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-  background: rgba(255, 255, 255, 0.2);
+  height: 6px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
   outline: none;
   cursor: pointer;
   margin: 8px 0;
@@ -613,11 +626,11 @@ input[type="text"], input[type="number"], select {
 .custom-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
   background: var(--accent);
-  border: 2px solid #fff;
+  border: 1.5px solid #fff;
   cursor: pointer;
 }
 
@@ -664,7 +677,7 @@ input[type="text"], input[type="number"], select {
 .player-card {
   background: rgba(0, 0, 0, 0.45);
   padding: 8px;
-  border-radius: 185px 25px 195px 15px / 15px 195px 20px 185px;
+  border-radius: 3px;
   border: 1.5px solid var(--border);
 }
 
@@ -686,7 +699,7 @@ input[type="text"], input[type="number"], select {
   width: 100%;
   height: 6px;
   background: var(--border);
-  border-radius: 10px;
+  border-radius: 2px;
   overflow: hidden;
   margin: 4px 0;
 }
@@ -715,7 +728,6 @@ input[type="text"], input[type="number"], select {
   margin-top: 10px;
 }
 
-/* 9x9 Grid */
 .board-wrapper {
   position: relative;
   display: flex;
@@ -755,7 +767,7 @@ input[type="text"], input[type="number"], select {
 .cell.completed-flash { animation: flashPulse 1s ease forwards; }
 
 @keyframes flashPulse {
-  0% { background-color: var(--highlight-row); transform: scale(1.08); z-index: 5; }
+  0% { background-color: var(--highlight-row); transform: scale(1.05); z-index: 5; }
   50% { background-color: var(--success); color: #000; }
   100% { transform: scale(1); z-index: 1; }
 }
@@ -871,14 +883,14 @@ input[type="text"], input[type="number"], select {
 }
 
 .leaderboard-table th {
-  border-bottom: 2px dashed var(--border);
+  border-bottom: 1.5px solid var(--border);
   padding: 8px 4px;
   color: var(--muted);
 }
 
 .leaderboard-table td {
   padding: 8px 4px;
-  border-bottom: 1px dashed var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .leaderboard-table tr:first-child td {
@@ -903,7 +915,7 @@ input[type="text"], input[type="number"], select {
 
 .role-badge {
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 2px;
   font-size: 0.75rem;
   font-weight: bold;
 }
