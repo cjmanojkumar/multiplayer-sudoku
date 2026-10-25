@@ -23,184 +23,106 @@
 [data-font="dancing"] * { font-family: 'Dancing Script', cursive !important; }
 
 /* =========================================
-   HIGH-CONTRAST PALETTES (THEME-SPECIFIC TEXT COLORS)
+   PALETTES (HIGH TRANSLUCENCY)
    ========================================= */
-
-/* 1. Dark (Milkyway / Lagoon / Sumi / Silk) - Crisp Ice Blue & White */
 [data-theme="dark"] {
-  --bg: #0b1120;
-  --card: rgba(11, 17, 32, 0.22);
+  --bg: #0f172a;
+  --card: rgba(15, 23, 42, 0.18);
+  --card-hover: rgba(15, 23, 42, 0.28);
   --accent: #38bdf8;
-  --success: #34d399;
-  --error: #f87171;
-  --text: #f0f9ff;                    /* Glacial white-cyan */
-  --text-heading: #7dd3fc;            /* Bright sky blue */
-  --muted: #bae6fd;                   /* Soft pastel ice blue */
-  --border: rgba(125, 211, 252, 0.45);
-  --grid-line: rgba(56, 189, 248, 0.7);
-  --cell-fixed: rgba(0, 0, 0, 0.25);
-  --highlight-row: rgba(56, 189, 248, 0.3);
-  --cell-focus: rgba(56, 189, 248, 0.22);
+  --success: #22c55e;
+  --error: #ef4444;
+  --text: #f8fafc;
+  --muted: #cbd5e1;
+  --border: rgba(255, 255, 255, 0.45);
+  --grid-line: rgba(255, 255, 255, 0.7);
+  --cell-fixed: rgba(0, 0, 0, 0.22);
+  --highlight-row: rgba(56, 189, 248, 0.28);
+  --cell-focus: rgba(56, 189, 248, 0.2);
 }
 
-/* 2. Neon (Tokyo / Aurora / Prism / Cosmic / Synthwave) - Electric Magenta & Neon White */
 [data-theme="neon"] {
-  --bg: #130026;
-  --card: rgba(22, 2, 43, 0.24);
+  --bg: #11052C;
+  --card: rgba(20, 8, 45, 0.2);
+  --card-hover: rgba(20, 8, 45, 0.32);
   --accent: #f72585;
   --success: #4cc9f0;
   --error: #ff4d6d;
-  --text: #fff0f7;                    /* Luminous neon white */
-  --text-heading: #ff70a6;            /* Neon pop pink */
-  --muted: #fbcfe8;                   /* Soft lilac rose */
+  --text: #ffffff;
+  --muted: #f3c4fb;
   --border: rgba(247, 37, 133, 0.55);
   --grid-line: #f72585;
-  --cell-fixed: rgba(15, 0, 30, 0.28);
-  --highlight-row: rgba(247, 37, 133, 0.32);
-  --cell-focus: rgba(247, 37, 133, 0.22);
+  --cell-fixed: rgba(10, 2, 28, 0.25);
+  --highlight-row: rgba(247, 37, 133, 0.28);
+  --cell-focus: rgba(247, 37, 133, 0.2);
 }
 
-/* 3. Emerald (Redwood / Dunes / Palette) - Luminous Mint & Gold Accent */
 [data-theme="emerald"] {
-  --bg: #032b1f;
-  --card: rgba(3, 43, 31, 0.22);
+  --bg: #064e3b;
+  --card: rgba(4, 70, 53, 0.2);
+  --card-hover: rgba(4, 70, 53, 0.3);
   --accent: #34d399;
   --success: #fbbf24;
   --error: #f87171;
-  --text: #ecfdf5;                    /* Crystal mint white */
-  --text-heading: #6ee7b7;            /* Bright seafoam jade */
-  --muted: #a7f3d0;                   /* Pale pistachio green */
+  --text: #f0fdf4;
+  --muted: #d1fae5;
   --border: rgba(52, 211, 153, 0.5);
   --grid-line: #34d399;
-  --cell-fixed: rgba(1, 26, 18, 0.28);
-  --highlight-row: rgba(52, 211, 153, 0.3);
+  --cell-fixed: rgba(2, 35, 27, 0.25);
+  --highlight-row: rgba(52, 211, 153, 0.28);
   --cell-focus: rgba(52, 211, 153, 0.2);
 }
 
-/* 4. Sunset (Sunset / Harvest / Dreamscape / Clay) - Radiant Warm Amber & Peach */
 [data-theme="sunset"] {
-  --bg: #270724;
-  --card: rgba(46, 10, 43, 0.24);
-  --accent: #fb923c;
-  --success: #facc15;
-  --error: #f43f5e;
-  --text: #fffbeb;                    /* Warm champagne vanilla */
-  --text-heading: #fdba74;            /* Golden sunset peach */
-  --muted: #fed7aa;                   /* Soft peach amber */
-  --border: rgba(251, 146, 60, 0.52);
-  --grid-line: #fb923c;
-  --cell-fixed: rgba(30, 5, 27, 0.28);
-  --highlight-row: rgba(251, 146, 60, 0.32);
-  --cell-focus: rgba(251, 146, 60, 0.22);
+  --bg: #2b0938;
+  --card: rgba(55, 15, 72, 0.2);
+  --card-hover: rgba(55, 15, 72, 0.32);
+  --accent: #ff7a00;
+  --success: #ffd166;
+  --error: #ff3366;
+  --text: #fff5eb;
+  --muted: #fbcfe8;
+  --border: rgba(255, 122, 0, 0.5);
+  --grid-line: #ff7a00;
+  --cell-fixed: rgba(26, 3, 36, 0.25);
+  --highlight-row: rgba(255, 122, 0, 0.28);
+  --cell-focus: rgba(255, 122, 0, 0.2);
 }
 
-/* 5. Dracula (Tempest / Hologram) - Vivid Lavender & Orchid White */
 [data-theme="dracula"] {
-  --bg: #1e1f29;
-  --card: rgba(35, 37, 49, 0.25);
+  --bg: #282a36;
+  --card: rgba(40, 42, 54, 0.22);
+  --card-hover: rgba(40, 42, 54, 0.32);
   --accent: #bd93f9;
   --success: #50fa7b;
   --error: #ff5555;
-  --text: #faf5ff;                    /* Pure moonlit lilac */
-  --text-heading: #d8b4fe;            /* Bright pastel amethyst */
-  --muted: #e9d5ff;                   /* Soft lavender mist */
+  --text: #f8f8f2;
+  --muted: #d6acff;
   --border: rgba(189, 147, 249, 0.5);
-  --grid-line: #bd93f9;
-  --cell-fixed: rgba(17, 18, 25, 0.3);
-  --highlight-row: rgba(189, 147, 249, 0.3);
+  --grid-line: #ff79c6;
+  --cell-fixed: rgba(20, 21, 28, 0.25);
+  --highlight-row: rgba(189, 147, 249, 0.28);
   --cell-focus: rgba(189, 147, 249, 0.2);
 }
 
-/* 6. Paper (Alpine / Ghibli) - Deep Charcoal Slate on Bright White */
 [data-theme="paper"] {
   --bg: #f8fafc;
-  --card: rgba(255, 255, 255, 0.55);
-  --accent: #0284c7;
-  --success: #059669;
+  --card: rgba(255, 255, 255, 0.35);
+  --card-hover: rgba(255, 255, 255, 0.5);
+  --accent: #2563eb;
+  --success: #16a34a;
   --error: #dc2626;
-  --text: #0f172a;                    /* Deep obsidian slate */
-  --text-heading: #0369a1;            /* Deep cerulean navy */
-  --muted: #334155;                   /* Charcoal graphite */
-  --border: rgba(15, 23, 42, 0.55);
-  --grid-line: #0f172a;
-  --cell-fixed: rgba(255, 255, 255, 0.65);
-  --highlight-row: rgba(2, 132, 199, 0.2);
-  --cell-focus: rgba(2, 132, 199, 0.14);
+  --text: #0f172a;
+  --muted: #334155;
+  --border: rgba(30, 41, 59, 0.5);
+  --grid-line: #1e293b;
+  --cell-fixed: rgba(255, 255, 255, 0.45);
+  --highlight-row: rgba(37, 99, 235, 0.2);
+  --cell-focus: rgba(37, 99, 235, 0.12);
 }
 
 /* =======================================================
-   UNIVERSAL TYPOGRAPHY & CONTRAST RULES
-   ======================================================= */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  color: var(--text);
-  transition: background-color 0.2s, color 0.25s, border-color 0.2s;
-}
-
-body {
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* Headings use the theme's bright key tone */
-h1, h2, h3, h4 {
-  color: var(--text-heading) !important;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
-}
-
-[data-theme="paper"] h1,
-[data-theme="paper"] h2,
-[data-theme="paper"] h3,
-[data-theme="paper"] h4 {
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9);
-}
-
-/* Labels, hints, and secondary meta inherit muted contrast */
-label,
-.color-hint,
-.score-text,
-.slider-ticks,
-.roster-list,
-.auth-switch-text,
-.privacy-content-scroll,
-.hud-top,
-.symbol-pad-title,
-.metric-title {
-  color: var(--muted) !important;
-  font-weight: 600;
-}
-
-/* Inputs & Dropdowns contrast to the theme */
-input[type="text"],
-input[type="number"],
-input[type="password"],
-select {
-  color: var(--text) !important;
-}
-
-/* Grid prefilled and user entries contrast */
-.cell.prefilled {
-  color: var(--text) !important;
-}
-.cell.user-filled {
-  color: var(--accent) !important;
-}
-
-/* Top Action Buttons text */
-.icon-btn {
-  color: var(--text) !important;
-}
-
-/* =======================================================
-   ARCHITECTURAL PENCIL SKETCH LINEWORK
+   ARCHITECTURAL PENCIL SKETCH LINEWORK WITH HIGH CLARITY
    ======================================================= */
 .sketch-card,
 .sketch-modal {
@@ -221,6 +143,7 @@ select {
   border: 1.4px solid var(--border) !important;
   background: rgba(0, 0, 0, 0.22) !important;
   backdrop-filter: blur(12px) !important;
+  color: #fff !important;
   outline: none;
 }
 .sketch-input:focus {
@@ -238,7 +161,7 @@ select {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* 9x9 Grid (Pencil-ruled translucent glass) */
+/* Sudoku 9x9 Grid (Pencil-ruled translucent glass) */
 .sketch-grid {
   border-radius: 3px 2px 2px 3px / 2px 3px 3px 2px !important;
   border: 2.4px solid var(--grid-line) !important;
@@ -282,9 +205,17 @@ select {
   z-index: 2;
 }
 
-.cell.correct { color: var(--success) !important; pointer-events: none; }
+.cell.prefilled {
+  background: var(--cell-fixed);
+  color: var(--text);
+  cursor: default;
+}
+
+.cell.user-filled { color: var(--accent); }
+.cell.correct { color: var(--success); pointer-events: none; }
+
 .cell.wrong {
-  color: var(--error) !important;
+  color: var(--error);
   animation: shake 0.25s ease;
 }
 
@@ -300,7 +231,7 @@ select {
   backdrop-filter: blur(10px);
   border: 1.5px solid var(--border);
   border-radius: 3px 2px 2px 3px / 2px 3px 1px 2px;
-  color: var(--text) !important;
+  color: var(--text);
   padding: 8px 0;
   font-size: 1.2rem;
   font-weight: bold;
@@ -310,7 +241,7 @@ select {
 
 .symbol-btn:hover {
   background: var(--accent);
-  color: #000 !important;
+  color: #000;
   transform: translateY(-1px);
 }
 
@@ -322,7 +253,25 @@ select {
   border-color: transparent !important;
 }
 
-/* Background Layers */
+/* Base Layout & Dynamic Scenery */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+body {
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  overflow-x: hidden;
+  position: relative;
+}
+
 .scenic-bg {
   position: fixed;
   inset: 0;
@@ -379,7 +328,7 @@ select {
   background: radial-gradient(circle at center, rgba(148, 163, 184, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
 }
 
-/* Translucent Glass Filter */
+/* Enhanced Translucency Glass Filter */
 .frosted {
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
@@ -402,9 +351,34 @@ select {
   align-items: center;
 }
 
+.top-bar h1 {
+  font-size: 1.45rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
 .top-buttons {
   display: flex;
   gap: 8px;
+}
+
+.icon-btn {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1.5px solid var(--border);
+  color: #fff;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn:hover {
+  background: var(--accent);
+  color: #000;
 }
 
 .admin-btn {
@@ -473,15 +447,31 @@ select {
 }
 .password-toggle-btn:hover { opacity: 1; }
 
+.auth-form input[type="password"],
+.auth-form input[type="text"] {
+  width: 100%;
+  padding: 9px 12px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.auth-switch-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
 .auth-switch-text a {
-  color: var(--accent) !important;
+  color: var(--accent);
   text-decoration: underline;
   cursor: pointer;
   margin-left: 4px;
 }
 
 .error-text {
-  color: var(--error) !important;
+  color: var(--error);
   font-size: 0.8rem;
   font-weight: bold;
   text-align: center;
@@ -508,19 +498,32 @@ select {
   cursor: pointer;
   border-radius: 3px;
   transition: background 0.2s;
-  color: var(--text);
+  color: #fff;
   user-select: none;
 }
 
 .radio-label:has(input:checked) {
   background: var(--accent);
-  color: #000 !important;
-}
-.radio-label:has(input:checked) span {
-  color: #000 !important;
+  color: #000;
 }
 
 .radio-label input { display: none; }
+
+.input-group label, .host-settings label {
+  display: block;
+  font-size: 0.85rem;
+  color: #ffffff;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+input[type="text"], input[type="number"], select {
+  width: 100%;
+  padding: 9px 12px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
 
 .host-settings {
   display: grid;
@@ -534,11 +537,12 @@ select {
   padding: 8px 12px;
   background: rgba(0, 0, 0, 0.18);
   font-size: 0.82rem;
+  color: var(--muted);
   text-align: center;
 }
 
 .lobby-meta-preview strong {
-  color: var(--accent) !important;
+  color: var(--accent);
 }
 
 .actions {
@@ -557,8 +561,8 @@ select {
   cursor: pointer;
 }
 
-.btn.primary { background: var(--accent); color: #000 !important; }
-.btn.secondary { background: rgba(255, 255, 255, 0.15); color: var(--text) !important; }
+.btn.primary { background: var(--accent); color: #000; }
+.btn.secondary { background: rgba(255, 255, 255, 0.15); color: #fff; }
 .btn.full-width { width: 100%; }
 
 .btn.small {
@@ -568,17 +572,18 @@ select {
 
 .btn.danger-small {
   background: transparent;
-  color: var(--error) !important;
+  color: var(--error);
   border: 1px solid var(--error);
   padding: 4px 8px;
   font-size: 0.75rem;
   cursor: pointer;
 }
 
-.btn.danger-small:hover { background: var(--error); color: #fff !important; }
+.btn.danger-small:hover { background: var(--error); color: #fff; }
 
 .divider {
   text-align: center;
+  color: var(--muted);
   font-size: 0.8rem;
   font-weight: bold;
 }
@@ -587,7 +592,7 @@ select {
   margin-top: 12px;
   font-size: 0.9rem;
   text-align: center;
-  color: var(--success) !important;
+  color: var(--success);
 }
 
 .roster-list {
@@ -596,6 +601,7 @@ select {
   gap: 4px;
   margin-top: 8px;
   font-size: 0.85rem;
+  color: var(--muted);
 }
 
 /* 7-Tier Slider UI */
@@ -610,7 +616,7 @@ select {
   font-size: 0.8rem;
   padding: 2px 8px;
   background: var(--accent);
-  color: #000 !important;
+  color: #000;
   font-weight: bold;
 }
 
@@ -637,6 +643,14 @@ select {
   cursor: pointer;
 }
 
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
 /* HUD */
 .hud {
   display: flex;
@@ -650,6 +664,7 @@ select {
   justify-content: space-between;
   align-items: center;
   font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .my-lives {
@@ -658,7 +673,7 @@ select {
 }
 
 .timer-box span {
-  color: var(--accent) !important;
+  color: var(--accent);
   font-weight: bold;
 }
 
@@ -688,7 +703,6 @@ select {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text) !important;
 }
 
 .progress-bar {
@@ -709,13 +723,14 @@ select {
 
 .score-text {
   font-size: 0.7rem;
+  color: var(--muted);
   display: flex;
   justify-content: space-between;
 }
 
 .banner {
   background: var(--error);
-  color: #fff !important;
+  color: #fff;
   padding: 8px;
   text-align: center;
   font-size: 0.85rem;
@@ -745,6 +760,11 @@ select {
   align-items: center;
 }
 
+.symbol-pad-title {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .symbol-pad {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -758,7 +778,7 @@ select {
 
 @keyframes flashPulse {
   0% { background-color: var(--highlight-row); transform: scale(1.05); z-index: 5; }
-  50% { background-color: var(--success); color: #000 !important; }
+  50% { background-color: var(--success); color: #000; }
   100% { transform: scale(1); z-index: 1; }
 }
 
@@ -816,6 +836,7 @@ select {
 
 .close-x {
   font-size: 1.6rem;
+  color: var(--muted);
   cursor: pointer;
   line-height: 1;
 }
@@ -824,6 +845,14 @@ select {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.setting-row label {
+  display: block;
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .setting-toggle-row {
@@ -849,7 +878,7 @@ select {
 }
 
 .winner-reason {
-  color: var(--accent) !important;
+  color: var(--accent);
   font-size: 0.95rem;
   font-weight: 700;
   text-align: center;
@@ -866,6 +895,7 @@ select {
 .leaderboard-table th {
   border-bottom: 1.5px solid var(--border);
   padding: 8px 4px;
+  color: var(--muted);
 }
 
 .leaderboard-table td {
@@ -874,7 +904,7 @@ select {
 }
 
 .leaderboard-table tr:first-child td {
-  color: var(--accent) !important;
+  color: var(--accent);
   font-weight: bold;
   font-size: 0.95rem;
 }
@@ -885,6 +915,7 @@ select {
   align-items: center;
   margin-bottom: 10px;
   font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .table-scroll {
@@ -898,10 +929,11 @@ select {
   font-size: 0.75rem;
   font-weight: bold;
 }
-.role-badge.admin { background: #eab308; color: #000 !important; }
-.role-badge.player { background: rgba(255, 255, 255, 0.2); color: var(--text) !important; }
+.role-badge.admin { background: #eab308; color: #000; }
+.role-badge.player { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
 .text-center { text-align: center; }
+.color-hint { font-size: 0.8rem; color: var(--muted); }
 
 /* Profile Grid */
 .profile-details-grid {
@@ -920,14 +952,21 @@ select {
   backdrop-filter: blur(8px);
 }
 
+.metric-title {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
 .metric-val {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--text) !important;
+  color: #fff;
 }
 
 .metric-val.highlight {
-  color: var(--accent) !important;
+  color: var(--accent);
 }
 
 .profile-footer-stats {
@@ -936,6 +975,7 @@ select {
   padding-top: 10px;
   border-top: 1px dashed rgba(255, 255, 255, 0.2);
   font-size: 0.8rem;
+  color: var(--muted);
 }
 
 /* Friends Hub */
@@ -954,7 +994,7 @@ select {
 
 .pending-requests-sec h4 {
   font-size: 0.82rem;
-  color: var(--accent) !important;
+  color: var(--accent);
   margin-bottom: 6px;
 }
 
@@ -983,8 +1023,8 @@ select {
   font-size: 0.78rem;
   font-weight: bold;
 }
-.status-badge.online { color: var(--success) !important; }
-.status-badge.offline { color: var(--muted) !important; }
+.status-badge.online { color: var(--success); }
+.status-badge.offline { color: var(--muted); }
 
 .status-dot {
   width: 8px;
@@ -998,7 +1038,7 @@ select {
 /* Privacy Statement */
 .privacy-intro {
   font-size: 0.85rem;
-  color: var(--text);
+  color: #fff;
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -1011,5 +1051,16 @@ select {
   margin: 6px 0 12px 0;
   font-size: 0.85rem;
   line-height: 1.5;
+  color: var(--muted);
   backdrop-filter: blur(8px);
+}
+
+.privacy-content-scroll h3 {
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 12px 0 4px 0;
+}
+
+.privacy-content-scroll h3:first-child {
+  margin-top: 0;
 }
