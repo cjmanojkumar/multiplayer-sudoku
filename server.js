@@ -12,39 +12,30 @@ const io = new Server(server);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- PERSISTENT DATABASE ENGINE ---
 const DB_FILE = path.join(__dirname, 'database.json');
-const DEFAULT_ADMIN_KEY = process.env.ADMIN_SECRET_KEY || 'SUDOKU_SUPER_ADMIN_2026';
 
 function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      adminSecretKey: DEFAULT_ADMIN_KEY
+      adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
   }
   try {
-    const raw = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(raw);
+    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
   } catch (err) {
-    console.error('Failed reading database file, returning fallback:', err);
-    return { users: [], adminSecretKey: DEFAULT_ADMIN_KEY };
+    return { users: [], adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026' };
   }
 }
 
 function saveDB(data) {
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-  } catch (err) {
-    console.error('Failed to write to database.json:', err);
-  }
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
 loadDB();
 
-// Track online players: username (lowercase) -> socket.id
 const onlineUsers = new Map();
 
 // --- AUTHENTICATION API ---
@@ -128,7 +119,7 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
-// --- PROFILE & CAREER STATS API ---
+// --- PROFILE & STATS API ---
 app.get('/api/user/profile/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
@@ -152,7 +143,7 @@ app.get('/api/user/profile/:username', (req, res) => {
   });
 });
 
-// --- FRIENDS SYSTEM API ---
+// --- FRIENDS API ---
 app.post('/api/friends/send-request', (req, res) => {
   const { fromUser, targetUser } = req.body;
   if (!fromUser || !targetUser || fromUser.toLowerCase() === targetUser.toLowerCase()) {
@@ -204,9 +195,6 @@ app.post('/api/friends/respond-request', (req, res) => {
 
     if (!user.friends.includes(requester.username)) user.friends.push(requester.username);
     if (!requester.friends.includes(user.username)) requester.friends.push(user.username);
-  } else if (action === 'remove') {
-    user.friends = (user.friends || []).filter(u => u.toLowerCase() !== requester.username.toLowerCase());
-    requester.friends = (requester.friends || []).filter(u => u.toLowerCase() !== user.username.toLowerCase());
   }
 
   saveDB(db);
@@ -233,11 +221,10 @@ app.get('/api/friends/list/:username', (req, res) => {
 app.get('/api/user/history/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
-  if (!user) return res.status(404).json({ error: 'User not found.' });
+  if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({ success: true, history: user.history || [] });
 });
 
-// --- ADMIN USERS PORTAL API ---
 app.post('/api/admin/users', (req, res) => {
   const { adminKey } = req.body;
   const db = loadDB();
@@ -277,7 +264,6 @@ function recordMatchStats(leaderboard, outcome, room) {
   saveDB(db);
 }
 
-// --- 7-TIER BLANKS GENERATOR ---
 function getBlanksForLevel(level) {
   const scale = { 1: 15, 2: 22, 3: 30, 4: 38, 5: 45, 6: 50, 7: 55 };
   return scale[level] || 38;
@@ -360,8 +346,15 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
 }
 
 io.on('connection', (socket) => {
-  // --- IN-GAME LIVE CHAT ---
-  socket.on('sendChatMessage', ({ roomCode, text, clientTime }) => {
+  socket.on('registerOnlineUser', ({ username }) => {
+    if (username) {
+      onlineUsers.set(username.toLowerCase(), socket.id);
+      socket.broadcast.emit('friendStatusChanged', { username, online: true });
+    }
+  });
+
+  // --- IN-GAME CHAT: SINGLE BROADCAST WITH TIMESTAMP ---
+  socket.on('sendChatMessage', ({ roomCode, text }) => {
     if (!roomCode || !text || !text.trim()) return;
     const code = roomCode.toUpperCase();
     const room = rooms[code];
@@ -370,20 +363,13 @@ io.on('connection', (socket) => {
     const player = room.players.find(p => p.id === socket.id);
     const senderName = player ? player.name : 'Player';
 
+    // Broadcast once to all players in the room with an ISO timestamp
     io.to(code).emit('newChatMessage', {
       sender: senderName,
       senderId: socket.id,
       text: text.trim().substring(0, 150),
-      clientTime: clientTime || new Date().toISOString()
+      timestamp: new Date().toISOString()
     });
-  });
-  
-  // Track online presence
-  socket.on('registerOnlineUser', ({ username }) => {
-    if (username) {
-      onlineUsers.set(username.toLowerCase(), socket.id);
-      socket.broadcast.emit('friendStatusChanged', { username, online: true });
-    }
   });
 
   socket.on('createRoom', ({ username, difficultyLevel, maxPlayers, durationMinutes, symbolSet }) => {

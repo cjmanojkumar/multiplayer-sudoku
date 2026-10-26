@@ -10,110 +10,54 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentUser = null;
 
   let isSoundEnabled = true;
-  let isMusicEnabled = false;
+  let isMusicEnabled = true; // Enabled by default
   let isEmojiEnabled = true;
 
- // 20 Unique, Verified Realistic Nature Backdrops with Matching Themes
+  // 20 Verified Backgrounds (matching exact names)
   const BACKGROUND_THEMES = {
-    glacier: { 
-      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'paper' 
-    },
-    redwood: { 
-      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'emerald' 
-    },
-    ocean: { 
-      url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'dark' 
-    },
-    pine: { 
-      url: 'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'emerald' 
-    },
-    aurora: { 
-      url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'neon' 
-    },
-    waterfall: { 
-      url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'emerald' 
-    },
-    sunset: { 
-      url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'sunset' 
-    },
-    canyon: { 
-      url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'sunset' 
-    },
-    meadow: { 
-      url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'sunset' 
-    },
-    canvas: { 
-      url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'paper' 
-    },
-    lake: { 
-      url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'dark' 
-    },
-    blossom: { 
-      url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'sunset' 
-    },
-    rain: { 
-      url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'dark' 
-    },
-    volcano: { 
-      url: 'https://images.unsplash.com/photo-1549350850-642714904e54?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'sunset' 
-    },
-    bamboo: { 
-      url: 'https://images.unsplash.com/photo-1510398462662-b28a5183460d?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'emerald' 
-    },
-    galaxy: { 
-      url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'dark' 
-    },
-    reef: { 
-      url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'emerald' 
-    },
-    holiday: { 
-      url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'paper' 
-    },
-    autumn: { 
-      url: 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'sunset' 
-    },
-    river: { 
-      url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'emerald' 
-    }
+    glacier: { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    redwood: { url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    ocean: { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    pine: { url: 'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    aurora: { url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
+    waterfall: { url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    sunset: { url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    canyon: { url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    meadow: { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    canvas: { url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    lake: { url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    blossom: { url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    rain: { url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    volcano: { url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    bamboo: { url: 'https://images.unsplash.com/photo-1510398462662-b28a5183460d?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    galaxy: { url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    reef: { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    cliff: { url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    autumn: { url: 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    river: { url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' }
   };
 
- const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
+  // Instrumental Background Track
+  const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
   bgAudio.loop = true;
   bgAudio.volume = 0.25;
 
-  // Unlocks browser audio autoplay restrictions on the player's very first click
-  function initAudioOnFirstGesture() {
+  // --- BROWSER AUTOPLAY UNLOCK ON FIRST CLICK ---
+  let hasUserInteracted = false;
+  function triggerAudioUnlock() {
+    if (hasUserInteracted) return;
+    hasUserInteracted = true;
     getAudioContext();
-    if (isMusicEnabled && bgAudio.paused) {
+    if (isMusicEnabled) {
       bgAudio.play().catch(() => {});
     }
-    window.removeEventListener('click', initAudioOnFirstGesture);
-    window.removeEventListener('keydown', initAudioOnFirstGesture);
-    window.removeEventListener('touchstart', initAudioOnFirstGesture);
+    window.removeEventListener('click', triggerAudioUnlock);
+    window.removeEventListener('keydown', triggerAudioUnlock);
+    window.removeEventListener('touchstart', triggerAudioUnlock);
   }
-  window.addEventListener('click', initAudioOnFirstGesture);
-  window.addEventListener('keydown', initAudioOnFirstGesture);
-  window.addEventListener('touchstart', initAudioOnFirstGesture);
+  window.addEventListener('click', triggerAudioUnlock);
+  window.addEventListener('keydown', triggerAudioUnlock);
+  window.addEventListener('touchstart', triggerAudioUnlock);
 
   const SYMBOL_SETS = {
     numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
@@ -271,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
-  // --- IN-GAME LIVE CHAT ---
+  // --- LIVE CHAT DRAWER CONTROLS ---
   chatToggleBtn?.addEventListener('click', () => {
     chatDrawer?.classList.toggle('hidden');
     if (!chatDrawer?.classList.contains('hidden')) {
@@ -288,23 +232,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = chatInput?.value.trim();
     if (!text || !currentRoomCode) return;
 
-    // Send to server only (do NOT append locally to avoid duplicate rendering)
-    socket.emit('sendChatMessage', { 
-      roomCode: currentRoomCode, 
-      text,
-      clientTime: new Date().toISOString()
-    });
+    // Send to server only; do not render locally to prevent duplicate messages
+    socket.emit('sendChatMessage', { roomCode: currentRoomCode, text });
     chatInput.value = '';
   });
 
-  // Single source of truth for rendering chat messages
-  socket.on('newChatMessage', ({ sender, senderId, text, clientTime }) => {
+  socket.on('newChatMessage', ({ sender, senderId, text, timestamp }) => {
     if (!chatMessages) return;
     const isMe = senderId === myId;
     
-    // Safely parse the timestamp into local format (IST / 12-hour AM/PM)
-    const validDate = clientTime ? new Date(clientTime) : new Date();
-    const localTime = validDate.toLocaleTimeString([], { 
+    // Parse timestamp in the user's local system timezone (IST, etc.)
+    const dateObj = timestamp ? new Date(timestamp) : new Date();
+    const localTime = dateObj.toLocaleTimeString([], { 
       hour: '2-digit', 
       minute: '2-digit', 
       hour12: true 
@@ -322,64 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    if (!isMe && isSoundEnabled) {
-      playTone(620, 'sine', 0.08, 0.04);
-    }
-  });
-
-  chatToggleBtn?.addEventListener('click', () => {
-    chatDrawer?.classList.toggle('hidden');
-    if (!chatDrawer?.classList.contains('hidden')) {
-      chatInput?.focus();
-    }
-  });
-
-  chatCloseBtn?.addEventListener('click', () => {
-    chatDrawer?.classList.add('hidden');
-  });
-
-  chatForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = chatInput?.value.trim();
-    if (!text || !currentRoomCode) return;
-
-    // Send ISO timestamp or raw timestamp from the client device
-    socket.emit('sendChatMessage', { 
-      roomCode: currentRoomCode, 
-      text,
-      clientTime: new Date().toISOString()
-    });
-    chatInput.value = '';
-  });
-
-  socket.on('newChatMessage', ({ sender, senderId, text, timestamp, clientTime }) => {
-    if (!chatMessages) return;
-    const isMe = senderId === myId;
-    
-    // Format timestamp in the player's local system time (IST / 12-hour format)
-    const localTime = new Date(clientTime || Date.now()).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: true 
-    });
-
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-msg ${isMe ? 'my-msg' : ''}`;
-    msgDiv.innerHTML = `
-      <div class="chat-meta">
-        <strong>${sender} ${isMe ? '(You)' : ''}</strong>
-        <span>${localTime}</span>
-      </div>
-      <div>${text}</div>
-    `;
-    chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    if (!isMe && isSoundEnabled) {
-      playTone(620, 'sine', 0.08, 0.04);
-    }
-  });
-    // Subtle incoming message pop sound
     if (!isMe && isSoundEnabled) {
       playTone(620, 'sine', 0.08, 0.04);
     }
@@ -499,8 +380,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   musicToggle?.addEventListener('change', (e) => {
     isMusicEnabled = e.target.checked;
-    if (isMusicEnabled) bgAudio.play().catch(() => {});
-    else bgAudio.pause();
+    if (isMusicEnabled) {
+      bgAudio.play().catch(() => {});
+    } else {
+      bgAudio.pause();
+    }
     saveGameSettings();
   });
 
@@ -515,7 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSettings();
   });
 
-  // Admin Portal inside Settings
   adminOpenBtn?.addEventListener('click', () => {
     settingsModal?.classList.add('hidden');
     adminSecretInput.value = '';
@@ -1163,7 +1046,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen';
 
-    // Clear and reset chat drawer
     if (chatMessages) chatMessages.innerHTML = '';
     chatDrawer?.classList.add('hidden');
 
@@ -1285,9 +1167,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('keydown', (e) => {
-    // Prevent interfering with typing in chat
     if (document.activeElement === chatInput) return;
-
     if (isEliminated || !selectedCell) return;
     const key = e.key.toUpperCase();
 
@@ -1479,3 +1359,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     winnerModal?.classList.remove('hidden');
   });
+});
