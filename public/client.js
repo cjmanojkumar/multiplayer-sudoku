@@ -27,9 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
       url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', 
       theme: 'dark' 
     },
-    dunes: { 
-      url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'sunset' 
+    pine: { 
+      url: 'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=1920&q=80', 
+      theme: 'emerald' 
     },
     aurora: { 
       url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', 
@@ -51,9 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
       url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80', 
       theme: 'sunset' 
     },
-    lightning: { 
-      url: 'https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?auto=format&fit=crop&w=1920&q=80', 
-      theme: 'dracula' 
+    canvas: { 
+      url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80', 
+      theme: 'paper' 
     },
     lake: { 
       url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80', 
@@ -68,11 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
       theme: 'dark' 
     },
     volcano: { 
-      url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32f?auto=format&fit=crop&w=1920&q=80', 
+      url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80', 
       theme: 'sunset' 
     },
     bamboo: { 
-      url: 'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=1920&q=80', 
+      url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80', 
       theme: 'emerald' 
     },
     galaxy: { 
@@ -652,14 +652,15 @@ document.addEventListener('DOMContentLoaded', () => {
   historyCloseX?.addEventListener('click', () => historyModal.classList.add('hidden'));
 
   // Admin Portal
-  adminOpenBtn?.addEventListener('click', () => {
+ adminOpenBtn?.addEventListener('click', () => {
+    settingsModal?.classList.add('hidden'); // Closes settings when admin opens
     adminSecretInput.value = '';
     adminErrorMsg.classList.add('hidden');
     adminLoginSec.classList.remove('hidden');
     adminDashboardSec.classList.add('hidden');
     adminModal.classList.remove('hidden');
   });
-
+  
   adminCloseX?.addEventListener('click', () => adminModal.classList.add('hidden'));
 
   async function fetchAdminUsers(key) {

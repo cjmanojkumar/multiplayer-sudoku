@@ -23,9 +23,9 @@
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
       <div class="top-buttons">
-        <button id="admin-open-btn" class="icon-btn admin-btn" title="Admin Portal">👑 Admin</button>
         <button id="settings-open-btn" class="icon-btn" title="Game Settings">⚙️ Settings</button>
       </div>
+    </div>
     </div>
 
     <!-- User Account Status Bar -->
@@ -176,20 +176,20 @@
          </div>
        </div>
 
-       <!-- 20 Clean Nature Backdrops -->
+<!-- 20 Clean Nature & Artistic Backdrops -->
         <div class="setting-row">
           <label for="bg-select">Theme & Scenery:</label>
           <select id="bg-select" class="sketch-input">
             <option value="glacier" selected>🏔️ Glacier</option>
             <option value="redwood">🌲 Redwood</option>
             <option value="ocean">🌊 Ocean</option>
-            <option value="dunes">🏜️ Dunes</option>
+            <option value="pine">🌲 Pine</option>
             <option value="aurora">🌌 Aurora</option>
             <option value="waterfall">💦 Waterfall</option>
             <option value="sunset">🌄 Sunset</option>
             <option value="canyon">🏜️ Canyon</option>
             <option value="meadow">🌾 Meadow</option>
-            <option value="lightning">⚡ Lightning</option>
+            <option value="canvas">🎨 Canvas</option>
             <option value="lake">🛶 Lake</option>
             <option value="blossom">🌸 Blossom</option>
             <option value="rain">🌧️ Rain</option>
@@ -243,9 +243,14 @@
           <label for="emoji-toggle">✨ Completion Emojis</label>
           <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
         </div>
+
+        <!-- Admin Portal Trigger Inside Settings -->
+        <div class="setting-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.25);">
+          <button type="button" id="admin-open-btn" class="btn admin-btn full-width sketch-btn" style="padding: 8px;">👑 Admin Portal</button>
+        </div>
       </div>
 
-      <button id="settings-save-btn" class="btn primary full-width sketch-btn">Save Settings</button>
+      <button id="settings-save-btn" class="btn primary full-width sketch-btn" style="margin-top: 8px;">Save Settings</button>
     </div>
   </div>
 
