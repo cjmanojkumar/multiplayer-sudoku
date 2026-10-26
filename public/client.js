@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lake: { url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
     blossom: { url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
     rain: { url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    volcano: { url: 'https://images.unsplash.com/photo-1549350850-642714904e54?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    volcano: { url: 'https://images.unsplash.com/photo-1619266465172-02a857c3556d?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
     bamboo: { url: 'https://images.unsplash.com/photo-1510398462662-b28a5183460d?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
     galaxy: { url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
     reef: { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
