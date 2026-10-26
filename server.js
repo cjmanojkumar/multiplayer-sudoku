@@ -351,7 +351,7 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
 io.on('connection', (socket) => {
 
   // --- IN-GAME LIVE CHAT ---
-  socket.on('sendChatMessage', ({ roomCode, text }) => {
+  socket.on('sendChatMessage', ({ roomCode, text, clientTime }) => {
     if (!roomCode || !text || !text.trim()) return;
     const code = roomCode.toUpperCase();
     const room = rooms[code];
@@ -364,7 +364,7 @@ io.on('connection', (socket) => {
       sender: senderName,
       senderId: socket.id,
       text: text.trim().substring(0, 150),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      clientTime: clientTime || new Date().toISOString()
     });
   });
   

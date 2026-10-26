@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
 
-  // 20 VERIFIED NATURAL & TEXTURED SCENERIES
+ // 20 Unique, Verified Realistic Nature Backdrops with Matching Themes
   const BACKGROUND_THEMES = {
     glacier: { 
       url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', 
@@ -68,11 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
       theme: 'dark' 
     },
     volcano: { 
-      url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80', 
+      url: 'https://images.unsplash.com/photo-1549350850-642714904e54?auto=format&fit=crop&w=1920&q=80', 
       theme: 'sunset' 
     },
     bamboo: { 
-      url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1920&q=80', 
+      url: 'https://images.unsplash.com/photo-1510398462662-b28a5183460d?auto=format&fit=crop&w=1920&q=80', 
       theme: 'emerald' 
     },
     galaxy: { 
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
       url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1920&q=80', 
       theme: 'emerald' 
     },
-    cliff: { 
+    holiday: { 
       url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80', 
       theme: 'paper' 
     },
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
+ const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
   bgAudio.loop = true;
   bgAudio.volume = 0.25;
 
@@ -292,7 +292,59 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+// --- LIVE CHAT DRAWER CONTROLS ---
+  chatToggleBtn?.addEventListener('click', () => {
+    chatDrawer?.classList.toggle('hidden');
+    if (!chatDrawer?.classList.contains('hidden')) {
+      chatInput?.focus();
+    }
+  });
 
+  chatCloseBtn?.addEventListener('click', () => {
+    chatDrawer?.classList.add('hidden');
+  });
+
+  chatForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = chatInput?.value.trim();
+    if (!text || !currentRoomCode) return;
+
+    // Send ISO timestamp or raw timestamp from the client device
+    socket.emit('sendChatMessage', { 
+      roomCode: currentRoomCode, 
+      text,
+      clientTime: new Date().toISOString()
+    });
+    chatInput.value = '';
+  });
+
+  socket.on('newChatMessage', ({ sender, senderId, text, timestamp, clientTime }) => {
+    if (!chatMessages) return;
+    const isMe = senderId === myId;
+    
+    // Format timestamp in the player's local system time (IST / 12-hour format)
+    const localTime = new Date(clientTime || Date.now()).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true 
+    });
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-msg ${isMe ? 'my-msg' : ''}`;
+    msgDiv.innerHTML = `
+      <div class="chat-meta">
+        <strong>${sender} ${isMe ? '(You)' : ''}</strong>
+        <span>${localTime}</span>
+      </div>
+      <div>${text}</div>
+    `;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    if (!isMe && isSoundEnabled) {
+      playTone(620, 'sine', 0.08, 0.04);
+    }
+  });
     // Subtle incoming message pop sound
     if (!isMe && isSoundEnabled) {
       playTone(620, 'sine', 0.08, 0.04);
