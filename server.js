@@ -349,6 +349,25 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
 }
 
 io.on('connection', (socket) => {
+
+  // --- IN-GAME LIVE CHAT ---
+  socket.on('sendChatMessage', ({ roomCode, text }) => {
+    if (!roomCode || !text || !text.trim()) return;
+    const code = roomCode.toUpperCase();
+    const room = rooms[code];
+    if (!room) return;
+
+    const player = room.players.find(p => p.id === socket.id);
+    const senderName = player ? player.name : 'Player';
+
+    io.to(code).emit('newChatMessage', {
+      sender: senderName,
+      senderId: socket.id,
+      text: text.trim().substring(0, 150),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+  });
+  
   // Track online status for logged players
   socket.on('registerOnlineUser', ({ username }) => {
     if (username) {

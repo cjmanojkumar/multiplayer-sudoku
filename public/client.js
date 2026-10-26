@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isMusicEnabled = false;
   let isEmojiEnabled = true;
 
- // 20 Unique, Verified Realistic Nature Backdrops with Matching Themes
+  // 20 VERIFIED NATURAL & TEXTURED SCENERIES
   const BACKGROUND_THEMES = {
     glacier: { 
       url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', 
@@ -219,6 +219,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalUsersCount = document.getElementById('total-users-count');
   const adminRefreshBtn = document.getElementById('admin-refresh-btn');
 
+  // Live Chat Elements
+  const chatDrawer = document.getElementById('chat-drawer');
+  const chatToggleBtn = document.getElementById('chat-toggle-btn');
+  const chatCloseBtn = document.getElementById('chat-close-btn');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const chatMessages = document.getElementById('chat-messages');
+
   const lobbyView = document.getElementById('lobby-view');
   const gameView = document.getElementById('game-view');
   const usernameInput = document.getElementById('username');
@@ -249,6 +257,48 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
+  // --- LIVE CHAT DRAWER CONTROLS ---
+  chatToggleBtn?.addEventListener('click', () => {
+    chatDrawer?.classList.toggle('hidden');
+    if (!chatDrawer?.classList.contains('hidden')) {
+      chatInput?.focus();
+    }
+  });
+
+  chatCloseBtn?.addEventListener('click', () => {
+    chatDrawer?.classList.add('hidden');
+  });
+
+  chatForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = chatInput?.value.trim();
+    if (!text || !currentRoomCode) return;
+
+    socket.emit('sendChatMessage', { roomCode: currentRoomCode, text });
+    chatInput.value = '';
+  });
+
+  socket.on('newChatMessage', ({ sender, senderId, text, timestamp }) => {
+    if (!chatMessages) return;
+    const isMe = senderId === myId;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-msg ${isMe ? 'my-msg' : ''}`;
+    msgDiv.innerHTML = `
+      <div class="chat-meta">
+        <strong>${sender} ${isMe ? '(You)' : ''}</strong>
+        <span>${timestamp}</span>
+      </div>
+      <div>${text}</div>
+    `;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Subtle incoming message pop sound
+    if (!isMe && isSoundEnabled) {
+      playTone(620, 'sine', 0.08, 0.04);
+    }
+  });
+
   // --- PASSWORD VISIBILITY TOGGLE ---
   togglePasswordVisibilityBtn?.addEventListener('click', () => {
     if (!authPasswordInput) return;
@@ -262,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settings = {
       difficultyLevel: activeDifficultyLevel,
       symbolSet: activeSymbolSet,
-      background: bgSelect?.value || 'galaxy',
+      background: bgSelect?.value || 'glacier',
       font: fontSelect?.value || 'default',
       music: isMusicEnabled,
       sound: isSoundEnabled,
@@ -370,7 +420,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadGameSettings();
 
-  // --- PRIVACY GATE (Pops BEFORE Registering) ---
+  // Settings Handlers
+  settingsOpenBtn?.addEventListener('click', () => settingsModal?.classList.remove('hidden'));
+  const closeSettings = () => settingsModal?.classList.add('hidden');
+  settingsCloseX?.addEventListener('click', closeSettings);
+  settingsSaveBtn?.addEventListener('click', () => {
+    saveGameSettings();
+    closeSettings();
+  });
+
+  // Admin Portal inside Settings
+  adminOpenBtn?.addEventListener('click', () => {
+    settingsModal?.classList.add('hidden');
+    adminSecretInput.value = '';
+    adminErrorMsg.classList.add('hidden');
+    adminLoginSec.classList.remove('hidden');
+    adminDashboardSec.classList.add('hidden');
+    adminModal.classList.remove('hidden');
+  });
+
+  adminCloseX?.addEventListener('click', () => adminModal.classList.add('hidden'));
+
+  async function fetchAdminUsers(key) {
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: key })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        adminErrorMsg.textContent = data.error || 'Access denied';
+        adminErrorMsg.classList.remove('hidden');
+        return;
+      }
+
+      adminLoginSec.classList.add('hidden');
+      adminDashboardSec.classList.remove('hidden');
+      totalUsersCount.textContent = `Total Registered Players: ${data.users.length}`;
+
+      adminUsersTableBody.innerHTML = '';
+      data.users.forEach(u => {
+        const tr = document.createElement('tr');
+        const regDate = new Date(u.registeredAt).toLocaleDateString();
+        tr.innerHTML = `
+          <td><strong>${u.username}</strong></td>
+          <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
+          <td>${u.matchesPlayed || 0}</td>
+          <td>${u.matchesWon || 0}</td>
+          <td>${regDate}</td>
+        `;
+        adminUsersTableBody.appendChild(tr);
+      });
+    } catch (err) {
+      adminErrorMsg.textContent = 'Failed to load users.';
+      adminErrorMsg.classList.remove('hidden');
+    }
+  }
+
+  adminUnlockBtn?.addEventListener('click', () => {
+    const key = adminSecretInput.value.trim();
+    if (key) fetchAdminUsers(key);
+  });
+
+  adminRefreshBtn?.addEventListener('click', () => {
+    const key = adminSecretInput.value.trim();
+    if (key) fetchAdminUsers(key);
+  });
+
+  // --- PRIVACY GATE ---
   openRegisterBtn?.addEventListener('click', () => {
     privacyModal?.classList.remove('hidden');
   });
@@ -651,66 +770,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   historyCloseX?.addEventListener('click', () => historyModal.classList.add('hidden'));
 
-  // Admin Portal
- adminOpenBtn?.addEventListener('click', () => {
-    settingsModal?.classList.add('hidden'); // Closes settings when admin opens
-    adminSecretInput.value = '';
-    adminErrorMsg.classList.add('hidden');
-    adminLoginSec.classList.remove('hidden');
-    adminDashboardSec.classList.add('hidden');
-    adminModal.classList.remove('hidden');
-  });
-  
-  adminCloseX?.addEventListener('click', () => adminModal.classList.add('hidden'));
-
-  async function fetchAdminUsers(key) {
-    try {
-      const res = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminKey: key })
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        adminErrorMsg.textContent = data.error || 'Access denied';
-        adminErrorMsg.classList.remove('hidden');
-        return;
-      }
-
-      adminLoginSec.classList.add('hidden');
-      adminDashboardSec.classList.remove('hidden');
-      totalUsersCount.textContent = `Total Registered Players: ${data.users.length}`;
-
-      adminUsersTableBody.innerHTML = '';
-      data.users.forEach(u => {
-        const tr = document.createElement('tr');
-        const regDate = new Date(u.registeredAt).toLocaleDateString();
-        tr.innerHTML = `
-          <td><strong>${u.username}</strong></td>
-          <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
-          <td>${u.matchesPlayed || 0}</td>
-          <td>${u.matchesWon || 0}</td>
-          <td>${regDate}</td>
-        `;
-        adminUsersTableBody.appendChild(tr);
-      });
-    } catch (err) {
-      adminErrorMsg.textContent = 'Failed to load users.';
-      adminErrorMsg.classList.remove('hidden');
-    }
-  }
-
-  adminUnlockBtn?.addEventListener('click', () => {
-    const key = adminSecretInput.value.trim();
-    if (key) fetchAdminUsers(key);
-  });
-
-  adminRefreshBtn?.addEventListener('click', () => {
-    const key = adminSecretInput.value.trim();
-    if (key) fetchAdminUsers(key);
-  });
-
   // --- WHITE GLITTER PARTICLES ---
   const glitterCanvas = document.getElementById('glitter-canvas');
   if (glitterCanvas) {
@@ -907,15 +966,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => playTone(330, 'sine', 0.40, 0.08), 120);
   }
 
-  // Settings Handlers
-  settingsOpenBtn?.addEventListener('click', () => settingsModal?.classList.remove('hidden'));
-  const closeSettings = () => settingsModal?.classList.add('hidden');
-  settingsCloseX?.addEventListener('click', closeSettings);
-  settingsSaveBtn?.addEventListener('click', () => {
-    saveGameSettings();
-    closeSettings();
-  });
-
   modalCloseX?.addEventListener('click', () => winnerModal?.classList.add('hidden'));
 
   document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
@@ -1026,6 +1076,10 @@ document.addEventListener('DOMContentLoaded', () => {
     completedBoxes.clear();
 
     if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen';
+
+    // Clear and reset chat drawer
+    if (chatMessages) chatMessages.innerHTML = '';
+    chatDrawer?.classList.add('hidden');
 
     lobbyView?.classList.add('hidden');
     gameView?.classList.remove('hidden', 'game-locked');
@@ -1145,6 +1199,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('keydown', (e) => {
+    // Prevent interfering with typing in chat
+    if (document.activeElement === chatInput) return;
+
     if (isEliminated || !selectedCell) return;
     const key = e.key.toUpperCase();
 
@@ -1336,10 +1393,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     winnerModal?.classList.remove('hidden');
   });
-});
-const fontColorPicker = document.getElementById('font-color-picker');
-
-fontColorPicker?.addEventListener('input', (e) => {
-  document.documentElement.style.setProperty('--text', e.target.value);
-  document.documentElement.style.setProperty('--number-color', e.target.value);
 });

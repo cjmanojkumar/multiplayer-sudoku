@@ -23,16 +23,16 @@
 [data-font="dancing"] * { font-family: 'Dancing Script', cursive !important; }
 
 /* =========================================
-   PALETTES (HIGH TRANSLUCENCY)
+   THEMES (HIGH TRANSLUCENCY)
    ========================================= */
 [data-theme="dark"] {
   --bg: #0f172a;
   --card: rgba(15, 23, 42, 0.18);
-  --card-hover: rgba(15, 23, 42, 0.28);
   --accent: #38bdf8;
   --success: #22c55e;
   --error: #ef4444;
   --text: #f8fafc;
+  --text-heading: #38bdf8;
   --muted: #cbd5e1;
   --border: rgba(255, 255, 255, 0.45);
   --grid-line: rgba(255, 255, 255, 0.7);
@@ -44,11 +44,11 @@
 [data-theme="neon"] {
   --bg: #11052C;
   --card: rgba(20, 8, 45, 0.2);
-  --card-hover: rgba(20, 8, 45, 0.32);
   --accent: #f72585;
   --success: #4cc9f0;
   --error: #ff4d6d;
   --text: #ffffff;
+  --text-heading: #f472b6;
   --muted: #f3c4fb;
   --border: rgba(247, 37, 133, 0.55);
   --grid-line: #f72585;
@@ -60,11 +60,11 @@
 [data-theme="emerald"] {
   --bg: #064e3b;
   --card: rgba(4, 70, 53, 0.2);
-  --card-hover: rgba(4, 70, 53, 0.3);
   --accent: #34d399;
   --success: #fbbf24;
   --error: #f87171;
   --text: #f0fdf4;
+  --text-heading: #6ee7b7;
   --muted: #d1fae5;
   --border: rgba(52, 211, 153, 0.5);
   --grid-line: #34d399;
@@ -76,11 +76,11 @@
 [data-theme="sunset"] {
   --bg: #2b0938;
   --card: rgba(55, 15, 72, 0.2);
-  --card-hover: rgba(55, 15, 72, 0.32);
   --accent: #ff7a00;
   --success: #ffd166;
   --error: #ff3366;
   --text: #fff5eb;
+  --text-heading: #fcd34d;
   --muted: #fbcfe8;
   --border: rgba(255, 122, 0, 0.5);
   --grid-line: #ff7a00;
@@ -92,11 +92,11 @@
 [data-theme="dracula"] {
   --bg: #282a36;
   --card: rgba(40, 42, 54, 0.22);
-  --card-hover: rgba(40, 42, 54, 0.32);
   --accent: #bd93f9;
   --success: #50fa7b;
   --error: #ff5555;
   --text: #f8f8f2;
+  --text-heading: #c084fc;
   --muted: #d6acff;
   --border: rgba(189, 147, 249, 0.5);
   --grid-line: #ff79c6;
@@ -108,11 +108,11 @@
 [data-theme="paper"] {
   --bg: #f8fafc;
   --card: rgba(255, 255, 255, 0.35);
-  --card-hover: rgba(255, 255, 255, 0.5);
   --accent: #2563eb;
   --success: #16a34a;
   --error: #dc2626;
   --text: #0f172a;
+  --text-heading: #1e3a8a;
   --muted: #334155;
   --border: rgba(30, 41, 59, 0.5);
   --grid-line: #1e293b;
@@ -121,64 +121,87 @@
   --cell-focus: rgba(37, 99, 235, 0.12);
 }
 
-/* Dark Galaxy: Crisp ice-white text with cyan highlights */
-[data-theme="dark"] {
-  --text: #f8fafc;
-  --text-heading: #38bdf8;
-  --muted: #94a3b8;
-  --number-color: #e2e8f0;
+/* =======================================================
+   RESPONSIVE LAYOUT ENGINE (CENTER IN PORTRAIT, RIGHT IN LANDSCAPE)
+   ======================================================= */
+body {
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  overflow-x: hidden;
+  position: relative;
+  /* Default Portrait / Mobile: Centered */
+  justify-content: center;
 }
 
-/* Cyber Neon: Soft electric violet text with hot pink headings */
-[data-theme="neon"] {
-  --text: #fdf4ff;
-  --text-heading: #f472b6;
-  --muted: #d8b4fe;
-  --number-color: #fae8ff;
+/* Landscape / Desktop: Dock neatly to the Right Side */
+@media (orientation: landscape) and (min-width: 768px) {
+  body {
+    justify-content: flex-end;
+    padding-right: 48px;
+  }
 }
 
-/* Emerald Forest: Minty pale-green text with gold headings */
-[data-theme="emerald"] {
-  --text: #ecfdf5;
-  --text-heading: #6ee7b7;
-  --muted: #a7f3d0;
-  --number-color: #d1fae5;
+.arena-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 10 !important;
+  pointer-events: auto !important;
 }
 
-/* Sunset / Amber: Warm cream text with golden headings */
-[data-theme="sunset"] {
-  --text: #fffbeb;
-  --text-heading: #fcd34d;
-  --muted: #fde68a;
-  --number-color: #fef3c7;
+/* Top bar positioning Settings Button directly on top of the menu */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
-/* Dracula: Pale lavender-grey text with neon purple headings */
-[data-theme="dracula"] {
-  --text: #f8f8f2;
-  --text-heading: #c084fc;
-  --muted: #d6acff;
-  --number-color: #f1f5f9;
+.top-bar h1 {
+  font-size: 1.4rem;
+  color: var(--text-heading) !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
 }
 
-/* Paper Frost (Light): Deep charcoal text for high contrast */
-[data-theme="paper"] {
-  --text: #0f172a;
-  --text-heading: #1e3a8a;
-  --muted: #475569;
-  --number-color: #1e293b;
+.icon-btn {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1.5px solid var(--border);
+  color: var(--text) !important;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.icon-btn:hover {
+  background: var(--accent);
+  color: #000 !important;
+}
+
+.admin-btn {
+  background: rgba(234, 179, 8, 0.18) !important;
+  border-color: #eab308 !important;
+  color: #fef08a !important;
 }
 
 /* =======================================================
-   ARCHITECTURAL PENCIL SKETCH LINEWORK WITH HIGH CLARITY
+   ARCHITECTURAL PENCIL SKETCH LINEWORK
    ======================================================= */
 .sketch-card,
 .sketch-modal {
   border-radius: 4px 2px 3px 2px / 2px 4px 2px 3px !important;
   border: 1.6px solid var(--border) !important;
-  box-shadow: 
-    0 12px 36px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
 }
 
 .sketch-border {
@@ -191,7 +214,7 @@
   border: 1.4px solid var(--border) !important;
   background: rgba(0, 0, 0, 0.22) !important;
   backdrop-filter: blur(12px) !important;
-  color: #fff !important;
+  color: var(--text) !important;
   outline: none;
 }
 .sketch-input:focus {
@@ -209,7 +232,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Sudoku 9x9 Grid (Pencil-ruled translucent glass) */
+/* 9x9 Sudoku Grid */
 .sketch-grid {
   border-radius: 3px 2px 2px 3px / 2px 3px 3px 2px !important;
   border: 2.4px solid var(--grid-line) !important;
@@ -235,12 +258,8 @@
   background: rgba(0, 0, 0, 0.08);
 }
 
-.cell:nth-child(3n) { 
-  border-right: 2.2px solid var(--grid-line) !important; 
-}
-.cell:nth-child(9n) { 
-  border-right: none !important; 
-}
+.cell:nth-child(3n) { border-right: 2.2px solid var(--grid-line) !important; }
+.cell:nth-child(9n) { border-right: none !important; }
 .cell:nth-child(n+19):nth-child(-n+27),
 .cell:nth-child(n+46):nth-child(-n+54) {
   border-bottom: 2.2px solid var(--grid-line) !important;
@@ -273,7 +292,6 @@
   75% { transform: translateX(4px); }
 }
 
-/* Translucent Keypad Buttons */
 .symbol-btn {
   background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
@@ -301,69 +319,7 @@
   border-color: transparent !important;
 }
 
-/* Headings */
-.top-bar h1,
-.modal-header h2,
-.privacy-intro,
-.privacy-content-scroll h3 {
-  color: var(--text-heading) !important;
-}
-
-/* Form Labels & Status Text */
-.input-group label,
-.host-settings label,
-.setting-row label,
-.setting-toggle-row {
-  color: var(--text) !important;
-}
-
-/* Input Fields & Dropdowns */
-.sketch-input,
-.auth-form input[type="text"],
-.auth-form input[type="password"] {
-  color: var(--text) !important;
-}
-
-/* Sudoku Numbers (Grid & Keypad) */
-.cell.prefilled {
-  color: var(--number-color) !important;
-}
-
-.symbol-btn {
-  color: var(--text) !important;
-}
-
-/* Profile Modal Metrics */
-.metric-val {
-  color: var(--text) !important;
-}
-
-/* Radio Mode & Secondary Buttons */
-.radio-label,
-.btn.secondary,
-.icon-btn {
-  color: var(--text) !important;
-}
-
-/* Base Layout & Dynamic Scenery */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-}
-
-body {
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-  overflow-x: hidden;
-  position: relative;
-}
-
+/* Background Layers */
 .scenic-bg {
   position: fixed;
   inset: 0;
@@ -420,68 +376,14 @@ body {
   background: radial-gradient(circle at center, rgba(148, 163, 184, 0.85) 0%, rgba(30, 41, 59, 0.95) 100%);
 }
 
-/* Enhanced Translucency Glass Filter */
 .frosted {
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
 }
 
-.arena-container {
-  width: 100%;
-  max-width: 520px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  position: relative;
-  z-index: 10 !important;
-  pointer-events: auto !important;
-}
-
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.top-bar h1 {
-  font-size: 1.45rem;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
-}
-
-.top-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.icon-btn {
-  background: rgba(0, 0, 0, 0.22);
-  border: 1.5px solid var(--border);
-  color: #fff;
-  border-radius: 4px;
-  padding: 6px 14px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.icon-btn:hover {
-  background: var(--accent);
-  color: #000;
-}
-
-.admin-btn {
-  background: rgba(234, 179, 8, 0.18) !important;
-  border-color: #eab308 !important;
-  color: #fef08a !important;
-}
-
 .card {
   background: var(--card);
-  padding: 22px;
+  padding: 20px;
   position: relative;
 }
 
@@ -494,7 +396,7 @@ body {
 
 /* Auth Bar */
 .auth-bar {
-  padding: 10px 16px !important;
+  padding: 8px 14px !important;
   background: var(--card);
 }
 
@@ -502,12 +404,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
 .auth-btn-group {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .auth-form {
@@ -543,7 +445,7 @@ body {
 .auth-form input[type="text"] {
   width: 100%;
   padding: 9px 12px;
-  color: #ffffff;
+  color: var(--text) !important;
   font-size: 0.95rem;
   font-weight: 600;
 }
@@ -590,7 +492,7 @@ body {
   cursor: pointer;
   border-radius: 3px;
   transition: background 0.2s;
-  color: #fff;
+  color: var(--text);
   user-select: none;
 }
 
@@ -604,7 +506,7 @@ body {
 .input-group label, .host-settings label {
   display: block;
   font-size: 0.85rem;
-  color: #ffffff;
+  color: var(--text) !important;
   margin-bottom: 6px;
   font-weight: 700;
 }
@@ -612,7 +514,7 @@ body {
 input[type="text"], input[type="number"], select {
   width: 100%;
   padding: 9px 12px;
-  color: #ffffff;
+  color: var(--text);
   font-size: 0.95rem;
   font-weight: 600;
 }
@@ -654,7 +556,7 @@ input[type="text"], input[type="number"], select {
 }
 
 .btn.primary { background: var(--accent); color: #000; }
-.btn.secondary { background: rgba(255, 255, 255, 0.15); color: #fff; }
+.btn.secondary { background: rgba(255, 255, 255, 0.15); color: var(--text); }
 .btn.full-width { width: 100%; }
 
 .btn.small {
@@ -670,7 +572,6 @@ input[type="text"], input[type="number"], select {
   font-size: 0.75rem;
   cursor: pointer;
 }
-
 .btn.danger-small:hover { background: var(--error); color: #fff; }
 
 .divider {
@@ -696,7 +597,7 @@ input[type="text"], input[type="number"], select {
   color: var(--muted);
 }
 
-/* 7-Tier Slider UI */
+/* 7-Tier Slider */
 .slider-header {
   display: flex;
   justify-content: space-between;
@@ -757,6 +658,12 @@ input[type="text"], input[type="number"], select {
   align-items: center;
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+.hud-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 .my-lives {
@@ -889,6 +796,87 @@ input[type="text"], input[type="number"], select {
   100% { opacity: 0; transform: translate(-50%, -70px) scale(1.6); }
 }
 
+/* =======================================================
+   IN-GAME LIVE CHAT FLOATING DRAWER
+   ======================================================= */
+.chat-drawer {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 320px;
+  max-width: calc(100vw - 48px);
+  height: 380px;
+  background: var(--card);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+  .chat-drawer {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    height: 320px;
+  }
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 6px;
+  color: var(--text-heading);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+  font-size: 0.82rem;
+}
+
+.chat-msg {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  word-break: break-word;
+}
+.chat-msg.my-msg {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent);
+}
+
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.chat-meta strong { color: var(--accent); }
+
+.chat-input-row {
+  display: flex;
+  gap: 6px;
+}
+.chat-input-row input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
 /* Modals */
 .modal-backdrop {
   position: fixed;
@@ -926,6 +914,10 @@ input[type="text"], input[type="number"], select {
   align-items: center;
 }
 
+.modal-header h2 {
+  color: var(--text-heading) !important;
+}
+
 .close-x {
   font-size: 1.6rem;
   color: var(--muted);
@@ -942,7 +934,7 @@ input[type="text"], input[type="number"], select {
 .setting-row label {
   display: block;
   font-size: 0.85rem;
-  color: #fff;
+  color: var(--text) !important;
   font-weight: 700;
   margin-bottom: 4px;
 }
@@ -955,6 +947,7 @@ input[type="text"], input[type="number"], select {
   border-top: 1px dashed rgba(255, 255, 255, 0.25);
   font-weight: 700;
   font-size: 0.9rem;
+  color: var(--text) !important;
 }
 
 .toggle-checkbox {
@@ -1054,11 +1047,11 @@ input[type="text"], input[type="number"], select {
 .metric-val {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text) !important;
 }
 
 .metric-val.highlight {
-  color: var(--accent);
+  color: var(--accent) !important;
 }
 
 .profile-footer-stats {
@@ -1130,7 +1123,7 @@ input[type="text"], input[type="number"], select {
 /* Privacy Statement */
 .privacy-intro {
   font-size: 0.85rem;
-  color: #fff;
+  color: var(--text-heading) !important;
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -1149,7 +1142,7 @@ input[type="text"], input[type="number"], select {
 
 .privacy-content-scroll h3 {
   font-size: 0.95rem;
-  color: #fff;
+  color: var(--text-heading) !important;
   margin: 12px 0 4px 0;
 }
 

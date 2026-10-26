@@ -11,7 +11,7 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <!-- Full-Screen Backdrop -->
+  <!-- Full-Screen Realistic Scenery -->
   <div id="scenic-bg" class="scenic-bg">
     <div class="scenic-overlay"></div>
   </div>
@@ -20,12 +20,10 @@
   <div id="result-flash-screen" class="result-flash-screen"></div>
 
   <div class="arena-container">
+    <!-- Top Bar with Title and Settings Directly on Top of the Main Menu -->
     <div class="top-bar">
       <h1>⚡ Sudoku Arena</h1>
-      <div class="top-buttons">
-        <button id="settings-open-btn" class="icon-btn" title="Game Settings">⚙️ Settings</button>
-      </div>
-    </div>
+      <button id="settings-open-btn" class="icon-btn sketch-btn" title="Game Settings">⚙️ Settings</button>
     </div>
 
     <!-- User Account Status Bar -->
@@ -117,7 +115,10 @@
           <div class="room-tag">Match: <span id="current-room"></span></div>
           <div class="my-lives" id="my-lives">Lives: ❤️❤️❤️</div>
           <div class="timer-box">⏳ <span id="timer-display">10:00</span></div>
-          <button id="quit-btn" class="btn danger-small sketch-border" title="Quit match">Resign 🏳️</button>
+          <div class="hud-actions">
+            <button id="chat-toggle-btn" class="btn small sketch-btn" title="Open In-Game Chat">💬 Chat</button>
+            <button id="quit-btn" class="btn danger-small sketch-border" title="Quit match">Resign 🏳️</button>
+          </div>
         </div>
         <div class="scoreboard" id="scoreboard"></div>
       </div>
@@ -137,7 +138,20 @@
     </div>
   </div>
 
-  <!-- Settings Modal -->
+  <!-- In-Game Chat Floating Drawer -->
+  <div id="chat-drawer" class="chat-drawer frosted sketch-modal hidden">
+    <div class="chat-header">
+      <span>💬 Match Chat</span>
+      <span id="chat-close-btn" class="close-x">&times;</span>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <form id="chat-form" class="chat-input-row">
+      <input type="text" id="chat-input" class="sketch-input" placeholder="Type a message..." maxlength="120" autocomplete="off" />
+      <button type="submit" class="btn primary small sketch-btn">Send</button>
+    </form>
+  </div>
+
+  <!-- Settings Modal (With Admin Portal Button inside) -->
   <div id="settings-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted settings-card sketch-modal">
       <div class="modal-header">
@@ -168,15 +182,6 @@
           </select>
         </div>
 
-        <div class="setting-row">
-         <label for="font-color-picker">Font Color:</label>
-         <div class="color-picker-wrap">
-           <input type="color" id="font-color-picker" value="#f8fafc" />
-           <span class="color-hint">Tap circle to change font color</span>
-         </div>
-       </div>
-
-<!-- 20 Clean Nature & Artistic Backdrops -->
         <div class="setting-row">
           <label for="bg-select">Theme & Scenery:</label>
           <select id="bg-select" class="sketch-input">
@@ -244,7 +249,6 @@
           <input type="checkbox" id="emoji-toggle" checked class="toggle-checkbox" />
         </div>
 
-        <!-- Admin Portal Trigger Inside Settings -->
         <div class="setting-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.25);">
           <button type="button" id="admin-open-btn" class="btn admin-btn full-width sketch-btn" style="padding: 8px;">👑 Admin Portal</button>
         </div>
@@ -330,7 +334,7 @@
     </div>
   </div>
 
-  <!-- Privacy Gate Modal (Pops Before Registering) -->
+  <!-- Privacy Gate Modal -->
   <div id="privacy-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted privacy-modal-card sketch-modal">
       <div class="modal-header">
@@ -339,16 +343,12 @@
       </div>
       <div class="privacy-content-scroll sketch-border">
         <p class="privacy-intro">Before creating an account on Sudoku Arena, please review our privacy commitment:</p>
-        
         <h3>1. Data We Store</h3>
         <p>We store only your unique username, match career statistics, and approved friendships. No personal identifiers or emails are collected.</p>
-
         <h3>2. Cryptographic Protection</h3>
         <p>Passwords are never saved in plain text. Every password is salt-hashed using <strong>bcryptjs (10 rounds)</strong> before storage.</p>
-
         <h3>3. Friend Presence</h3>
         <p>Your online presence is shared strictly with confirmed friends on your list via real-time WebSocket sessions to facilitate games.</p>
-
         <h3>4. Account Ownership</h3>
         <p>You can request data reset or account removal by reaching out to the game administrator at any time.</p>
       </div>
@@ -359,7 +359,7 @@
     </div>
   </div>
 
-  <!-- Player Personal History Modal -->
+  <!-- Match History Modal -->
   <div id="history-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted history-card sketch-modal">
       <div class="modal-header">
@@ -385,7 +385,7 @@
     </div>
   </div>
 
-  <!-- Register / Login Modal with Password Visibility Eye -->
+  <!-- Auth Modal -->
   <div id="auth-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted sketch-modal">
       <div class="modal-header">
@@ -456,7 +456,7 @@
     </div>
   </div>
 
-  <!-- Winner / End Game Modal -->
+  <!-- Winner Modal -->
   <div id="winner-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted sketch-modal">
       <div class="modal-header">
