@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     volcano: { url: 'https://images.unsplash.com/photo-1619266465172-02a857c3556d?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
     bamboo: { url: 'https://images.unsplash.com/photo-1510398462662-b28a5183460d?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
     galaxy: { url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    reef: { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    reef: { url: 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
     cliff: { url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
-    autumn: { url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    autumn: { url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
     river: { url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' }
   };
 
