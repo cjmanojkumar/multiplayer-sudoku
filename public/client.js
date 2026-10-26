@@ -447,7 +447,22 @@ document.addEventListener('DOMContentLoaded', () => {
       adminErrorMsg.classList.remove('hidden');
     }
   }
-
+ adminUsersTableBody.innerHTML = '';
+ data.users.forEach(u => {
+   const tr = document.createElement('tr');
+   const regDate = new Date(u.registeredAt).toLocaleDateString();
+   tr.innerHTML = `
+     <td><strong>${u.username}</strong></td>
+     <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
+     <td>${u.matchesPlayed || 0}</td>
+     <td>${u.matchesWon || 0}</td>
+     <td>${regDate}</td>
+     <td>
+       <button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button>
+     </td>
+   `;
+  adminUsersTableBody.appendChild(tr);
+ }); 
   adminUnlockBtn?.addEventListener('click', () => {
     const key = adminSecretInput.value.trim();
     if (key) fetchAdminUsers(key);
@@ -1360,3 +1375,55 @@ document.addEventListener('DOMContentLoaded', () => {
     winnerModal?.classList.remove('hidden');
   });
 });
+const deleteMyAccountBtn = document.getElementById('delete-my-account-btn');
+
+deleteMyAccountBtn?.addEventListener('click', async () => {
+  if (!currentUser) return;
+
+  const confirmed = confirm('Are you sure you want to permanently delete your account, game stats, and friend links? This cannot be undone.');
+  if (!confirmed) return;
+
+  const pass = prompt('Please enter your password to confirm account deletion:');
+  if (!pass) return;
+
+  try {
+    const res = await fetch('/api/user/delete-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser.username, password: pass })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.error || 'Failed to delete account.');
+    }
+
+    alert(data.message);
+    localStorage.removeItem('sudoku_active_user');
+    currentUser = null;
+    location.reload();
+  } catch (err) {
+    alert('Connection error. Could not delete account.');
+  }
+});
+window.adminDeleteUser = async function(targetUsername) {
+  const key = adminSecretInput.value.trim();
+  if (!key) return;
+
+  if (!confirm(`Are you sure you want to permanently delete ${targetUsername}?`)) return;
+
+  try {
+    const res = await fetch('/api/admin/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: key, targetUsername })
+    });
+    const data = await res.json();
+    if (!res.ok) return alert(data.error || 'Failed to delete user.');
+
+    alert(data.message);
+    fetchAdminUsers(key); // Refresh table
+  } catch (err) {
+    alert('Failed to connect to server.');
+  }
+};
