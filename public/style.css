@@ -503,12 +503,62 @@ body {
 
 .radio-label input { display: none; }
 
-.input-group label, .host-settings label {
+/* 1. Strictly enforce border-box on all elements and form controls */
+*, *::before, *::after {
+  box-sizing: border-box !important;
+  margin: 0;
+  padding: 0;
+}
+
+input, select, textarea, button {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+/* 2. Contain card contents cleanly within pencil borders */
+.card {
+  background: var(--card);
+  padding: 20px;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* Prevents any child linework from poking through */
+}
+
+/* 3. Ensure input groups and inputs stay locked to container width */
+.input-group {
+  width: 100%;
+}
+
+.sketch-input {
+  width: 100% !important;
+  max-width: 100% !important;
   display: block;
-  font-size: 0.85rem;
+  border-radius: 3px 1px 2px 2px / 2px 3px 1px 2px !important;
+  border: 1.4px solid var(--border) !important;
+  background: rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(12px) !important;
   color: var(--text) !important;
-  margin-bottom: 6px;
-  font-weight: 700;
+  outline: none;
+}
+
+/* 4. Constrain grid columns so the Time Limit input cannot expand past the right edge */
+.host-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.setting-col {
+  min-width: 0;
+  width: 100%;
+}
+
+.setting-col input,
+.setting-col select {
+  width: 100% !important;
 }
 
 input[type="text"], input[type="number"], select {
