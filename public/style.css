@@ -1199,3 +1199,29 @@ input[type="text"], input[type="number"], select {
 .privacy-content-scroll h3:first-child {
   margin-top: 0;
 }
+.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+.modal-backdrop.hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+.scenic-bg,
+.scenic-overlay,
+.glitter-canvas,
+.result-flash-screen {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+.arena-container {
+  position: relative;
+  z-index: 10 !important;
+  pointer-events: auto !important;
+}
+
+.arena-container * {
+  pointer-events: auto;
+}
