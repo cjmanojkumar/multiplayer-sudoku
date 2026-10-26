@@ -101,6 +101,20 @@ document.addEventListener('DOMContentLoaded', () => {
   bgAudio.loop = true;
   bgAudio.volume = 0.25;
 
+  // Unlocks browser audio autoplay restrictions on the player's very first click
+  function initAudioOnFirstGesture() {
+    getAudioContext();
+    if (isMusicEnabled && bgAudio.paused) {
+      bgAudio.play().catch(() => {});
+    }
+    window.removeEventListener('click', initAudioOnFirstGesture);
+    window.removeEventListener('keydown', initAudioOnFirstGesture);
+    window.removeEventListener('touchstart', initAudioOnFirstGesture);
+  }
+  window.addEventListener('click', initAudioOnFirstGesture);
+  window.addEventListener('keydown', initAudioOnFirstGesture);
+  window.addEventListener('touchstart', initAudioOnFirstGesture);
+
   const SYMBOL_SETS = {
     numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
     letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
@@ -257,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
-  // --- LIVE CHAT DRAWER CONTROLS ---
+  // --- IN-GAME LIVE CHAT ---
   chatToggleBtn?.addEventListener('click', () => {
     chatDrawer?.classList.toggle('hidden');
     if (!chatDrawer?.classList.contains('hidden')) {
@@ -274,25 +288,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = chatInput?.value.trim();
     if (!text || !currentRoomCode) return;
 
-    socket.emit('sendChatMessage', { roomCode: currentRoomCode, text });
+    // Send to server only (do NOT append locally to avoid duplicate rendering)
+    socket.emit('sendChatMessage', { 
+      roomCode: currentRoomCode, 
+      text,
+      clientTime: new Date().toISOString()
+    });
     chatInput.value = '';
   });
 
-  socket.on('newChatMessage', ({ sender, senderId, text, timestamp }) => {
+  // Single source of truth for rendering chat messages
+  socket.on('newChatMessage', ({ sender, senderId, text, clientTime }) => {
     if (!chatMessages) return;
     const isMe = senderId === myId;
+    
+    // Safely parse the timestamp into local format (IST / 12-hour AM/PM)
+    const validDate = clientTime ? new Date(clientTime) : new Date();
+    const localTime = validDate.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true 
+    });
+
     const msgDiv = document.createElement('div');
     msgDiv.className = `chat-msg ${isMe ? 'my-msg' : ''}`;
     msgDiv.innerHTML = `
       <div class="chat-meta">
         <strong>${sender} ${isMe ? '(You)' : ''}</strong>
-        <span>${timestamp}</span>
+        <span>${localTime}</span>
       </div>
       <div>${text}</div>
     `;
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-// --- LIVE CHAT DRAWER CONTROLS ---
+
+    if (!isMe && isSoundEnabled) {
+      playTone(620, 'sine', 0.08, 0.04);
+    }
+  });
+
   chatToggleBtn?.addEventListener('click', () => {
     chatDrawer?.classList.toggle('hidden');
     if (!chatDrawer?.classList.contains('hidden')) {
@@ -1445,4 +1479,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     winnerModal?.classList.remove('hidden');
   });
-});
