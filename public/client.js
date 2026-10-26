@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 20 Verified Backgrounds (matching exact names)
   const BACKGROUND_THEMES = {
-    glacier: { url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    glacier: { url: 'https://images.unsplash.com/photo-1517760444937-f6397edcbbcd?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
     redwood: { url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
     ocean: { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
     pine: { url: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
