@@ -12,32 +12,40 @@ const io = new Server(server);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- PERSISTENT DATABASE ENGINE ---
 const DB_FILE = path.join(__dirname, 'database.json');
+const DEFAULT_ADMIN_KEY = process.env.ADMIN_SECRET_KEY || 'SUDOKU_SUPER_ADMIN_2026';
 
 function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      adminSecretKey: '22Harinishree C J Pallavishree15'
+      adminSecretKey: DEFAULT_ADMIN_KEY
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
   }
   try {
-    return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    const raw = fs.readFileSync(DB_FILE, 'utf8');
+    return JSON.parse(raw);
   } catch (err) {
-    return { users: [], adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026' };
+    console.error('Failed reading database file, returning fallback:', err);
+    return { users: [], adminSecretKey: DEFAULT_ADMIN_KEY };
   }
 }
 
 function saveDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error('Failed to write to database.json:', err);
+  }
 }
 
 loadDB();
 
-// Track online players
-const onlineUsers = new Map(); // username -> socketId
+// Track online players: username (lowercase) -> socket.id
+const onlineUsers = new Map();
 
 // --- AUTHENTICATION API ---
 app.post('/api/register', async (req, res) => {
@@ -62,8 +70,8 @@ app.post('/api/register', async (req, res) => {
     matchesPlayed: 0,
     matchesWon: 0,
     totalScore: 0,
-    friends: [], // array of usernames
-    friendRequests: [], // array of incoming usernames
+    friends: [],
+    friendRequests: [],
     history: [],
     registeredAt: new Date().toISOString(),
     lastLoginAt: new Date().toISOString()
@@ -120,7 +128,7 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
-// --- PROFILE & STATS API ---
+// --- PROFILE & CAREER STATS API ---
 app.get('/api/user/profile/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
@@ -172,7 +180,6 @@ app.post('/api/friends/send-request', (req, res) => {
   target.friendRequests.push(sender.username);
   saveDB(db);
 
-  // Notify target user if currently online
   const targetSocketId = onlineUsers.get(target.username.toLowerCase());
   if (targetSocketId) {
     io.to(targetSocketId).emit('friendRequestReceived', { from: sender.username });
@@ -182,7 +189,7 @@ app.post('/api/friends/send-request', (req, res) => {
 });
 
 app.post('/api/friends/respond-request', (req, res) => {
-  const { username, fromUser, action } = req.body; // action: 'accept' | 'decline'
+  const { username, fromUser, action } = req.body;
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
   const requester = db.users.find(u => u.username.toLowerCase() === fromUser.trim().toLowerCase());
@@ -197,6 +204,9 @@ app.post('/api/friends/respond-request', (req, res) => {
 
     if (!user.friends.includes(requester.username)) user.friends.push(requester.username);
     if (!requester.friends.includes(user.username)) requester.friends.push(user.username);
+  } else if (action === 'remove') {
+    user.friends = (user.friends || []).filter(u => u.toLowerCase() !== requester.username.toLowerCase());
+    requester.friends = (requester.friends || []).filter(u => u.toLowerCase() !== user.username.toLowerCase());
   }
 
   saveDB(db);
@@ -223,10 +233,11 @@ app.get('/api/friends/list/:username', (req, res) => {
 app.get('/api/user/history/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
-  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (!user) return res.status(404).json({ error: 'User not found.' });
   res.json({ success: true, history: user.history || [] });
 });
 
+// --- ADMIN USERS PORTAL API ---
 app.post('/api/admin/users', (req, res) => {
   const { adminKey } = req.body;
   const db = loadDB();
@@ -349,7 +360,6 @@ function terminateMatch(code, reason, matchOutcome = 'draw') {
 }
 
 io.on('connection', (socket) => {
-
   // --- IN-GAME LIVE CHAT ---
   socket.on('sendChatMessage', ({ roomCode, text, clientTime }) => {
     if (!roomCode || !text || !text.trim()) return;
@@ -368,7 +378,7 @@ io.on('connection', (socket) => {
     });
   });
   
-  // Track online status for logged players
+  // Track online presence
   socket.on('registerOnlineUser', ({ username }) => {
     if (username) {
       onlineUsers.set(username.toLowerCase(), socket.id);
@@ -624,7 +634,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    // Clean up online map
     for (const [user, sId] of onlineUsers.entries()) {
       if (sId === socket.id) {
         onlineUsers.delete(user);
