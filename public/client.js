@@ -447,22 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
       adminErrorMsg.classList.remove('hidden');
     }
   }
- adminUsersTableBody.innerHTML = '';
- data.users.forEach(u => {
-   const tr = document.createElement('tr');
-   const regDate = new Date(u.registeredAt).toLocaleDateString();
-   tr.innerHTML = `
-     <td><strong>${u.username}</strong></td>
-     <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
-     <td>${u.matchesPlayed || 0}</td>
-     <td>${u.matchesWon || 0}</td>
-     <td>${regDate}</td>
-     <td>
-       <button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button>
-     </td>
-   `;
-  adminUsersTableBody.appendChild(tr);
- }); 
+
   adminUnlockBtn?.addEventListener('click', () => {
     const key = adminSecretInput.value.trim();
     if (key) fetchAdminUsers(key);
@@ -486,6 +471,110 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- PLAYER PROFILE MODAL ---
+  // --- SELF-SERVICE DATA DELETION ---
+  const deleteMyAccountBtn = document.getElementById('delete-my-account-btn');
+  deleteMyAccountBtn?.addEventListener('click', async () => {
+    if (!currentUser) return;
+
+    const confirmChoice = confirm('⚠️ Are you sure you want to permanently delete your account, match history, and all statistics? This action cannot be undone.');
+    if (!confirmChoice) return;
+
+    const passwordConfirm = prompt('Please enter your password to confirm permanent deletion:');
+    if (!passwordConfirm) return;
+
+    try {
+      const res = await fetch('/api/user/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser.username, password: passwordConfirm })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || 'Failed to delete account.');
+        return;
+      }
+
+      alert(data.message || 'Account successfully deleted.');
+      localStorage.removeItem('sudoku_active_user');
+      currentUser = null;
+      profileModal?.classList.add('hidden');
+      location.reload();
+    } catch (err) {
+      alert('Server connection error. Could not delete account.');
+    }
+  });
+
+  // --- ADMIN PORTAL: USER LISTING WITH DELETE ACTION ---
+  async function fetchAdminUsers(key) {
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: key })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        adminErrorMsg.textContent = data.error || 'Access denied';
+        adminErrorMsg.classList.remove('hidden');
+        return;
+      }
+
+      adminLoginSec.classList.add('hidden');
+      adminDashboardSec.classList.remove('hidden');
+      totalUsersCount.textContent = `Total Registered Players: ${data.users.length}`;
+
+      adminUsersTableBody.innerHTML = '';
+      data.users.forEach(u => {
+        const tr = document.createElement('tr');
+        const regDate = new Date(u.registeredAt).toLocaleDateString();
+        tr.innerHTML = `
+          <td><strong>${u.username}</strong></td>
+          <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
+          <td>${u.matchesPlayed || 0}</td>
+          <td>${u.matchesWon || 0}</td>
+          <td>${regDate}</td>
+          <td>
+            <button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button>
+          </td>
+        `;
+        adminUsersTableBody.appendChild(tr);
+      });
+    } catch (err) {
+      adminErrorMsg.textContent = 'Failed to load users.';
+      adminErrorMsg.classList.remove('hidden');
+    }
+  }
+
+  // Global helper for admin to delete any player
+  window.adminDeleteUser = async function(targetUsername) {
+    const key = adminSecretInput.value.trim();
+    if (!key) return;
+
+    if (!confirm(`Are you sure you want to permanently erase all records and data for user "${targetUsername}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: key, targetUsername })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || 'Failed to delete user.');
+        return;
+      }
+
+      alert(data.message);
+      fetchAdminUsers(key); // Refresh the admin table
+    } catch (err) {
+      alert('Error communicating with server.');
+    }
+  };
   openProfileBtn?.addEventListener('click', async () => {
     if (!currentUser) return;
     try {
@@ -1406,24 +1495,3 @@ deleteMyAccountBtn?.addEventListener('click', async () => {
     alert('Connection error. Could not delete account.');
   }
 });
-window.adminDeleteUser = async function(targetUsername) {
-  const key = adminSecretInput.value.trim();
-  if (!key) return;
-
-  if (!confirm(`Are you sure you want to permanently delete ${targetUsername}?`)) return;
-
-  try {
-    const res = await fetch('/api/admin/delete-user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey: key, targetUsername })
-    });
-    const data = await res.json();
-    if (!res.ok) return alert(data.error || 'Failed to delete user.');
-
-    alert(data.message);
-    fetchAdminUsers(key); // Refresh table
-  } catch (err) {
-    alert('Failed to connect to server.');
-  }
-};

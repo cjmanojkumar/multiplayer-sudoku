@@ -119,6 +119,85 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
+// --- DATA DELETION ENDPOINTS ---
+
+// 1. Self-Service Account Deletion (User deletes their own data)
+app.post('/api/user/delete-account', async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password confirmation required.' });
+  }
+
+  const db = loadDB();
+  const userIndex = db.users.findIndex(u => u.username.toLowerCase() === username.trim().toLowerCase());
+
+  if (userIndex === -1) {
+    return res.status(404).json({ error: 'User does not exist.' });
+  }
+
+  const user = db.users[userIndex];
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) {
+    return res.status(403).json({ error: 'Incorrect password. Cannot delete account.' });
+  }
+
+  const targetName = user.username.toLowerCase();
+
+  // Remove target from other users' friends and request lists
+  db.users.forEach(otherUser => {
+    if (otherUser.friends) {
+      otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
+    }
+    if (otherUser.friendRequests) {
+      otherUser.friendRequests = otherUser.friendRequests.filter(f => f.toLowerCase() !== targetName);
+    }
+  });
+
+  // Permanently delete user
+  db.users.splice(userIndex, 1);
+  saveDB(db);
+
+  onlineUsers.delete(targetName);
+  res.json({ success: true, message: 'Your account and all associated match data were permanently deleted.' });
+});
+
+// 2. Admin Deletion Endpoint (Admin deletes a user from the Admin Portal)
+app.post('/api/admin/delete-user', (req, res) => {
+  const { adminKey, targetUsername } = req.body;
+  const db = loadDB();
+
+  if (adminKey !== db.adminSecretKey) {
+    return res.status(403).json({ error: 'Access denied: Invalid Admin Key.' });
+  }
+
+  if (!targetUsername) {
+    return res.status(400).json({ error: 'Target username is required.' });
+  }
+
+  const targetName = targetUsername.trim().toLowerCase();
+  const userIndex = db.users.findIndex(u => u.username.toLowerCase() === targetName);
+
+  if (userIndex === -1) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  // Remove target from other users' friends and request lists
+  db.users.forEach(otherUser => {
+    if (otherUser.friends) {
+      otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
+    }
+    if (otherUser.friendRequests) {
+      otherUser.friendRequests = otherUser.friendRequests.filter(f => f.toLowerCase() !== targetName);
+    }
+  });
+
+  db.users.splice(userIndex, 1);
+  saveDB(db);
+
+  onlineUsers.delete(targetName);
+  res.json({ success: true, message: `User ${targetUsername} has been permanently deleted.` });
+});
+
 // --- PROFILE & STATS API ---
 app.get('/api/user/profile/:username', (req, res) => {
   const db = loadDB();
@@ -353,7 +432,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // --- IN-GAME CHAT: SINGLE BROADCAST WITH TIMESTAMP ---
   socket.on('sendChatMessage', ({ roomCode, text }) => {
     if (!roomCode || !text || !text.trim()) return;
     const code = roomCode.toUpperCase();
@@ -363,7 +441,6 @@ io.on('connection', (socket) => {
     const player = room.players.find(p => p.id === socket.id);
     const senderName = player ? player.name : 'Player';
 
-    // Broadcast once to all players in the room with an ISO timestamp
     io.to(code).emit('newChatMessage', {
       sender: senderName,
       senderId: socket.id,
@@ -660,61 +737,4 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
-// 1. Player deletes their own account
-app.post('/api/user/delete-account', async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password required to delete account.' });
-  }
-
-  const db = loadDB();
-  const index = db.users.findIndex(u => u.username.toLowerCase() === username.trim().toLowerCase());
-  if (index === -1) {
-    return res.status(404).json({ error: 'User not found.' });
-  }
-
-  const match = await bcrypt.compare(password, db.users[index].passwordHash);
-  if (!match) {
-    return res.status(400).json({ error: 'Incorrect password.' });
-  }
-
-  const deletedUser = db.users[index].username;
-  db.users.splice(index, 1);
-
-  // Clean up references from friends lists
-  db.users.forEach(u => {
-    if (u.friends) u.friends = u.friends.filter(f => f.toLowerCase() !== deletedUser.toLowerCase());
-    if (u.friendRequests) u.friendRequests = u.friendRequests.filter(f => f.toLowerCase() !== deletedUser.toLowerCase());
-  });
-
-  saveDB(db);
-  res.json({ success: true, message: 'Account and associated match records permanently deleted.' });
-});
-
-// 2. Admin deletes any user directly from the Admin Portal
-app.post('/api/admin/delete-user', (req, res) => {
-  const { adminKey, targetUsername } = req.body;
-  const db = loadDB();
-
-  if (adminKey !== db.adminSecretKey) {
-    return res.status(403).json({ error: 'Access denied: Invalid Admin Key.' });
-  }
-
-  const index = db.users.findIndex(u => u.username.toLowerCase() === targetUsername.trim().toLowerCase());
-  if (index === -1) {
-    return res.status(404).json({ error: 'User not found.' });
-  }
-
-  const deletedUser = db.users[index].username;
-  db.users.splice(index, 1);
-
-  // Remove from friends and requests
-  db.users.forEach(u => {
-    if (u.friends) u.friends = u.friends.filter(f => f.toLowerCase() !== deletedUser.toLowerCase());
-    if (u.friendRequests) u.friendRequests = u.friendRequests.filter(f => f.toLowerCase() !== deletedUser.toLowerCase());
-  });
-
-  saveDB(db);
-  res.json({ success: true, message: `User ${deletedUser} successfully deleted.` });
 });
