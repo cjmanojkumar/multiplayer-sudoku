@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentUser = null;
 
   let isSoundEnabled = true;
-  let isMusicEnabled = true; // Enabled by default
+  let isMusicEnabled = true;
   let isEmojiEnabled = true;
 
-  // 20 Verified Backgrounds (matching exact names)
+  // 20 Verified Backgrounds
   const BACKGROUND_THEMES = {
     glacier: { url: 'https://images.unsplash.com/photo-1493581177532-0d70399ff18a?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
     redwood: { url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
@@ -37,12 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     river: { url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' }
   };
 
-  // Instrumental Background Track
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
   bgAudio.loop = true;
   bgAudio.volume = 0.25;
 
-  // --- BROWSER AUTOPLAY UNLOCK ON FIRST CLICK ---
   let hasUserInteracted = false;
   function triggerAudioUnlock() {
     if (hasUserInteracted) return;
@@ -107,11 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsCloseX = document.getElementById('settings-close-x');
   const settingsSaveBtn = document.getElementById('settings-save-btn');
 
-  // Password Visibility Toggle
   const authPasswordInput = document.getElementById('auth-password');
   const togglePasswordVisibilityBtn = document.getElementById('toggle-password-visibility');
 
-  //// Profile DOM Elements
+  // Profile DOM Elements
   const openProfileBtn = document.getElementById('open-profile-btn');
   const profileModal = document.getElementById('profile-modal');
   const profileCloseX = document.getElementById('profile-close-x');
@@ -126,58 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const profTotalScore = document.getElementById('prof-total-score');
   const profFriendsCount = document.getElementById('prof-friends-count');
   const profMemberSince = document.getElementById('prof-member-since');
+  const deleteMyAccountBtn = document.getElementById('delete-my-account-btn');
 
-  // Status Bar Sync
-  function updateAuthUI() {
-    if (currentUser) {
-      guestAuthControls.classList.add('hidden');
-      loggedAuthControls.classList.remove('hidden');
-      loggedUsernameSpan.textContent = currentUser.username;
-      
-      const pvpW = currentUser.pvpWon || 0;
-      const pvpP = currentUser.pvpPlayed || 0;
-      const botW = currentUser.botWon || 0;
-      const botP = currentUser.botPlayed || 0;
-      userStatsSpan.textContent = `PvP: ${pvpW}W/${pvpP}P | Bot: ${botW}W/${botP}P`;
-
-      if (usernameInput) usernameInput.value = currentUser.username;
-    } else {
-      guestAuthControls.classList.remove('hidden');
-      loggedAuthControls.classList.add('hidden');
-    }
-  }
-
-  // Populate Profile Modal with Separate Stats
-  openProfileBtn?.addEventListener('click', async () => {
-    if (!currentUser) return;
-    try {
-      const res = await fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`);
-      const data = await res.json();
-      if (!data.success) return alert(data.error || 'Failed to load profile.');
-
-      const p = data.profile;
-      profUsername.textContent = p.username;
-      profRole.textContent = p.role.toUpperCase();
-      
-      // PvP Stats
-      profPvpWinRate.textContent = p.pvpWinRate;
-      profPvpWon.textContent = p.pvpWon;
-      profPvpPlayed.textContent = p.pvpPlayed;
-
-      // Bot Stats
-      profBotWinRate.textContent = p.botWinRate;
-      profBotWon.textContent = p.botWon;
-      profBotPlayed.textContent = p.botPlayed;
-
-      profTotalScore.textContent = p.totalScore;
-      profFriendsCount.textContent = p.friendsCount;
-      profMemberSince.textContent = new Date(p.registeredAt).toLocaleDateString([], { month: 'short', year: 'numeric' });
-
-      profileModal?.classList.remove('hidden');
-    } catch (err) {
-      alert('Could not retrieve player profile.');
-    }
-  });
   // Friends Elements
   const openFriendsBtn = document.getElementById('open-friends-btn');
   const friendsModal = document.getElementById('friends-modal');
@@ -286,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = chatInput?.value.trim();
     if (!text || !currentRoomCode) return;
 
-    // Send to server only; do not render locally to prevent duplicate messages
     socket.emit('sendChatMessage', { roomCode: currentRoomCode, text });
     chatInput.value = '';
   });
@@ -295,7 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!chatMessages) return;
     const isMe = senderId === myId;
     
-    // Parse timestamp in the user's local system timezone (IST, etc.)
     const dateObj = timestamp ? new Date(timestamp) : new Date();
     const localTime = dateObj.toLocaleTimeString([], { 
       hour: '2-digit', 
@@ -391,7 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
-  // --- SETTINGS CONTROLS ---
   difficultySlider?.addEventListener('input', (e) => {
     activeDifficultyLevel = parseInt(e.target.value, 10);
     const label = DIFFICULTY_TIERS[activeDifficultyLevel];
@@ -444,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadGameSettings();
 
-  // Settings Handlers
   settingsOpenBtn?.addEventListener('click', () => settingsModal?.classList.remove('hidden'));
   const closeSettings = () => settingsModal?.classList.add('hidden');
   settingsCloseX?.addEventListener('click', closeSettings);
@@ -493,6 +436,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <td>${u.matchesPlayed || 0}</td>
           <td>${u.matchesWon || 0}</td>
           <td>${regDate}</td>
+          <td>
+            <button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button>
+          </td>
         `;
         adminUsersTableBody.appendChild(tr);
       });
@@ -512,96 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (key) fetchAdminUsers(key);
   });
 
-  // --- PRIVACY GATE ---
-  openRegisterBtn?.addEventListener('click', () => {
-    privacyModal?.classList.remove('hidden');
-  });
-
-  privacyCloseX?.addEventListener('click', () => privacyModal?.classList.add('hidden'));
-
-  privacyAcceptBtn?.addEventListener('click', () => {
-    privacyModal?.classList.add('hidden');
-    openAuth(true);
-  });
-
-  // --- PLAYER PROFILE MODAL ---
-  // --- SELF-SERVICE DATA DELETION ---
-  const deleteMyAccountBtn = document.getElementById('delete-my-account-btn');
-  deleteMyAccountBtn?.addEventListener('click', async () => {
-    if (!currentUser) return;
-
-    const confirmChoice = confirm('⚠️ Are you sure you want to permanently delete your account, match history, and all statistics? This action cannot be undone.');
-    if (!confirmChoice) return;
-
-    const passwordConfirm = prompt('Please enter your password to confirm permanent deletion:');
-    if (!passwordConfirm) return;
-
-    try {
-      const res = await fetch('/api/user/delete-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUser.username, password: passwordConfirm })
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.error || 'Failed to delete account.');
-        return;
-      }
-
-      alert(data.message || 'Account successfully deleted.');
-      localStorage.removeItem('sudoku_active_user');
-      currentUser = null;
-      profileModal?.classList.add('hidden');
-      location.reload();
-    } catch (err) {
-      alert('Server connection error. Could not delete account.');
-    }
-  });
-
-  // --- ADMIN PORTAL: USER LISTING WITH DELETE ACTION ---
-  async function fetchAdminUsers(key) {
-    try {
-      const res = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminKey: key })
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        adminErrorMsg.textContent = data.error || 'Access denied';
-        adminErrorMsg.classList.remove('hidden');
-        return;
-      }
-
-      adminLoginSec.classList.add('hidden');
-      adminDashboardSec.classList.remove('hidden');
-      totalUsersCount.textContent = `Total Registered Players: ${data.users.length}`;
-
-      adminUsersTableBody.innerHTML = '';
-      data.users.forEach(u => {
-        const tr = document.createElement('tr');
-        const regDate = new Date(u.registeredAt).toLocaleDateString();
-        tr.innerHTML = `
-          <td><strong>${u.username}</strong></td>
-          <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
-          <td>${u.matchesPlayed || 0}</td>
-          <td>${u.matchesWon || 0}</td>
-          <td>${regDate}</td>
-          <td>
-            <button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button>
-          </td>
-        `;
-        adminUsersTableBody.appendChild(tr);
-      });
-    } catch (err) {
-      adminErrorMsg.textContent = 'Failed to load users.';
-      adminErrorMsg.classList.remove('hidden');
-    }
-  }
-
-  // Global helper for admin to delete any player
   window.adminDeleteUser = async function(targetUsername) {
     const key = adminSecretInput.value.trim();
     if (!key) return;
@@ -624,11 +480,45 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       alert(data.message);
-      fetchAdminUsers(key); // Refresh the admin table
+      fetchAdminUsers(key);
     } catch (err) {
       alert('Error communicating with server.');
     }
   };
+
+  // --- PRIVACY GATE ---
+  openRegisterBtn?.addEventListener('click', () => {
+    privacyModal?.classList.remove('hidden');
+  });
+
+  privacyCloseX?.addEventListener('click', () => privacyModal?.classList.add('hidden'));
+
+  privacyAcceptBtn?.addEventListener('click', () => {
+    privacyModal?.classList.add('hidden');
+    openAuth(true);
+  });
+
+  // --- STATUS BAR SYNC ---
+  function updateAuthUI() {
+    if (currentUser) {
+      guestAuthControls.classList.add('hidden');
+      loggedAuthControls.classList.remove('hidden');
+      loggedUsernameSpan.textContent = currentUser.username;
+      
+      const pvpW = currentUser.pvpWon || 0;
+      const pvpP = currentUser.pvpPlayed || 0;
+      const botW = currentUser.botWon || 0;
+      const botP = currentUser.botPlayed || 0;
+      userStatsSpan.textContent = `PvP: ${pvpW}W/${pvpP}P | Bot: ${botW}W/${botP}P`;
+
+      if (usernameInput) usernameInput.value = currentUser.username;
+    } else {
+      guestAuthControls.classList.remove('hidden');
+      loggedAuthControls.classList.add('hidden');
+    }
+  }
+
+  // --- PLAYER PROFILE MODAL ---
   openProfileBtn?.addEventListener('click', async () => {
     if (!currentUser) return;
     try {
@@ -639,9 +529,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const p = data.profile;
       profUsername.textContent = p.username;
       profRole.textContent = p.role.toUpperCase();
-      profWinRate.textContent = p.winRate;
-      profMatchesWon.textContent = p.matchesWon;
-      profMatchesPlayed.textContent = p.matchesPlayed;
+      
+      profPvpWinRate.textContent = p.pvpWinRate;
+      profPvpWon.textContent = p.pvpWon;
+      profPvpPlayed.textContent = p.pvpPlayed;
+
+      profBotWinRate.textContent = p.botWinRate;
+      profBotWon.textContent = p.botWon;
+      profBotPlayed.textContent = p.botPlayed;
+
       profTotalScore.textContent = p.totalScore;
       profFriendsCount.textContent = p.friendsCount;
       profMemberSince.textContent = new Date(p.registeredAt).toLocaleDateString([], { month: 'short', year: 'numeric' });
@@ -653,6 +549,37 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   profileCloseX?.addEventListener('click', () => profileModal?.classList.add('hidden'));
+
+  // --- SELF-SERVICE DATA DELETION ---
+  deleteMyAccountBtn?.addEventListener('click', async () => {
+    if (!currentUser) return;
+
+    const confirmed = confirm('Are you sure you want to permanently delete your account, game stats, and friend links? This cannot be undone.');
+    if (!confirmed) return;
+
+    const pass = prompt('Please enter your password to confirm account deletion:');
+    if (!pass) return;
+
+    try {
+      const res = await fetch('/api/user/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser.username, password: pass })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        return alert(data.error || 'Failed to delete account.');
+      }
+
+      alert(data.message);
+      localStorage.removeItem('sudoku_active_user');
+      currentUser = null;
+      location.reload();
+    } catch (err) {
+      alert('Connection error. Could not delete account.');
+    }
+  });
 
   // --- FRIENDS HUB ---
   async function refreshFriendsList() {
@@ -694,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </span>
             </td>
             <td>
-              <button class="btn danger-small sketch-border" onclick="respondFriendReq('${f.username}', 'decline')">Remove</button>
+              <button class="btn danger-small sketch-border" onclick="removeFriend('${f.username}')">Remove</button>
             </td>
           `;
           friendsTableBody.appendChild(tr);
@@ -705,28 +632,38 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
-  // Friends list
-      friendsTableBody.innerHTML = '';
-      if (data.friends && data.friends.length > 0) {
-        noFriendsMsg.classList.add('hidden');
-        data.friends.forEach(f => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${f.username}</strong></td>
-            <td>
-              <span class="status-badge ${f.online ? 'online' : 'offline'}">
-                <span class="status-dot"></span> ${f.online ? 'Online' : 'Offline'}
-              </span>
-            </td>
-            <td>
-              <button class="btn danger-small sketch-border" onclick="removeFriend('${f.username}')">Remove</button>
-            </td>
-          `;
-          friendsTableBody.appendChild(tr);
-        });
+  window.respondFriendReq = async function(fromUser, action) {
+    if (!currentUser) return;
+    try {
+      await fetch('/api/friends/respond-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser.username, fromUser, action })
+      });
+      refreshFriendsList();
+    } catch (e) {}
+  };
+
+  window.removeFriend = async function(targetFriend) {
+    if (!currentUser) return;
+    if (!confirm(`Are you sure you want to remove ${targetFriend} from your friends list?`)) return;
+
+    try {
+      const res = await fetch('/api/friends/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser.username, targetFriend })
+      });
+      const data = await res.json();
+      if (data.success) {
+        refreshFriendsList();
       } else {
-        noFriendsMsg.classList.remove('hidden');
+        alert(data.error || 'Failed to remove friend.');
       }
+    } catch (e) {
+      alert('Network error while removing friend.');
+    }
+  };
 
   openFriendsBtn?.addEventListener('click', () => {
     friendFeedbackMsg.classList.add('hidden');
@@ -782,19 +719,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (e) {
         currentUser = null;
       }
-    }
-  }
-
-  function updateAuthUI() {
-    if (currentUser) {
-      guestAuthControls.classList.add('hidden');
-      loggedAuthControls.classList.remove('hidden');
-      loggedUsernameSpan.textContent = currentUser.username;
-      userStatsSpan.textContent = `${currentUser.matchesWon || 0}W / ${currentUser.matchesPlayed || 0}P`;
-      if (usernameInput) usernameInput.value = currentUser.username;
-    } else {
-      guestAuthControls.classList.remove('hidden');
-      loggedAuthControls.classList.add('hidden');
     }
   }
 
@@ -874,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadPersistedUser();
 
-  // Personal Match History
+  // --- MATCH HISTORY ---
   openHistoryBtn?.addEventListener('click', async () => {
     if (!currentUser) return;
     try {
@@ -908,7 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   historyCloseX?.addEventListener('click', () => historyModal.classList.add('hidden'));
 
-  // --- WHITE GLITTER PARTICLES ---
+  // --- PARTICLES CANVAS ---
   const glitterCanvas = document.getElementById('glitter-canvas');
   if (glitterCanvas) {
     const gCtx = glitterCanvas.getContext('2d');
@@ -956,7 +880,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGlitter();
   }
 
-  // --- PROCEDURAL AUDIO ---
+  // --- WEB AUDIO ---
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -1037,7 +961,7 @@ document.addEventListener('DOMContentLoaded', () => {
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(1400, now + n.delay);
       gain.gain.setValueAtTime(0.0001, now + n.delay);
-      gain.linearRampToValueAtTime?.(0.09, now + n.delay + 0.05);
+      gain.gain.linearRampToValueAtTime(0.09, now + n.delay + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
       osc.connect(filter);
       filter.connect(gain);
@@ -1067,7 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(600, now + n.delay);
       gain.gain.setValueAtTime(0.0001, now + n.delay);
-      gain.linearRampToValueAtTime?.(0.12, now + n.delay + 0.08);
+      gain.gain.linearRampToValueAtTime(0.12, now + n.delay + 0.08);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
       osc.connect(filter);
       sub.connect(filter);
@@ -1090,7 +1014,7 @@ document.addEventListener('DOMContentLoaded', () => {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
       gain.gain.setValueAtTime(0.0001, now);
-      gain.linearRampToValueAtTime?.(0.08, now + 0.1);
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.1);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -1528,35 +1452,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     winnerModal?.classList.remove('hidden');
   });
-});
-const deleteMyAccountBtn = document.getElementById('delete-my-account-btn');
-
-deleteMyAccountBtn?.addEventListener('click', async () => {
-  if (!currentUser) return;
-
-  const confirmed = confirm('Are you sure you want to permanently delete your account, game stats, and friend links? This cannot be undone.');
-  if (!confirmed) return;
-
-  const pass = prompt('Please enter your password to confirm account deletion:');
-  if (!pass) return;
-
-  try {
-    const res = await fetch('/api/user/delete-account', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: currentUser.username, password: pass })
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      return alert(data.error || 'Failed to delete account.');
-    }
-
-    alert(data.message);
-    localStorage.removeItem('sudoku_active_user');
-    currentUser = null;
-    location.reload();
-  } catch (err) {
-    alert('Connection error. Could not delete account.');
-  }
 });
