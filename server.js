@@ -18,7 +18,7 @@ function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      adminSecretKey: '22Harinishree C J Pallavishree15'
+      adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
@@ -58,8 +58,11 @@ app.post('/api/register', async (req, res) => {
     username: cleanUser,
     passwordHash,
     role: cleanUser.toLowerCase() === 'admin' ? 'admin' : 'player',
-    matchesPlayed: 0,
-    matchesWon: 0,
+    // Split PvP vs Bot Statistics
+    pvpPlayed: 0,
+    pvpWon: 0,
+    botPlayed: 0,
+    botWon: 0,
     totalScore: 0,
     friends: [],
     friendRequests: [],
@@ -77,8 +80,10 @@ app.post('/api/register', async (req, res) => {
       id: newUser.id,
       username: newUser.username,
       role: newUser.role,
-      matchesPlayed: 0,
-      matchesWon: 0,
+      pvpPlayed: 0,
+      pvpWon: 0,
+      botPlayed: 0,
+      botWon: 0,
       totalScore: 0,
       friends: [],
       friendRequests: [],
@@ -109,8 +114,10 @@ app.post('/api/login', async (req, res) => {
       id: user.id,
       username: user.username,
       role: user.role,
-      matchesPlayed: user.matchesPlayed || 0,
-      matchesWon: user.matchesWon || 0,
+      pvpPlayed: user.pvpPlayed || 0,
+      pvpWon: user.pvpWon || 0,
+      botPlayed: user.botPlayed || 0,
+      botWon: user.botWon || 0,
       totalScore: user.totalScore || 0,
       friends: user.friends || [],
       friendRequests: user.friendRequests || [],
@@ -119,9 +126,81 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
-// --- DATA DELETION ENDPOINTS ---
+// --- PROFILE & SEPARATE STATS API ---
+app.get('/api/user/profile/:username', (req, res) => {
+  const db = loadDB();
+  const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
+  if (!user) return res.status(404).json({ error: 'Player profile not found.' });
 
-// 1. Self-Service Account Deletion (User deletes their own data)
+  const pvpPlayed = user.pvpPlayed || 0;
+  const pvpWon = user.pvpWon || 0;
+  const pvpWinRate = pvpPlayed > 0 ? Math.round((pvpWon / pvpPlayed) * 100) : 0;
+
+  const botPlayed = user.botPlayed || 0;
+  const botWon = user.botWon || 0;
+  const botWinRate = botPlayed > 0 ? Math.round((botWon / botPlayed) * 100) : 0;
+
+  res.json({
+    success: true,
+    profile: {
+      username: user.username,
+      role: user.role,
+      // Granular PvP Stats
+      pvpPlayed,
+      pvpWon,
+      pvpWinRate: `${pvpWinRate}%`,
+      // Granular Bot Stats
+      botPlayed,
+      botWon,
+      botWinRate: `${botWinRate}%`,
+      totalScore: user.totalScore || 0,
+      registeredAt: user.registeredAt,
+      lastLoginAt: user.lastLoginAt,
+      friendsCount: (user.friends || []).length
+    }
+  });
+});
+
+// --- STATS RECORDING ENGINE (SEPARATES PVP FROM BOT) ---
+function recordMatchStats(leaderboard, outcome, room) {
+  const db = loadDB();
+  const isBotGame = !!room.isBotGame;
+
+  leaderboard.forEach((p, idx) => {
+    // Only update registered human players
+    if (p.id === 'bot_ai') return;
+
+    const user = db.users.find(u => u.username.toLowerCase() === p.name.toLowerCase());
+    if (user) {
+      const won = idx === 0 && outcome === 'win' && !p.eliminated;
+      user.totalScore = (user.totalScore || 0) + p.score;
+
+      if (isBotGame) {
+        user.botPlayed = (user.botPlayed || 0) + 1;
+        if (won) user.botWon = (user.botWon || 0) + 1;
+      } else {
+        user.pvpPlayed = (user.pvpPlayed || 0) + 1;
+        if (won) user.pvpWon = (user.pvpWon || 0) + 1;
+      }
+
+      if (!user.history) user.history = [];
+      user.history.unshift({
+        date: new Date().toISOString(),
+        outcome: won ? 'Won' : p.eliminated ? 'Eliminated' : outcome === 'draw' ? 'Draw' : 'Finished',
+        score: p.score,
+        totalBlanks: room.totalBlanks,
+        mistakes: p.mistakes,
+        difficultyLevel: room.difficultyLevel || 4,
+        mode: isBotGame ? 'Solo vs Bot' : 'Player vs Player'
+      });
+
+      if (user.history.length > 30) user.history.pop();
+    }
+  });
+  saveDB(db);
+}
+
+// --- DATA DELETION ENDPOINTS ---
 app.post('/api/user/delete-account', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -143,7 +222,6 @@ app.post('/api/user/delete-account', async (req, res) => {
 
   const targetName = user.username.toLowerCase();
 
-  // Remove target from other users' friends and request lists
   db.users.forEach(otherUser => {
     if (otherUser.friends) {
       otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
@@ -153,7 +231,6 @@ app.post('/api/user/delete-account', async (req, res) => {
     }
   });
 
-  // Permanently delete user
   db.users.splice(userIndex, 1);
   saveDB(db);
 
@@ -161,7 +238,6 @@ app.post('/api/user/delete-account', async (req, res) => {
   res.json({ success: true, message: 'Your account and all associated match data were permanently deleted.' });
 });
 
-// 2. Admin Deletion Endpoint (Admin deletes a user from the Admin Portal)
 app.post('/api/admin/delete-user', (req, res) => {
   const { adminKey, targetUsername } = req.body;
   const db = loadDB();
@@ -181,7 +257,6 @@ app.post('/api/admin/delete-user', (req, res) => {
     return res.status(404).json({ error: 'User not found.' });
   }
 
-  // Remove target from other users' friends and request lists
   db.users.forEach(otherUser => {
     if (otherUser.friends) {
       otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
@@ -196,30 +271,6 @@ app.post('/api/admin/delete-user', (req, res) => {
 
   onlineUsers.delete(targetName);
   res.json({ success: true, message: `User ${targetUsername} has been permanently deleted.` });
-});
-
-// --- PROFILE & STATS API ---
-app.get('/api/user/profile/:username', (req, res) => {
-  const db = loadDB();
-  const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
-  if (!user) return res.status(404).json({ error: 'Player profile not found.' });
-
-  const winRate = user.matchesPlayed > 0 ? Math.round((user.matchesWon / user.matchesPlayed) * 100) : 0;
-  
-  res.json({
-    success: true,
-    profile: {
-      username: user.username,
-      role: user.role,
-      matchesPlayed: user.matchesPlayed || 0,
-      matchesWon: user.matchesWon || 0,
-      winRate: `${winRate}%`,
-      totalScore: user.totalScore || 0,
-      registeredAt: user.registeredAt,
-      lastLoginAt: user.lastLoginAt,
-      friendsCount: (user.friends || []).length
-    }
-  });
 });
 
 // --- FRIENDS API ---
@@ -315,33 +366,6 @@ app.post('/api/admin/users', (req, res) => {
   const safeUsers = db.users.map(({ passwordHash, ...rest }) => rest);
   res.json({ success: true, users: safeUsers });
 });
-
-function recordMatchStats(leaderboard, outcome, room) {
-  const db = loadDB();
-  leaderboard.forEach((p, idx) => {
-    const user = db.users.find(u => u.username.toLowerCase() === p.name.toLowerCase());
-    if (user) {
-      user.matchesPlayed = (user.matchesPlayed || 0) + 1;
-      user.totalScore = (user.totalScore || 0) + p.score;
-      const won = idx === 0 && outcome === 'win' && !p.eliminated;
-      if (won) user.matchesWon = (user.matchesWon || 0) + 1;
-
-      if (!user.history) user.history = [];
-      user.history.unshift({
-        date: new Date().toISOString(),
-        outcome: won ? 'Won' : p.eliminated ? 'Eliminated' : outcome === 'draw' ? 'Draw' : 'Finished',
-        score: p.score,
-        totalBlanks: room.totalBlanks,
-        mistakes: p.mistakes,
-        difficultyLevel: room.difficultyLevel || 4,
-        mode: room.isBotGame ? 'Solo vs Bot' : 'Multiplayer'
-      });
-
-      if (user.history.length > 30) user.history.pop();
-    }
-  });
-  saveDB(db);
-}
 
 function getBlanksForLevel(level) {
   const scale = { 1: 15, 2: 22, 3: 30, 4: 38, 5: 45, 6: 50, 7: 55 };

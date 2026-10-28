@@ -111,19 +111,73 @@ document.addEventListener('DOMContentLoaded', () => {
   const authPasswordInput = document.getElementById('auth-password');
   const togglePasswordVisibilityBtn = document.getElementById('toggle-password-visibility');
 
-  // Profile Elements
+  //// Profile DOM Elements
   const openProfileBtn = document.getElementById('open-profile-btn');
   const profileModal = document.getElementById('profile-modal');
   const profileCloseX = document.getElementById('profile-close-x');
   const profUsername = document.getElementById('prof-username');
   const profRole = document.getElementById('prof-role');
-  const profWinRate = document.getElementById('prof-winrate');
-  const profMatchesWon = document.getElementById('prof-matches-won');
-  const profMatchesPlayed = document.getElementById('prof-matches-played');
+  const profPvpWinRate = document.getElementById('prof-pvp-winrate');
+  const profPvpWon = document.getElementById('prof-pvp-won');
+  const profPvpPlayed = document.getElementById('prof-pvp-played');
+  const profBotWinRate = document.getElementById('prof-bot-winrate');
+  const profBotWon = document.getElementById('prof-bot-won');
+  const profBotPlayed = document.getElementById('prof-bot-played');
   const profTotalScore = document.getElementById('prof-total-score');
   const profFriendsCount = document.getElementById('prof-friends-count');
   const profMemberSince = document.getElementById('prof-member-since');
 
+  // Status Bar Sync
+  function updateAuthUI() {
+    if (currentUser) {
+      guestAuthControls.classList.add('hidden');
+      loggedAuthControls.classList.remove('hidden');
+      loggedUsernameSpan.textContent = currentUser.username;
+      
+      const pvpW = currentUser.pvpWon || 0;
+      const pvpP = currentUser.pvpPlayed || 0;
+      const botW = currentUser.botWon || 0;
+      const botP = currentUser.botPlayed || 0;
+      userStatsSpan.textContent = `PvP: ${pvpW}W/${pvpP}P | Bot: ${botW}W/${botP}P`;
+
+      if (usernameInput) usernameInput.value = currentUser.username;
+    } else {
+      guestAuthControls.classList.remove('hidden');
+      loggedAuthControls.classList.add('hidden');
+    }
+  }
+
+  // Populate Profile Modal with Separate Stats
+  openProfileBtn?.addEventListener('click', async () => {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`);
+      const data = await res.json();
+      if (!data.success) return alert(data.error || 'Failed to load profile.');
+
+      const p = data.profile;
+      profUsername.textContent = p.username;
+      profRole.textContent = p.role.toUpperCase();
+      
+      // PvP Stats
+      profPvpWinRate.textContent = p.pvpWinRate;
+      profPvpWon.textContent = p.pvpWon;
+      profPvpPlayed.textContent = p.pvpPlayed;
+
+      // Bot Stats
+      profBotWinRate.textContent = p.botWinRate;
+      profBotWon.textContent = p.botWon;
+      profBotPlayed.textContent = p.botPlayed;
+
+      profTotalScore.textContent = p.totalScore;
+      profFriendsCount.textContent = p.friendsCount;
+      profMemberSince.textContent = new Date(p.registeredAt).toLocaleDateString([], { month: 'short', year: 'numeric' });
+
+      profileModal?.classList.remove('hidden');
+    } catch (err) {
+      alert('Could not retrieve player profile.');
+    }
+  });
   // Friends Elements
   const openFriendsBtn = document.getElementById('open-friends-btn');
   const friendsModal = document.getElementById('friends-modal');

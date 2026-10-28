@@ -259,14 +259,16 @@
     </div>
   </div>
 
-  <!-- Player Profile Modal (With Self-Service Account & Data Deletion) -->
+ <!-- Player Profile Modal (Divided PvP vs Bot Stats) -->
   <div id="profile-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted profile-card sketch-modal">
       <div class="modal-header">
-        <h2>📊 Player Profile & Career</h2>
+        <h2>📊 Player Career Stats</h2>
         <span class="close-x" id="profile-close-x">&times;</span>
       </div>
-      <div class="profile-details-grid">
+
+      <!-- Account Details -->
+      <div class="profile-details-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 6px;">
         <div class="profile-metric sketch-border">
           <span class="metric-title">Player Name</span>
           <span class="metric-val" id="prof-username">-</span>
@@ -275,27 +277,54 @@
           <span class="metric-title">Account Tier</span>
           <span class="metric-val" id="prof-role">PLAYER</span>
         </div>
+      </div>
+
+      <!-- Category 1: Player vs Player -->
+      <h4 style="color: var(--accent); margin: 6px 0 2px 2px; font-size: 0.85rem;">👥 Player vs Player (Multiplayer)</h4>
+      <div class="profile-details-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 0;">
         <div class="profile-metric sketch-border">
-          <span class="metric-title">Win Rate</span>
-          <span class="metric-val highlight" id="prof-winrate">0%</span>
+          <span class="metric-title">PvP Win Rate</span>
+          <span class="metric-val highlight" id="prof-pvp-winrate">0%</span>
         </div>
         <div class="profile-metric sketch-border">
-          <span class="metric-title">Victories</span>
-          <span class="metric-val" id="prof-matches-won">0</span>
+          <span class="metric-title">PvP Wins</span>
+          <span class="metric-val" id="prof-pvp-won">0</span>
         </div>
         <div class="profile-metric sketch-border">
-          <span class="metric-title">Matches Played</span>
-          <span class="metric-val" id="prof-matches-played">0</span>
-        </div>
-        <div class="profile-metric sketch-border">
-          <span class="metric-title">Cumulative Points</span>
-          <span class="metric-val" id="prof-total-score">0</span>
+          <span class="metric-title">PvP Matches</span>
+          <span class="metric-val" id="prof-pvp-played">0</span>
         </div>
       </div>
+
+      <!-- Category 2: Solo vs Bot -->
+      <h4 style="color: var(--accent); margin: 8px 0 2px 2px; font-size: 0.85rem;">🤖 Solo vs AI Bot</h4>
+      <div class="profile-details-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 0;">
+        <div class="profile-metric sketch-border">
+          <span class="metric-title">Bot Win Rate</span>
+          <span class="metric-val highlight" id="prof-bot-winrate">0%</span>
+        </div>
+        <div class="profile-metric sketch-border">
+          <span class="metric-title">Bot Wins</span>
+          <span class="metric-val" id="prof-bot-won">0</span>
+        </div>
+        <div class="profile-metric sketch-border">
+          <span class="metric-title">Bot Matches</span>
+          <span class="metric-val" id="prof-bot-played">0</span>
+        </div>
+      </div>
+
       <div class="profile-footer-stats">
-        <span>Friends on Arena: <strong id="prof-friends-count">0</strong></span>
+        <span>Total Points: <strong id="prof-total-score">0</strong></span>
+        <span>Friends: <strong id="prof-friends-count">0</strong></span>
         <span>Member Since: <strong id="prof-member-since">-</strong></span>
       </div>
+
+      <!-- Self-Service Data Deletion -->
+      <div class="self-delete-section" style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(239,68,68,0.4); text-align: center;">
+        <button id="delete-my-account-btn" class="btn danger-small sketch-border" style="width: 100%; padding: 6px;">🗑️ Permanently Delete My Account & Data</button>
+      </div>
+    </div>
+  </div>
 
       <!-- Self-Service Data Deletion Option -->
       <div class="self-delete-section" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(239,68,68,0.4); text-align: center;">
