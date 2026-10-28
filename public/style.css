@@ -945,12 +945,17 @@ input[type="text"], input[type="number"], select {
   padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
   max-width: 440px;
+  max-height: 90vh; /* Keeps the card comfortably inside the viewport */
+  overflow-y: auto;  /* Allows smooth scrolling inside the card if needed */
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.profile-card {
+  max-width: 520px !important;
+}
 .settings-card { text-align: left; }
 .admin-card { max-width: 620px !important; }
 .history-card { max-width: 580px !important; }

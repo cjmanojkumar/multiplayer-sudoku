@@ -259,7 +259,7 @@
     </div>
   </div>
 
- <!-- Player Profile Modal (Divided PvP vs Bot Stats) -->
+<!-- Player Profile Modal (Properly Nested & Scrolled) -->
   <div id="profile-modal" class="modal-backdrop hidden">
     <div class="modal-card frosted profile-card sketch-modal">
       <div class="modal-header">
@@ -319,20 +319,14 @@
         <span>Member Since: <strong id="prof-member-since">-</strong></span>
       </div>
 
-      <!-- Self-Service Data Deletion -->
+      <!-- Self-Service Data Deletion (Safely Kept INSIDE the Modal Card) -->
       <div class="self-delete-section" style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(239,68,68,0.4); text-align: center;">
+        <p class="color-hint" style="margin-bottom: 6px; font-size: 0.78rem;">Need to erase your profile, friendships, and match history?</p>
         <button id="delete-my-account-btn" class="btn danger-small sketch-border" style="width: 100%; padding: 6px;">🗑️ Permanently Delete My Account & Data</button>
       </div>
-    </div>
-  </div>
 
-      <!-- Self-Service Data Deletion Option -->
-      <div class="self-delete-section" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(239,68,68,0.4); text-align: center;">
-        <p class="color-hint" style="margin-bottom: 8px; font-size: 0.78rem;">Need to erase your profile, friendships, and match history?</p>
-        <button id="delete-my-account-btn" class="btn danger-small sketch-border" style="width: 100%; padding: 8px;">🗑️ Permanently Delete My Account & Data</button>
-      </div>
-    </div>
-  </div>
+    </div> <!-- Closes .modal-card -->
+  </div>   <!-- Closes #profile-modal -->
 
   <!-- Friends Hub Modal -->
   <div id="friends-modal" class="modal-backdrop hidden">
