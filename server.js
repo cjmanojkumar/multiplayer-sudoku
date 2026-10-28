@@ -347,15 +347,6 @@ app.get('/api/friends/list/:username', (req, res) => {
     requests: user.friendRequests || []
   });
 });
-window.removeFriend = async function(targetFriend) {
-    if (!currentUser) return;
-    
-    if (!confirm(`Are you sure you want to remove ${targetFriend} from your friends list?`)) {
-      return;
-    }
-// DELETE THIS ENTIRE BLOCK FROM server.js:
-window.removeFriend = async function(targetFriend) {
-};
 app.post('/api/friends/remove', (req, res) => {
   const { username, targetFriend } = req.body;
   if (!username || !targetFriend) {
@@ -403,7 +394,6 @@ app.post('/api/friends/remove', (req, res) => {
     } catch (e) {
       alert('Network error while removing friend.');
     }
-  };
 app.get('/api/user/history/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
