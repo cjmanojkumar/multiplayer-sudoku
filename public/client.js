@@ -681,7 +681,31 @@ document.addEventListener('DOMContentLoaded', () => {
         pendingRequestsSec.classList.add('hidden');
       }
 
-      // Friends list
+      friendsTableBody.innerHTML = '';
+      if (data.friends && data.friends.length > 0) {
+        noFriendsMsg.classList.add('hidden');
+        data.friends.forEach(f => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${f.username}</strong></td>
+            <td>
+              <span class="status-badge ${f.online ? 'online' : 'offline'}">
+                <span class="status-dot"></span> ${f.online ? 'Online' : 'Offline'}
+              </span>
+            </td>
+            <td>
+              <button class="btn danger-small sketch-border" onclick="respondFriendReq('${f.username}', 'decline')">Remove</button>
+            </td>
+          `;
+          friendsTableBody.appendChild(tr);
+        });
+      } else {
+        noFriendsMsg.classList.remove('hidden');
+      }
+    } catch (e) {}
+  }
+
+  // Friends list
       friendsTableBody.innerHTML = '';
       if (data.friends && data.friends.length > 0) {
         noFriendsMsg.classList.add('hidden');
@@ -703,18 +727,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         noFriendsMsg.classList.remove('hidden');
       }
-
-  window.respondFriendReq = async function(fromUser, action) {
-    if (!currentUser) return;
-    try {
-      await fetch('/api/friends/respond-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUser.username, fromUser, action })
-      });
-      refreshFriendsList();
-    } catch (e) {}
-  };
 
   openFriendsBtn?.addEventListener('click', () => {
     friendFeedbackMsg.classList.add('hidden');
