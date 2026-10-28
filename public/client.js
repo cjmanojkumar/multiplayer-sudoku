@@ -645,25 +645,31 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   window.removeFriend = async function(targetFriend) {
-    if (!currentUser) return;
-    if (!confirm(`Are you sure you want to remove ${targetFriend} from your friends list?`)) return;
+  if (!currentUser) return;
+  
+  if (!confirm(`Are you sure you want to remove ${targetFriend} from your friends list?`)) {
+    return;
+  }
 
-    try {
-      const res = await fetch('/api/friends/remove', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: currentUser.username, targetFriend })
-      });
-      const data = await res.json();
-      if (data.success) {
-        refreshFriendsList();
-      } else {
-        alert(data.error || 'Failed to remove friend.');
-      }
-    } catch (e) {
-      alert('Network error while removing friend.');
+  try {
+    const res = await fetch('/api/friends/remove', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        username: currentUser.username, 
+        targetFriend: targetFriend 
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      refreshFriendsList();
+    } else {
+      alert(data.error || 'Failed to remove friend.');
     }
-  };
+  } catch (e) {
+    alert('Network error while removing friend.');
+  }
+};
 
   openFriendsBtn?.addEventListener('click', () => {
     friendFeedbackMsg.classList.add('hidden');
