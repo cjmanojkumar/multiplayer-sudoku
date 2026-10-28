@@ -347,7 +347,32 @@ app.get('/api/friends/list/:username', (req, res) => {
     requests: user.friendRequests || []
   });
 });
+window.removeFriend = async function(targetFriend) {
+    if (!currentUser) return;
+    
+    if (!confirm(`Are you sure you want to remove ${targetFriend} from your friends list?`)) {
+      return;
+    }
 
+    try {
+      const res = await fetch('/api/friends/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          username: currentUser.username, 
+          targetFriend: targetFriend 
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        refreshFriendsList();
+      } else {
+        alert(data.error || 'Failed to remove friend.');
+      }
+    } catch (e) {
+      alert('Network error while removing friend.');
+    }
+  };
 app.get('/api/user/history/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());

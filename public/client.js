@@ -681,6 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pendingRequestsSec.classList.add('hidden');
       }
 
+      // Friends list
       friendsTableBody.innerHTML = '';
       if (data.friends && data.friends.length > 0) {
         noFriendsMsg.classList.add('hidden');
@@ -694,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </span>
             </td>
             <td>
-              <button class="btn danger-small sketch-border" onclick="respondFriendReq('${f.username}', 'decline')">Remove</button>
+              <button class="btn danger-small sketch-border" onclick="removeFriend('${f.username}')">Remove</button>
             </td>
           `;
           friendsTableBody.appendChild(tr);
@@ -702,8 +703,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         noFriendsMsg.classList.remove('hidden');
       }
-    } catch (e) {}
-  }
 
   window.respondFriendReq = async function(fromUser, action) {
     if (!currentUser) return;
