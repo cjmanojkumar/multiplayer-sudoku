@@ -18,7 +18,7 @@ function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026'
+      adminSecretKey: '22Harinishree C  J Pallavishree15'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
@@ -26,7 +26,7 @@ function loadDB() {
   try {
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
   } catch (err) {
-    return { users: [], adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026' };
+    return { users: [], adminSecretKey: '22Harinishree C  J Pallavishree15' };
   }
 }
 
@@ -347,53 +347,7 @@ app.get('/api/friends/list/:username', (req, res) => {
     requests: user.friendRequests || []
   });
 });
-app.post('/api/friends/remove', (req, res) => {
-  const { username, targetFriend } = req.body;
-  if (!username || !targetFriend) {
-    return res.status(400).json({ error: 'Username and target friend are required.' });
-  }
 
-  const db = loadDB();
-  const user = db.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
-  const friend = db.users.find(u => u.username.toLowerCase() === targetFriend.trim().toLowerCase());
-
-  if (!user) return res.status(404).json({ error: 'User not found.' });
-
-  if (user.friends) {
-    user.friends = user.friends.filter(f => f.toLowerCase() !== targetFriend.trim().toLowerCase());
-  }
-  if (friend && friend.friends) {
-    friend.friends = friend.friends.filter(f => f.toLowerCase() !== username.trim().toLowerCase());
-  }
-
-  saveDB(db);
-
-  const friendSocketId = onlineUsers.get(targetFriend.trim().toLowerCase());
-  if (friendSocketId) {
-    io.to(friendSocketId).emit('friendStatusChanged');
-  }
-
-  res.json({ success: true, message: `Removed ${targetFriend} from friends.` });
-});
-
-    try {
-      const res = await fetch('/api/friends/remove', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          username: currentUser.username, 
-          targetFriend: targetFriend 
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        refreshFriendsList();
-      } else {
-        alert(data.error || 'Failed to remove friend.');
-      }
-    } catch (e) {
-      alert('Network error while removing friend.');
-    }
 app.get('/api/user/history/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
