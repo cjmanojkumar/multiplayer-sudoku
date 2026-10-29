@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsModal = document.getElementById('settings-modal');
   const settingsCloseX = document.getElementById('settings-close-x');
   const settingsSaveBtn = document.getElementById('settings-save-btn');
-
+  const returnLobbyBtn = document.getElementById('return-lobby-btn');
   const authPasswordInput = document.getElementById('auth-password');
   const togglePasswordVisibilityBtn = document.getElementById('toggle-password-visibility');
 
@@ -1052,7 +1052,12 @@ async function fetchAdminUsers(key) {
     setTimeout(() => playTone(330, 'sine', 0.40, 0.08), 120);
   }
 
-  modalCloseX?.addEventListener('click', () => winnerModal?.classList.add('hidden'));
+  modalCloseX?.addEventListener('click', () => {
+  winnerModal?.classList.add('hidden');
+  if (confirm('Return to the lobby menu?')) {
+    location.reload();
+  }
+});
 
   document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
@@ -1154,6 +1159,7 @@ async function fetchAdminUsers(key) {
   socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet, roomCode }) => {
     isEliminated = false;
     selectedCell = null;
+    returnLobbyBtn?.classList.add('hidden');
     activeSymbolSet = symbolSet || 'numbers';
     currentRoomCode = roomCode || currentRoomCode;
     if (quitBtn) quitBtn.disabled = false;
@@ -1435,6 +1441,7 @@ async function fetchAdminUsers(key) {
   socket.on('gameOver', ({ reason, leaderboard, outcome }) => {
     gameView?.classList.add('game-locked');
     if (quitBtn) quitBtn.disabled = true;
+    returnLobbyBtn?.classList.remove('hidden');
 
     // Refresh top-bar stats after match completion
     if (currentUser) {
@@ -1493,4 +1500,7 @@ async function fetchAdminUsers(key) {
 
     winnerModal?.classList.remove('hidden');
   });
+});
+returnLobbyBtn?.addEventListener('click', () => {
+  location.reload();
 });
