@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   adminCloseX?.addEventListener('click', () => adminModal.classList.add('hidden'));
 
-  async function fetchAdminUsers(key) {
+async function fetchAdminUsers(key) {
     try {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
@@ -430,11 +430,17 @@ document.addEventListener('DOMContentLoaded', () => {
       data.users.forEach(u => {
         const tr = document.createElement('tr');
         const regDate = new Date(u.registeredAt).toLocaleDateString();
+        
+        const pvpWins = u.pvpWon || 0;
+        const pvpTotal = u.pvpPlayed || 0;
+        const botWins = u.botWon || 0;
+        const botTotal = u.botPlayed || 0;
+
         tr.innerHTML = `
           <td><strong>${u.username}</strong></td>
           <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
-          <td>${u.matchesPlayed || 0}</td>
-          <td>${u.matchesWon || 0}</td>
+          <td>${pvpWins}W / ${pvpTotal}P</td>
+          <td>${botWins}W / ${botTotal}P</td>
           <td>${regDate}</td>
           <td>
             <button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button>
@@ -1449,7 +1455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isMeWinner = leaderboard.length > 0 && leaderboard[0].id === myId;
     // ... rest of the existing gameOver code continues below
-    
+
     if (outcome === 'resign' && isMeEliminated) {
       if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen flash-resign';
       if (winnerTitle) winnerTitle.textContent = '🏳️ RESIGNED';
