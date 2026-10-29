@@ -715,13 +715,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- AUTH & REGISTRATION ---
   let isRegisterMode = false;
 
-  function loadPersistedUser() {
+ async function loadPersistedUser() {
     const saved = localStorage.getItem('sudoku_active_user');
     if (saved) {
       try {
         currentUser = JSON.parse(saved);
         updateAuthUI();
         socket.emit('registerOnlineUser', { username: currentUser.username });
+
+        // Fetch fresh stats from the server to refresh top-bar counters
+        const res = await fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`);
+        const data = await res.json();
+        if (data.success && data.profile) {
+          currentUser.pvpWon = data.profile.pvpWon;
+          currentUser.pvpPlayed = data.profile.pvpPlayed;
+          currentUser.botWon = data.profile.botWon;
+          currentUser.botPlayed = data.profile.botPlayed;
+          localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
+          updateAuthUI();
+        }
       } catch (e) {
         currentUser = null;
       }
@@ -1418,9 +1430,26 @@ document.addEventListener('DOMContentLoaded', () => {
     gameView?.classList.add('game-locked');
     if (quitBtn) quitBtn.disabled = true;
 
-    const isMeWinner = leaderboard.length > 0 && leaderboard[0].id === myId;
-    const isMeEliminated = leaderboard.find(p => p.id === myId)?.eliminated;
+    // Refresh top-bar stats after match completion
+    if (currentUser) {
+      fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.profile) {
+            currentUser.pvpWon = data.profile.pvpWon;
+            currentUser.pvpPlayed = data.profile.pvpPlayed;
+            currentUser.botWon = data.profile.botWon;
+            currentUser.botPlayed = data.profile.botPlayed;
+            localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
+            updateAuthUI();
+          }
+        })
+        .catch(() => {});
+    }
 
+    const isMeWinner = leaderboard.length > 0 && leaderboard[0].id === myId;
+    // ... rest of the existing gameOver code continues below
+    
     if (outcome === 'resign' && isMeEliminated) {
       if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen flash-resign';
       if (winnerTitle) winnerTitle.textContent = '🏳️ RESIGNED';
