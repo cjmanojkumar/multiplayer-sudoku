@@ -13,92 +13,90 @@ document.addEventListener('DOMContentLoaded', () => {
   let isMusicEnabled = true;
   let isEmojiEnabled = true;
 
- // 20 Verified Authentic Fine Art Paintings (Wikimedia Commons High-Res Scans)
+ // 20 Verified backgrounds
   const BACKGROUND_THEMES = {
-    // --- 10 High Renaissance Masterpieces ---
-    monalisa: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/1280px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
-      theme: 'dark'
-    },
-    venus: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project.jpg/1280px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project.jpg',
+    chhota_bheem: {
+      url: 'https://images5.alphacoders.com/131/1318465.jpeg',
       theme: 'sunset'
     },
-    primavera: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Botticelli-primavera.jpg/1280px-Botticelli-primavera.jpg',
+    mr_bean: {
+      url: 'https://images7.alphacoders.com/112/1126786.jpg',
+      theme: 'paper'
+    },
+    roll_no_21: {
+      url: 'https://images6.alphacoders.com/133/1335478.jpeg',
+      theme: 'neon'
+    },
+    tom_and_jerry: {
+      url: 'https://images.alphacoders.com/133/1331777.png',
+      theme: 'sunset'
+    },
+    oggy: {
+      url: 'https://images5.alphacoders.com/712/712493.png',
+      theme: 'neon'
+    },
+    ben10_alien_force: {
+      url: 'https://images6.alphacoders.com/710/710899.png',
       theme: 'emerald'
     },
-    adam: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/1280px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg',
-      theme: 'paper'
-    },
-    athens: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg/1280px-%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg',
-      theme: 'paper'
-    },
-    supper: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/%C3%9Altima_Cena_-_Da_Vinci_5.jpg/1280px-%C3%9Altima_Cena_-_Da_Vinci_5.jpg',
-      theme: 'dark'
-    },
-    ermine: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Leonardo_da_Vinci_-_Lady_with_an_Ermine_%281489-1490%29.jpg/1280px-Leonardo_da_Vinci_-_Lady_with_an_Ermine_%281489-1490%29.jpg',
-      theme: 'dark'
-    },
-    pearl: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/1280px-Meisje_met_de_parel.jpg',
-      theme: 'dark'
-    },
-    nightwatch: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/The_Night_Watch_-_HD.jpg/1280px-The_Night_Watch_-_HD.jpg',
-      theme: 'dark'
-    },
-    starry: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
-      theme: 'dark'
-    },
-
-    // --- 10 Authentic Indian Classical Paintings ---
-    shakuntala: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Shakuntala_looking_back_for_Raja_Dushyanta.jpg/1280px-Shakuntala_looking_back_for_Raja_Dushyanta.jpg',
-      theme: 'sunset'
-    },
-    damayanti: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Hamsa_Damayanthi_by_Raja_Ravi_Varma.jpg/1280px-Hamsa_Damayanthi_by_Raja_Ravi_Varma.jpg',
-      theme: 'paper'
-    },
-    saraswati: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Raja_Ravi_Varma_-_Saraswati.jpg/1280px-Raja_Ravi_Varma_-_Saraswati.jpg',
-      theme: 'paper'
-    },
-    jatayu: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Jatayu_vadham_by_Raja_Ravi_Varma.jpg/1280px-Jatayu_vadham_by_Raja_Ravi_Varma.jpg',
-      theme: 'dark'
-    },
-    papa: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/There_Comes_Papa_by_Raja_Ravi_Varma.jpg/1280px-There_Comes_Papa_by_Raja_Ravi_Varma.jpg',
-      theme: 'paper'
-    },
-    banithani: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Radha_%28Bani_Thani%29.jpg/1280px-Radha_%28Bani_Thani%29.jpg',
-      theme: 'sunset'
-    },
-    krishnagrove: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Radha_and_Krishna_in_the_boat_of_love.jpg/1280px-Radha_and_Krishna_in_the_boat_of_love.jpg',
+    shaun_the_sheep: {
+      url: 'https://images2.alphacoders.com/601/601138.jpg',
       theme: 'emerald'
     },
-    mughalcourt: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Jahangir_receives_Prince_Khurram_returning_from_the_Deccan_campaign_in_1617.jpg/1280px-Jahangir_receives_Prince_Khurram_returning_from_the_Deccan_campaign_in_1617.jpg',
+    doraemon: {
+      url: 'https://images2.alphacoders.com/700/700813.png',
+      theme: 'neon'
+    },
+    shinchan: {
+      url: 'https://images7.alphacoders.com/942/942698.jpg',
       theme: 'sunset'
     },
-    deccanfalcon: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/A_Lady_with_a_Falcon_-_Google_Art_Project.jpg/1280px-A_Lady_with_a_Falcon_-_Google_Art_Project.jpg',
+    ninja_hattori: {
+      url: 'https://images8.alphacoders.com/134/1348120.jpeg',
+      theme: 'paper'
+    },
+    pink_panther: {
+      url: 'https://images8.alphacoders.com/105/1058249.jpg',
+      theme: 'sunset'
+    },
+    spongebob: {
+      url: 'https://images2.alphacoders.com/669/669399.jpg',
+      theme: 'neon'
+    },
+    jackie_chan: {
+      url: 'https://images2.alphacoders.com/134/1349102.jpeg',
+      theme: 'sunset'
+    },
+    dragon_booster: {
+      url: 'https://images4.alphacoders.com/134/1349104.jpeg',
+      theme: 'neon'
+    },
+    scooby_doo: {
+      url: 'https://images6.alphacoders.com/682/682054.jpg',
       theme: 'emerald'
     },
-    mewarprocession: {
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Maharana_Sangram_Singh_II_visiting_an_elephant_enclosure.jpg/1280px-Maharana_Sangram_Singh_II_visiting_an_elephant_enclosure.jpg',
+    motu_patlu: {
+      url: 'https://images3.alphacoders.com/134/1349105.jpeg',
+      theme: 'sunset'
+    },
+    courage: {
+      url: 'https://images4.alphacoders.com/681/681600.jpg',
+      theme: 'dark'
+    },
+    spectacular_spiderman: {
+      url: 'https://images4.alphacoders.com/665/665972.jpg',
+      theme: 'dark'
+    },
+    avengers_assemble: {
+      url: 'https://images4.alphacoders.com/593/593922.jpg',
+      theme: 'dark'
+    },
+    the_batman: {
+      url: 'https://images6.alphacoders.com/609/609149.jpg',
       theme: 'dark'
     }
   };
+
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
   bgAudio.loop = true;
   bgAudio.volume = 0.25;
