@@ -15,88 +15,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
  // 20 Verified backgrounds
   const BACKGROUND_THEMES = {
-    chhota_bheem: {
-      url: 'https://images5.alphacoders.com/131/1318465.jpeg',
-      theme: 'sunset'
-    },
-    mr_bean: {
-      url: 'https://images7.alphacoders.com/112/1126786.jpg',
-      theme: 'paper'
-    },
-    roll_no_21: {
-      url: 'https://images6.alphacoders.com/133/1335478.jpeg',
-      theme: 'neon'
-    },
-    tom_and_jerry: {
-      url: 'https://images.alphacoders.com/133/1331777.png',
-      theme: 'sunset'
-    },
-    oggy: {
-      url: 'https://images5.alphacoders.com/712/712493.png',
-      theme: 'neon'
-    },
-    ben10_alien_force: {
-      url: 'https://images6.alphacoders.com/710/710899.png',
-      theme: 'emerald'
-    },
-    shaun_the_sheep: {
-      url: 'https://images2.alphacoders.com/601/601138.jpg',
-      theme: 'emerald'
-    },
-    doraemon: {
-      url: 'https://images2.alphacoders.com/700/700813.png',
-      theme: 'neon'
-    },
-    shinchan: {
-      url: 'https://images7.alphacoders.com/942/942698.jpg',
-      theme: 'sunset'
-    },
-    ninja_hattori: {
-      url: 'https://images8.alphacoders.com/134/1348120.jpeg',
-      theme: 'paper'
-    },
-    pink_panther: {
-      url: 'https://images8.alphacoders.com/105/1058249.jpg',
-      theme: 'sunset'
-    },
-    spongebob: {
-      url: 'https://images2.alphacoders.com/669/669399.jpg',
-      theme: 'neon'
-    },
-    jackie_chan: {
-      url: 'https://images2.alphacoders.com/134/1349102.jpeg',
-      theme: 'sunset'
-    },
-    dragon_booster: {
-      url: 'https://images4.alphacoders.com/134/1349104.jpeg',
-      theme: 'neon'
-    },
-    scooby_doo: {
-      url: 'https://images6.alphacoders.com/682/682054.jpg',
-      theme: 'emerald'
-    },
-    motu_patlu: {
-      url: 'https://images3.alphacoders.com/134/1349105.jpeg',
-      theme: 'sunset'
-    },
-    courage: {
-      url: 'https://images4.alphacoders.com/681/681600.jpg',
-      theme: 'dark'
-    },
-    spectacular_spiderman: {
-      url: 'https://images4.alphacoders.com/665/665972.jpg',
-      theme: 'dark'
-    },
-    avengers_assemble: {
-      url: 'https://images4.alphacoders.com/593/593922.jpg',
-      theme: 'dark'
-    },
-    the_batman: {
-      url: 'https://images6.alphacoders.com/609/609149.jpg',
-      theme: 'dark'
-    }
+    chhota_bheem: { url: 'https://wallpapercave.com/wp/wp6658098.jpg', theme: 'emerald' },
+    mr_bean: { url: 'https://wallpapercave.com/wp/wp2936712.jpg', theme: 'paper' },
+    roll_no_21: { url: 'https://wallpapercave.com/wp/wp6658145.jpg', theme: 'neon' },
+    tom_and_jerry: { url: 'https://images.alphacoders.com/485/thumb-1920-485729.jpg', theme: 'sunset' },
+    oggy: { url: 'https://wallpapercave.com/wp/wp3158763.jpg', theme: 'paper' },
+    ben_10: { url: 'https://images.alphacoders.com/189/thumb-1920-189361.jpg', theme: 'emerald' },
+    shaun_the_sheep: { url: 'https://images.alphacoders.com/604/thumb-1920-604724.jpg', theme: 'emerald' },
+    doraemon: { url: 'https://images.alphacoders.com/712/thumb-1920-712869.jpg', theme: 'paper' },
+    shinchan: { url: 'https://wallpapercave.com/wp/wp2938102.jpg', theme: 'sunset' },
+    ninja_hattori: { url: 'https://wallpapercave.com/wp/wp6658172.jpg', theme: 'dark' },
+    pink_panther: { url: 'https://images.alphacoders.com/269/thumb-1920-269229.jpg', theme: 'sunset' },
+    spongebob: { url: 'https://images.alphacoders.com/131/thumb-1920-1317666.jpeg', theme: 'paper' },
+    jackie_chan: { url: 'https://wallpapercave.com/wp/wp7412702.jpg', theme: 'sunset' },
+    dragon_booster: { url: 'https://wallpapercave.com/wp/wp6923412.jpg', theme: 'neon' },
+    scooby_doo: { url: 'https://images.alphacoders.com/694/thumb-1920-694508.jpg', theme: 'dark' },
+    motu_patlu: { url: 'https://wallpapercave.com/wp/wp6658204.jpg', theme: 'sunset' },
+    courage: { url: 'https://images.alphacoders.com/605/thumb-1920-605785.png', theme: 'dark' },
+    spiderman: { url: 'https://images.alphacoders.com/998/thumb-1920-998814.jpg', theme: 'neon' },
+    avengers: { url: 'https://images.alphacoders.com/180/thumb-1920-180572.jpg', theme: 'dark' },
+    the_batman: { url: 'https://images.alphacoders.com/130/thumb-1920-1309862.png', theme: 'dark' }
   };
-
+  
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
   bgAudio.loop = true;
   bgAudio.volume = 0.25;

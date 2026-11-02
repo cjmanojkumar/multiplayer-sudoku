@@ -321,14 +321,7 @@ body {
 
 /* Background Layers */
 .scenic-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -3;
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  transition: background-image 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  background-image: url('https://images5.alphacoders.com/131/1318465.jpeg');
+  background-image: url('https://wallpapercave.com/wp/wp6658098.jpg');
 }
 
 .scenic-overlay {
