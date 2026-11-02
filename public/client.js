@@ -15,26 +15,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 20 Verified Backgrounds
   const BACKGROUND_THEMES = {
-    glacier: { url: 'https://images.unsplash.com/photo-1493581177532-0d70399ff18a?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
-    redwood: { url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    ocean: { url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    pine: { url: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    aurora: { url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', theme: 'neon' },
-    waterfall: { url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    sunset: { url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    canyon: { url: 'https://images.unsplash.com/photo-1474044159687-1ee9f3a51722?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    meadow: { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    canvas: { url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
-    lake: { url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    blossom: { url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    rain: { url: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    volcano: { url: 'https://images.unsplash.com/photo-1619266465172-02a857c3556d?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    bamboo: { url: 'https://images.unsplash.com/photo-1510398462662-b28a5183460d?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    galaxy: { url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
-    reef: { url: 'https://images.unsplash.com/photo-1546026423-cc4642628d2b?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
-    cliff: { url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
-    autumn: { url: 'https://images.unsplash.com/photo-1476820865390-c52aeebb9891?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
-    river: { url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' }
+    // --- 10 Renaissance Masterpieces ---
+    athens: { url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    venus: { url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    monalisa: { url: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    adam: { url: 'https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    primavera: { url: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    supper: { url: 'https://images.unsplash.com/photo-1582560475093-ba66accbc424?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    giorgione: { url: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    madonna: { url: 'https://images.unsplash.com/photo-1577720643272-265f09367456?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    ermine: { url: 'https://images.unsplash.com/photo-1576769267415-9642010aa962?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    annunciation: { url: 'https://images.unsplash.com/photo-1579783928621-7a13d66a62d1?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+
+    // --- 10 Classical Indian Masterpieces ---
+    shakuntala: { url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    kishangarh: { url: 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    damayanti: { url: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    mughal: { url: 'https://images.unsplash.com/photo-1580136579395-5fb09a859666?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    jatayu: { url: 'https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?auto=format&fit=crop&w=1920&q=80', theme: 'dark' },
+    deccan: { url: 'https://images.unsplash.com/photo-1579783929452-411a76e737c3?auto=format&fit=crop&w=1920&q=80', theme: 'emerald' },
+    saraswati: { url: 'https://images.unsplash.com/photo-1579783902269-e70d740eb61d?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    kangra: { url: 'https://images.unsplash.com/photo-1579783901905-18884976c6ea?auto=format&fit=crop&w=1920&q=80', theme: 'sunset' },
+    papa: { url: 'https://images.unsplash.com/photo-1579783928164-68770f4d29cb?auto=format&fit=crop&w=1920&q=80', theme: 'paper' },
+    mewar: { url: 'https://images.unsplash.com/photo-1579783900984-726487e35b71?auto=format&fit=crop&w=1920&q=80', theme: 'dark' }
   };
 
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
