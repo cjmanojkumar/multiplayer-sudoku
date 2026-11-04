@@ -15,26 +15,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
  // 20 Verified backgrounds
   const BACKGROUND_THEMES = {
-    chhota_bheem: { url: 'https://wallpapercave.com/wp/wp6658098.jpg', theme: 'emerald' },
-    mr_bean: { url: 'https://wallpapercave.com/wp/wp2936712.jpg', theme: 'paper' },
-    roll_no_21: { url: 'https://wallpapercave.com/wp/wp6658145.jpg', theme: 'neon' },
-    tom_and_jerry: { url: 'https://images.alphacoders.com/485/thumb-1920-485729.jpg', theme: 'sunset' },
-    oggy: { url: 'https://wallpapercave.com/wp/wp3158763.jpg', theme: 'paper' },
-    ben_10: { url: 'https://images.alphacoders.com/189/thumb-1920-189361.jpg', theme: 'emerald' },
-    shaun_the_sheep: { url: 'https://images.alphacoders.com/604/thumb-1920-604724.jpg', theme: 'emerald' },
-    doraemon: { url: 'https://images.alphacoders.com/712/thumb-1920-712869.jpg', theme: 'paper' },
-    shinchan: { url: 'https://wallpapercave.com/wp/wp2938102.jpg', theme: 'sunset' },
-    ninja_hattori: { url: 'https://wallpapercave.com/wp/wp6658172.jpg', theme: 'dark' },
-    pink_panther: { url: 'https://images.alphacoders.com/269/thumb-1920-269229.jpg', theme: 'sunset' },
-    spongebob: { url: 'https://images.alphacoders.com/131/thumb-1920-1317666.jpeg', theme: 'paper' },
-    jackie_chan: { url: 'https://wallpapercave.com/wp/wp7412702.jpg', theme: 'sunset' },
-    dragon_booster: { url: 'https://wallpapercave.com/wp/wp6923412.jpg', theme: 'neon' },
-    scooby_doo: { url: 'https://images.alphacoders.com/694/thumb-1920-694508.jpg', theme: 'dark' },
-    motu_patlu: { url: 'https://wallpapercave.com/wp/wp6658204.jpg', theme: 'sunset' },
-    courage: { url: 'https://images.alphacoders.com/605/thumb-1920-605785.png', theme: 'dark' },
-    spiderman: { url: 'https://images.alphacoders.com/998/thumb-1920-998814.jpg', theme: 'neon' },
-    avengers: { url: 'https://images.alphacoders.com/180/thumb-1920-180572.jpg', theme: 'dark' },
-    the_batman: { url: 'https://images.alphacoders.com/130/thumb-1920-1309862.png', theme: 'dark' }
+    dragon: { url: '/backgrounds/dragon.jpg', theme: 'sunset' },
+    phoenix: { url: '/backgrounds/phoenix.jpg', theme: 'sunset' },
+    griffin: { url: '/backgrounds/griffin.jpg', theme: 'paper' },
+    leviathan: { url: '/backgrounds/leviathan.jpg', theme: 'dark' },
+    pegasus: { url: '/backgrounds/pegasus.jpg', theme: 'paper' },
+    kraken: { url: '/backgrounds/kraken.jpg', theme: 'dark' },
+    hydra: { url: '/backgrounds/hydra.jpg', theme: 'emerald' },
+    cerberus: { url: '/backgrounds/cerberus.jpg', theme: 'dark' },
+    kitsune: { url: '/backgrounds/kitsune.jpg', theme: 'neon' },
+    basilisk: { url: '/backgrounds/basilisk.jpg', theme: 'emerald' },
+    chimera: { url: '/backgrounds/chimera.jpg', theme: 'sunset' },
+    fenrir: { url: '/backgrounds/fenrir.jpg', theme: 'neon' },
+    roc: { url: '/backgrounds/roc.jpg', theme: 'paper' },
+    banshee: { url: '/backgrounds/banshee.jpg', theme: 'dark' },
+    sphinx: { url: '/backgrounds/sphinx.jpg', theme: 'sunset' },
+    behemoth: { url: '/backgrounds/behemoth.jpg', theme: 'emerald' },
+    thunderbird: { url: '/backgrounds/thunderbird.jpg', theme: 'neon' },
+    manticore: { url: '/backgrounds/manticore.jpg', theme: 'sunset' },
+    qilin: { url: '/backgrounds/qilin.jpg', theme: 'emerald' },
+    wyvern: { url: '/backgrounds/wyvern.jpg', theme: 'dark' }
   };
   
   const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
