@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentRoomCode = null;
   let myId = null;
   let isEliminated = false;
+  let isCompleted = false;
+  let isAbandoned = false;
   let selectedCell = null;
   let activeSymbolSet = 'numbers';
   let activeDifficultyLevel = 4;
@@ -13,8 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let isMusicEnabled = true;
   let isEmojiEnabled = true;
 
- // 20 Verified backgrounds
+  // 20 Verified Mythical & Scenery Backgrounds
   const BACKGROUND_THEMES = {
+    glacier: { url: '/backgrounds/glacier.jpg', theme: 'paper' },
     dragon: { url: '/backgrounds/dragon.jpg', theme: 'sunset' },
     phoenix: { url: '/backgrounds/phoenix.jpg', theme: 'sunset' },
     griffin: { url: '/backgrounds/griffin.jpg', theme: 'paper' },
@@ -36,10 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
     qilin: { url: '/backgrounds/qilin.jpg', theme: 'emerald' },
     wyvern: { url: '/backgrounds/wyvern.jpg', theme: 'dark' }
   };
-  
-  const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3');
+
+  // Mystical Celtic/Fantasy Instrumental Harp & Ambient Strings
+  const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/11/06/audio_2c2d28f73b.mp3');
   bgAudio.loop = true;
-  bgAudio.volume = 0.25;
+  bgAudio.volume = 0.22;
 
   let hasUserInteracted = false;
   function triggerAudioUnlock() {
@@ -104,11 +108,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingsModal = document.getElementById('settings-modal');
   const settingsCloseX = document.getElementById('settings-close-x');
   const settingsSaveBtn = document.getElementById('settings-save-btn');
-  const returnLobbyBtn = document.getElementById('return-lobby-btn');
+
   const authPasswordInput = document.getElementById('auth-password');
   const togglePasswordVisibilityBtn = document.getElementById('toggle-password-visibility');
 
-  // Profile DOM Elements
   const openProfileBtn = document.getElementById('open-profile-btn');
   const profileModal = document.getElementById('profile-modal');
   const profileCloseX = document.getElementById('profile-close-x');
@@ -125,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const profMemberSince = document.getElementById('prof-member-since');
   const deleteMyAccountBtn = document.getElementById('delete-my-account-btn');
 
-  // Friends Elements
   const openFriendsBtn = document.getElementById('open-friends-btn');
   const friendsModal = document.getElementById('friends-modal');
   const friendsCloseX = document.getElementById('friends-close-x');
@@ -137,12 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const friendsTableBody = document.getElementById('friends-table-body');
   const noFriendsMsg = document.getElementById('no-friends-msg');
 
-  // Privacy Elements
   const privacyModal = document.getElementById('privacy-modal');
   const privacyCloseX = document.getElementById('privacy-close-x');
   const privacyAcceptBtn = document.getElementById('privacy-accept-btn');
 
-  // History & Auth
   const openHistoryBtn = document.getElementById('open-history-btn');
   const historyModal = document.getElementById('history-modal');
   const historyCloseX = document.getElementById('history-close-x');
@@ -178,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalUsersCount = document.getElementById('total-users-count');
   const adminRefreshBtn = document.getElementById('admin-refresh-btn');
 
-  // Live Chat Elements
   const chatDrawer = document.getElementById('chat-drawer');
   const chatToggleBtn = document.getElementById('chat-toggle-btn');
   const chatCloseBtn = document.getElementById('chat-close-btn');
@@ -216,23 +215,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const leaderboardBody = document.getElementById('leaderboard-body');
   const modalCloseX = document.getElementById('modal-close-x');
 
-  // --- LIVE CHAT DRAWER CONTROLS ---
+  // Return to Lobby button inside winner modal
+  const returnLobbyBtn = winnerModal?.querySelector('button.full-width');
+  if (returnLobbyBtn) {
+    returnLobbyBtn.removeAttribute('onclick');
+    returnLobbyBtn.addEventListener('click', returnToLobby);
+  }
+
+  function returnToLobby() {
+    winnerModal?.classList.add('hidden');
+    gameView?.classList.add('hidden');
+    gameView?.classList.remove('game-locked');
+    lobbyView?.classList.remove('hidden');
+    chatDrawer?.classList.add('hidden');
+    eliminatedBanner?.classList.add('hidden');
+
+    currentRoomCode = null;
+    isEliminated = false;
+    isCompleted = false;
+    isAbandoned = false;
+    selectedCell = null;
+
+    if (roomStatus) roomStatus.textContent = '';
+    if (lobbyRoster) lobbyRoster.textContent = '';
+    if (gridContainer) gridContainer.innerHTML = '';
+    if (quitBtn) quitBtn.disabled = false;
+
+    // Refresh user's top bar stats
+    if (currentUser) {
+      fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.profile) {
+            currentUser.pvpWon = data.profile.pvpWon;
+            currentUser.pvpPlayed = data.profile.pvpPlayed;
+            currentUser.botWon = data.profile.botWon;
+            currentUser.botPlayed = data.profile.botPlayed;
+            localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
+            updateAuthUI();
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  // Live Chat
   chatToggleBtn?.addEventListener('click', () => {
     chatDrawer?.classList.toggle('hidden');
-    if (!chatDrawer?.classList.contains('hidden')) {
-      chatInput?.focus();
-    }
+    if (!chatDrawer?.classList.contains('hidden')) chatInput?.focus();
   });
-
-  chatCloseBtn?.addEventListener('click', () => {
-    chatDrawer?.classList.add('hidden');
-  });
+  chatCloseBtn?.addEventListener('click', () => chatDrawer?.classList.add('hidden'));
 
   chatForm?.addEventListener('submit', (e) => {
     e.preventDefault();
     const text = chatInput?.value.trim();
     if (!text || !currentRoomCode) return;
-
     socket.emit('sendChatMessage', { roomCode: currentRoomCode, text });
     chatInput.value = '';
   });
@@ -240,13 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on('newChatMessage', ({ sender, senderId, text, timestamp }) => {
     if (!chatMessages) return;
     const isMe = senderId === myId;
-    
     const dateObj = timestamp ? new Date(timestamp) : new Date();
-    const localTime = dateObj.toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: true 
-    });
+    const localTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 
     const msgDiv = document.createElement('div');
     msgDiv.className = `chat-msg ${isMe ? 'my-msg' : ''}`;
@@ -260,12 +292,9 @@ document.addEventListener('DOMContentLoaded', () => {
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    if (!isMe && isSoundEnabled) {
-      playTone(620, 'sine', 0.08, 0.04);
-    }
+    if (!isMe && isSoundEnabled) playTone(620, 'sine', 0.08, 0.04);
   });
 
-  // --- PASSWORD VISIBILITY TOGGLE ---
   togglePasswordVisibilityBtn?.addEventListener('click', () => {
     if (!authPasswordInput) return;
     const isPass = authPasswordInput.type === 'password';
@@ -273,12 +302,12 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePasswordVisibilityBtn.textContent = isPass ? '🙈' : '👁️';
   });
 
-  // --- PERSISTENT SETTINGS ---
+  // Settings
   function saveGameSettings() {
     const settings = {
       difficultyLevel: activeDifficultyLevel,
       symbolSet: activeSymbolSet,
-      background: bgSelect?.value || 'glacier',
+      background: bgSelect?.value || 'dragon',
       font: fontSelect?.value || 'default',
       music: isMusicEnabled,
       sound: isSoundEnabled,
@@ -346,14 +375,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   symbolSetSelect?.addEventListener('change', (e) => {
     activeSymbolSet = e.target.value;
-    const readable = symbolSetSelect.options[symbolSetSelect.selectedIndex].text;
-    if (activeSymbolLabel) activeSymbolLabel.textContent = readable;
+    if (activeSymbolLabel) activeSymbolLabel.textContent = symbolSetSelect.options[symbolSetSelect.selectedIndex].text;
     saveGameSettings();
   });
 
   bgSelect?.addEventListener('change', (e) => {
-    const chosenKey = e.target.value;
-    const config = BACKGROUND_THEMES[chosenKey];
+    const config = BACKGROUND_THEMES[e.target.value];
     if (scenicBg && config) {
       scenicBg.style.backgroundImage = `url('${config.url}')`;
       document.documentElement.setAttribute('data-theme', config.theme);
@@ -378,11 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   musicToggle?.addEventListener('change', (e) => {
     isMusicEnabled = e.target.checked;
-    if (isMusicEnabled) {
-      bgAudio.play().catch(() => {});
-    } else {
-      bgAudio.pause();
-    }
+    if (isMusicEnabled) bgAudio.play().catch(() => {});
+    else bgAudio.pause();
     saveGameSettings();
   });
 
@@ -404,10 +428,9 @@ document.addEventListener('DOMContentLoaded', () => {
     adminDashboardSec.classList.add('hidden');
     adminModal.classList.remove('hidden');
   });
-
   adminCloseX?.addEventListener('click', () => adminModal.classList.add('hidden'));
 
-async function fetchAdminUsers(key) {
+  async function fetchAdminUsers(key) {
     try {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
@@ -415,7 +438,6 @@ async function fetchAdminUsers(key) {
         body: JSON.stringify({ adminKey: key })
       });
       const data = await res.json();
-
       if (!res.ok) {
         adminErrorMsg.textContent = data.error || 'Access denied';
         adminErrorMsg.classList.remove('hidden');
@@ -429,22 +451,13 @@ async function fetchAdminUsers(key) {
       adminUsersTableBody.innerHTML = '';
       data.users.forEach(u => {
         const tr = document.createElement('tr');
-        const regDate = new Date(u.registeredAt).toLocaleDateString();
-        
-        const pvpWins = u.pvpWon || 0;
-        const pvpTotal = u.pvpPlayed || 0;
-        const botWins = u.botWon || 0;
-        const botTotal = u.botPlayed || 0;
-
         tr.innerHTML = `
           <td><strong>${u.username}</strong></td>
           <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
-          <td>${pvpWins}W / ${pvpTotal}P</td>
-          <td>${botWins}W / ${botTotal}P</td>
-          <td>${regDate}</td>
-          <td>
-            <button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button>
-          </td>
+          <td>${u.pvpWon || 0}W / ${u.pvpPlayed || 0}P</td>
+          <td>${u.botWon || 0}W / ${u.botPlayed || 0}P</td>
+          <td>${new Date(u.registeredAt).toLocaleDateString()}</td>
+          <td><button class="btn danger-small sketch-border" onclick="adminDeleteUser('${u.username}')">Delete</button></td>
         `;
         adminUsersTableBody.appendChild(tr);
       });
@@ -458,7 +471,6 @@ async function fetchAdminUsers(key) {
     const key = adminSecretInput.value.trim();
     if (key) fetchAdminUsers(key);
   });
-
   adminRefreshBtn?.addEventListener('click', () => {
     const key = adminSecretInput.value.trim();
     if (key) fetchAdminUsers(key);
@@ -466,11 +478,7 @@ async function fetchAdminUsers(key) {
 
   window.adminDeleteUser = async function(targetUsername) {
     const key = adminSecretInput.value.trim();
-    if (!key) return;
-
-    if (!confirm(`Are you sure you want to permanently erase all records and data for user "${targetUsername}"?`)) {
-      return;
-    }
+    if (!key || !confirm(`Permanently erase user "${targetUsername}"?`)) return;
 
     try {
       const res = await fetch('/api/admin/delete-user', {
@@ -479,44 +487,28 @@ async function fetchAdminUsers(key) {
         body: JSON.stringify({ adminKey: key, targetUsername })
       });
       const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.error || 'Failed to delete user.');
-        return;
-      }
-
-      alert(data.message);
-      fetchAdminUsers(key);
+      if (res.ok) {
+        alert(data.message);
+        fetchAdminUsers(key);
+      } else alert(data.error || 'Failed to delete user.');
     } catch (err) {
       alert('Error communicating with server.');
     }
   };
 
-  // --- PRIVACY GATE ---
-  openRegisterBtn?.addEventListener('click', () => {
-    privacyModal?.classList.remove('hidden');
-  });
-
+  openRegisterBtn?.addEventListener('click', () => privacyModal?.classList.remove('hidden'));
   privacyCloseX?.addEventListener('click', () => privacyModal?.classList.add('hidden'));
-
   privacyAcceptBtn?.addEventListener('click', () => {
     privacyModal?.classList.add('hidden');
     openAuth(true);
   });
 
-  // --- STATUS BAR SYNC ---
   function updateAuthUI() {
     if (currentUser) {
       guestAuthControls.classList.add('hidden');
       loggedAuthControls.classList.remove('hidden');
       loggedUsernameSpan.textContent = currentUser.username;
-      
-      const pvpW = currentUser.pvpWon || 0;
-      const pvpP = currentUser.pvpPlayed || 0;
-      const botW = currentUser.botWon || 0;
-      const botP = currentUser.botPlayed || 0;
-      userStatsSpan.textContent = `PvP: ${pvpW}W/${pvpP}P | Bot: ${botW}W/${botP}P`;
-
+      userStatsSpan.textContent = `PvP: ${currentUser.pvpWon || 0}W/${currentUser.pvpPlayed || 0}P | Bot: ${currentUser.botWon || 0}W/${currentUser.botPlayed || 0}P`;
       if (usernameInput) usernameInput.value = currentUser.username;
     } else {
       guestAuthControls.classList.remove('hidden');
@@ -524,7 +516,30 @@ async function fetchAdminUsers(key) {
     }
   }
 
-  // --- PLAYER PROFILE MODAL ---
+  async function loadPersistedUser() {
+    const saved = localStorage.getItem('sudoku_active_user');
+    if (saved) {
+      try {
+        currentUser = JSON.parse(saved);
+        updateAuthUI();
+        socket.emit('registerOnlineUser', { username: currentUser.username });
+
+        const res = await fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`);
+        const data = await res.json();
+        if (data.success && data.profile) {
+          currentUser.pvpWon = data.profile.pvpWon;
+          currentUser.pvpPlayed = data.profile.pvpPlayed;
+          currentUser.botWon = data.profile.botWon;
+          currentUser.botPlayed = data.profile.botPlayed;
+          localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
+          updateAuthUI();
+        }
+      } catch (e) {
+        currentUser = null;
+      }
+    }
+  }
+
   openProfileBtn?.addEventListener('click', async () => {
     if (!currentUser) return;
     try {
@@ -535,15 +550,12 @@ async function fetchAdminUsers(key) {
       const p = data.profile;
       profUsername.textContent = p.username;
       profRole.textContent = p.role.toUpperCase();
-      
       profPvpWinRate.textContent = p.pvpWinRate;
       profPvpWon.textContent = p.pvpWon;
       profPvpPlayed.textContent = p.pvpPlayed;
-
       profBotWinRate.textContent = p.botWinRate;
       profBotWon.textContent = p.botWon;
       profBotPlayed.textContent = p.botPlayed;
-
       profTotalScore.textContent = p.totalScore;
       profFriendsCount.textContent = p.friendsCount;
       profMemberSince.textContent = new Date(p.registeredAt).toLocaleDateString([], { month: 'short', year: 'numeric' });
@@ -553,17 +565,11 @@ async function fetchAdminUsers(key) {
       alert('Could not retrieve player profile.');
     }
   });
-
   profileCloseX?.addEventListener('click', () => profileModal?.classList.add('hidden'));
 
-  // --- SELF-SERVICE DATA DELETION ---
   deleteMyAccountBtn?.addEventListener('click', async () => {
-    if (!currentUser) return;
-
-    const confirmed = confirm('Are you sure you want to permanently delete your account, game stats, and friend links? This cannot be undone.');
-    if (!confirmed) return;
-
-    const pass = prompt('Please enter your password to confirm account deletion:');
+    if (!currentUser || !confirm('Permanently delete your account, game stats, and friendships? This cannot be undone.')) return;
+    const pass = prompt('Enter password to confirm deletion:');
     if (!pass) return;
 
     try {
@@ -573,21 +579,17 @@ async function fetchAdminUsers(key) {
         body: JSON.stringify({ username: currentUser.username, password: pass })
       });
       const data = await res.json();
-
-      if (!res.ok) {
-        return alert(data.error || 'Failed to delete account.');
-      }
-
-      alert(data.message);
-      localStorage.removeItem('sudoku_active_user');
-      currentUser = null;
-      location.reload();
+      if (res.ok) {
+        alert(data.message);
+        localStorage.removeItem('sudoku_active_user');
+        currentUser = null;
+        location.reload();
+      } else alert(data.error || 'Failed to delete account.');
     } catch (err) {
-      alert('Connection error. Could not delete account.');
+      alert('Connection error.');
     }
   });
 
-  // --- FRIENDS HUB ---
   async function refreshFriendsList() {
     if (!currentUser) return;
     try {
@@ -626,9 +628,7 @@ async function fetchAdminUsers(key) {
                 <span class="status-dot"></span> ${f.online ? 'Online' : 'Offline'}
               </span>
             </td>
-            <td>
-              <button class="btn danger-small sketch-border" onclick="removeFriend('${f.username}')">Remove</button>
-            </td>
+            <td><button class="btn danger-small sketch-border" onclick="removeFriend('${f.username}')">Remove</button></td>
           `;
           friendsTableBody.appendChild(tr);
         });
@@ -651,29 +651,18 @@ async function fetchAdminUsers(key) {
   };
 
   window.removeFriend = async function(targetFriend) {
-    if (!currentUser) return;
-
-    if (!confirm(`Are you sure you want to remove ${targetFriend} from your friends list?`)) {
-      return;
-    }
-
+    if (!currentUser || !confirm(`Remove ${targetFriend} from friends?`)) return;
     try {
       const res = await fetch('/api/friends/remove', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          username: currentUser.username, 
-          targetFriend: targetFriend 
-        })
+        body: JSON.stringify({ username: currentUser.username, targetFriend })
       });
       const data = await res.json();
-      if (data.success) {
-        refreshFriendsList();
-      } else {
-        alert(data.error || 'Failed to remove friend.');
-      }
+      if (data.success) refreshFriendsList();
+      else alert(data.error || 'Failed to remove friend.');
     } catch (e) {
-      alert('Network error while removing friend.');
+      alert('Network error.');
     }
   };
 
@@ -683,7 +672,6 @@ async function fetchAdminUsers(key) {
     refreshFriendsList();
     friendsModal?.classList.remove('hidden');
   });
-
   friendsCloseX?.addEventListener('click', () => friendsModal?.classList.add('hidden'));
 
   sendFriendReqBtn?.addEventListener('click', async () => {
@@ -710,42 +698,12 @@ async function fetchAdminUsers(key) {
   });
 
   socket.on('friendRequestReceived', ({ from }) => {
-    alert(`👥 New friend request received from ${from}!`);
+    alert(`👥 Friend request from ${from}!`);
     refreshFriendsList();
   });
+  socket.on('friendStatusChanged', () => refreshFriendsList());
 
-  socket.on('friendStatusChanged', () => {
-    refreshFriendsList();
-  });
-
-  // --- AUTH & REGISTRATION ---
   let isRegisterMode = false;
-
- async function loadPersistedUser() {
-    const saved = localStorage.getItem('sudoku_active_user');
-    if (saved) {
-      try {
-        currentUser = JSON.parse(saved);
-        updateAuthUI();
-        socket.emit('registerOnlineUser', { username: currentUser.username });
-
-        // Fetch fresh stats from the server to refresh top-bar counters
-        const res = await fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`);
-        const data = await res.json();
-        if (data.success && data.profile) {
-          currentUser.pvpWon = data.profile.pvpWon;
-          currentUser.pvpPlayed = data.profile.pvpPlayed;
-          currentUser.botWon = data.profile.botWon;
-          currentUser.botPlayed = data.profile.botPlayed;
-          localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
-          updateAuthUI();
-        }
-      } catch (e) {
-        currentUser = null;
-      }
-    }
-  }
-
   function openAuth(isRegister) {
     isRegisterMode = isRegister;
     authErrorMsg.classList.add('hidden');
@@ -754,17 +712,10 @@ async function fetchAdminUsers(key) {
     authPasswordInput.type = 'password';
     if (togglePasswordVisibilityBtn) togglePasswordVisibilityBtn.textContent = '👁️';
 
-    if (isRegisterMode) {
-      authModalTitle.textContent = '📝 Register Player';
-      authSubmitBtn.textContent = 'Create Account';
-      authSwitchMsg.textContent = 'Already have an account?';
-      authToggleLink.textContent = 'Log In here';
-    } else {
-      authModalTitle.textContent = '🔑 Player Login';
-      authSubmitBtn.textContent = 'Log In';
-      authSwitchMsg.textContent = "Don't have an account?";
-      authToggleLink.textContent = 'Register here';
-    }
+    authModalTitle.textContent = isRegisterMode ? '📝 Register Player' : '🔑 Player Login';
+    authSubmitBtn.textContent = isRegisterMode ? 'Create Account' : 'Log In';
+    authSwitchMsg.textContent = isRegisterMode ? 'Already have an account?' : "Don't have an account?";
+    authToggleLink.textContent = isRegisterMode ? 'Log In here' : 'Register here';
     authModal.classList.remove('hidden');
   }
 
@@ -776,15 +727,12 @@ async function fetchAdminUsers(key) {
     if (!isRegisterMode) {
       authModal.classList.add('hidden');
       privacyModal?.classList.remove('hidden');
-    } else {
-      openAuth(false);
-    }
+    } else openAuth(false);
   });
 
   authForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     authErrorMsg.classList.add('hidden');
-
     const username = authUsernameInput.value.trim();
     const password = authPasswordInput.value;
     const endpoint = isRegisterMode ? '/api/register' : '/api/login';
@@ -796,13 +744,11 @@ async function fetchAdminUsers(key) {
         body: JSON.stringify({ username, password })
       });
       const data = await res.json();
-
       if (!res.ok) {
         authErrorMsg.textContent = data.error || 'Authentication error';
         authErrorMsg.classList.remove('hidden');
         return;
       }
-
       currentUser = data.user;
       localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
       updateAuthUI();
@@ -822,7 +768,6 @@ async function fetchAdminUsers(key) {
 
   loadPersistedUser();
 
-  // --- MATCH HISTORY ---
   openHistoryBtn?.addEventListener('click', async () => {
     if (!currentUser) return;
     try {
@@ -834,9 +779,8 @@ async function fetchAdminUsers(key) {
         noHistoryMsg.classList.add('hidden');
         data.history.forEach(item => {
           const tr = document.createElement('tr');
-          const d = new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
           tr.innerHTML = `
-            <td>${d}</td>
+            <td>${new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
             <td><strong>${item.outcome}</strong></td>
             <td>${item.mode}</td>
             <td>Level ${item.difficultyLevel}</td>
@@ -853,10 +797,9 @@ async function fetchAdminUsers(key) {
       alert('Unable to load history.');
     }
   });
-
   historyCloseX?.addEventListener('click', () => historyModal.classList.add('hidden'));
 
-  // --- PARTICLES CANVAS ---
+  // Glitter Canvas
   const glitterCanvas = document.getElementById('glitter-canvas');
   if (glitterCanvas) {
     const gCtx = glitterCanvas.getContext('2d');
@@ -904,7 +847,7 @@ async function fetchAdminUsers(key) {
     renderGlitter();
   }
 
-  // --- WEB AUDIO ---
+  // Audio synthesis
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -967,97 +910,23 @@ async function fetchAdminUsers(key) {
     if (!isSoundEnabled) return;
     const ctx = getAudioContext();
     const now = ctx.currentTime;
-    const brassNotes = [
-      { freq: 261.63, delay: 0.0, dur: 0.35 },
-      { freq: 329.63, delay: 0.15, dur: 0.35 },
-      { freq: 392.00, delay: 0.30, dur: 0.35 },
-      { freq: 523.25, delay: 0.45, dur: 0.65 },
-      { freq: 659.25, delay: 0.70, dur: 0.50 },
-      { freq: 783.99, delay: 0.90, dur: 0.90 },
-      { freq: 1046.5, delay: 1.15, dur: 1.40 }
-    ];
-    brassNotes.forEach(n => {
+    const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(n.freq, now + n.delay);
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1400, now + n.delay);
-      gain.gain.setValueAtTime(0.0001, now + n.delay);
-      gain.gain.linearRampToValueAtTime(0.09, now + n.delay + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now + n.delay);
-      osc.stop(now + n.delay + n.dur);
-    });
-  }
-
-  function playDramaticLoss() {
-    if (!isSoundEnabled) return;
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-    const minorDescent = [
-      { freq: 220.00, delay: 0.0, dur: 0.7 },
-      { freq: 207.65, delay: 0.45, dur: 0.7 },
-      { freq: 196.00, delay: 0.90, dur: 0.8 },
-      { freq: 146.83, delay: 1.40, dur: 1.8 }
-    ];
-    minorDescent.forEach(n => {
-      const osc = ctx.createOscillator();
-      const sub = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(n.freq, now + n.delay);
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(600, now + n.delay);
-      gain.gain.setValueAtTime(0.0001, now + n.delay);
-      gain.gain.linearRampToValueAtTime(0.12, now + n.delay + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.delay + n.dur);
-      osc.connect(filter);
-      sub.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now + n.delay);
-      sub.start(now + n.delay);
-      osc.stop(now + n.delay + n.dur);
-      sub.stop(now + n.delay + n.dur);
-    });
-  }
-
-  function playDrawSound() {
-    if (!isSoundEnabled) return;
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-    [392.00, 523.25].forEach(freq => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(0.08, now + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+      gain.gain.setValueAtTime(0.001, now + idx * 0.16);
+      gain.gain.linearRampToValueAtTime(0.12, now + idx * 0.16 + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.16 + 0.5);
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 1.9);
+      osc.start(now + idx * 0.16);
+      osc.stop(now + idx * 0.16 + 0.52);
     });
   }
 
-  function playResignSound() {
-    playTone(440, 'sine', 0.22, 0.08);
-    setTimeout(() => playTone(330, 'sine', 0.40, 0.08), 120);
-  }
-
-  modalCloseX?.addEventListener('click', () => {
-  winnerModal?.classList.add('hidden');
-  if (confirm('Return to the lobby menu?')) {
-    location.reload();
-  }
-});
+  modalCloseX?.addEventListener('click', () => winnerModal?.classList.add('hidden'));
 
   document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
@@ -1102,20 +971,18 @@ async function fetchAdminUsers(key) {
     const selectedMode = document.querySelector('input[name="game-mode"]:checked')?.value || 'multi';
 
     if (selectedMode === 'bot') {
-      const botSpeed = botSpeedSelect?.value || 'medium';
       socket.emit('createSoloBotRoom', { 
         username, 
         difficultyLevel: activeDifficultyLevel, 
-        botSpeed, 
+        botSpeed: botSpeedSelect?.value || 'medium', 
         durationMinutes, 
         symbolSet: activeSymbolSet 
       });
     } else {
-      const maxPlayers = maxPlayersSelect?.value || 2;
       socket.emit('createRoom', { 
         username, 
         difficultyLevel: activeDifficultyLevel, 
-        maxPlayers, 
+        maxPlayers: maxPlayersSelect?.value || 2, 
         durationMinutes, 
         symbolSet: activeSymbolSet 
       });
@@ -1125,21 +992,27 @@ async function fetchAdminUsers(key) {
   joinBtn?.addEventListener('click', () => {
     getAudioContext();
     if (isMusicEnabled) bgAudio.play().catch(() => {});
-
     const username = usernameInput?.value.trim() || currentUser?.username || 'Player';
     const roomCode = roomCodeInput?.value.trim();
-    if (!roomCode) return alert('Please enter a room code');
+    if (!roomCode) return alert('Please enter room code');
     socket.emit('joinRoom', { roomCode, username });
   });
 
+  // Quit / Resign handler
   quitBtn?.addEventListener('click', () => {
-    if (confirm('Are you sure you want to resign from the match?')) {
+    if (confirm('Are you sure you want to resign and abandon this match? You will be ranked last.')) {
       socket.emit('quitGame', { roomCode: currentRoomCode });
-      triggerPlayerEliminated('🏳️ You resigned from the match.');
+      isAbandoned = true;
+      isEliminated = true;
+      if (quitBtn) quitBtn.disabled = true;
+      if (eliminatedBanner) {
+        eliminatedBanner.textContent = '🏳️ You abandoned the match. Ranked last as DNF.';
+        eliminatedBanner.classList.remove('hidden');
+      }
     }
   });
 
-  socket.on('roomCreated', ({ roomCode, maxPlayers, difficultyLevel, durationMinutes, symbolSet }) => {
+  socket.on('roomCreated', ({ roomCode, maxPlayers, difficultyLevel }) => {
     currentRoomCode = roomCode;
     if (roomStatus) roomStatus.textContent = `Room: ${roomCode} | Level: ${difficultyLevel} | Waiting (1/${maxPlayers})...`;
   });
@@ -1156,19 +1029,26 @@ async function fetchAdminUsers(key) {
   socket.on('errorMessage', (msg) => alert(msg));
   socket.on('playerDisconnected', ({ name }) => alert(`${name} left the room.`));
 
+  socket.on('playerAnnouncement', ({ message }) => {
+    const banner = document.createElement('div');
+    banner.className = 'player-announcement sketch-border';
+    banner.textContent = message;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 4000);
+  });
+
   socket.on('startGame', ({ puzzle, players, totalBlanks, duration, symbolSet, roomCode }) => {
     isEliminated = false;
+    isCompleted = false;
+    isAbandoned = false;
     selectedCell = null;
-    returnLobbyBtn?.classList.add('hidden');
     activeSymbolSet = symbolSet || 'numbers';
     currentRoomCode = roomCode || currentRoomCode;
-    if (quitBtn) quitBtn.disabled = false;
     completedRows.clear();
     completedCols.clear();
     completedBoxes.clear();
 
     if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen';
-
     if (chatMessages) chatMessages.innerHTML = '';
     chatDrawer?.classList.add('hidden');
 
@@ -1177,6 +1057,7 @@ async function fetchAdminUsers(key) {
     eliminatedBanner?.classList.add('hidden');
     winnerModal?.classList.add('hidden');
     if (currentRoomSpan) currentRoomSpan.textContent = currentRoomCode;
+    if (quitBtn) quitBtn.disabled = false;
 
     updateLivesDisplay(0);
     updateTimerDisplay(duration);
@@ -1255,7 +1136,7 @@ async function fetchAdminUsers(key) {
           cell.textContent = getSymbol(val);
         } else {
           cell.addEventListener('click', () => {
-            if (isEliminated || cell.classList.contains('correct')) return;
+            if (isEliminated || isCompleted || isAbandoned || cell.classList.contains('correct')) return;
             if (selectedCell) selectedCell.classList.remove('selected');
             selectedCell = cell;
             cell.classList.add('selected');
@@ -1280,7 +1161,7 @@ async function fetchAdminUsers(key) {
       btn.textContent = symbol;
 
       btn.addEventListener('click', () => {
-        if (isEliminated || !selectedCell) return;
+        if (isEliminated || isCompleted || isAbandoned || !selectedCell) return;
         makeMove(parseInt(selectedCell.dataset.row, 10), parseInt(selectedCell.dataset.col, 10), val);
       });
 
@@ -1291,7 +1172,7 @@ async function fetchAdminUsers(key) {
 
   window.addEventListener('keydown', (e) => {
     if (document.activeElement === chatInput) return;
-    if (isEliminated || !selectedCell) return;
+    if (isEliminated || isCompleted || isAbandoned || !selectedCell) return;
     const key = e.key.toUpperCase();
 
     if (/^[1-9]$/.test(key)) {
@@ -1327,7 +1208,12 @@ async function fetchAdminUsers(key) {
       updateLivesDisplay(mistakes);
 
       if (eliminated) {
-        triggerPlayerEliminated('❌ You were eliminated (3 mistakes)!');
+        isEliminated = true;
+        if (quitBtn) quitBtn.disabled = true;
+        if (eliminatedBanner) {
+          eliminatedBanner.textContent = '❌ You were eliminated (3 mistakes)!';
+          eliminatedBanner.classList.remove('hidden');
+        }
       }
 
       setTimeout(() => {
@@ -1338,8 +1224,6 @@ async function fetchAdminUsers(key) {
   });
 
   function checkCompletions() {
-    let anyCompleted = false;
-
     for (let r = 0; r < 9; r++) {
       if (completedRows.has(r)) continue;
       let full = true;
@@ -1352,7 +1236,6 @@ async function fetchAdminUsers(key) {
       if (full) {
         completedRows.add(r);
         animateCompletedSection(cells, ['🔥', '⚡', '💯']);
-        anyCompleted = true;
       }
     }
 
@@ -1368,7 +1251,6 @@ async function fetchAdminUsers(key) {
       if (full) {
         completedCols.add(c);
         animateCompletedSection(cells, ['🚀', '✨', '🎯']);
-        anyCompleted = true;
       }
     }
 
@@ -1389,12 +1271,9 @@ async function fetchAdminUsers(key) {
         if (full) {
           completedBoxes.add(boxKey);
           animateCompletedSection(cells, ['⭐', '👑', '🌟']);
-          anyCompleted = true;
         }
       }
     }
-
-    if (anyCompleted) playSectionCompleteSound();
   }
 
   function isCellSolved(cell) {
@@ -1402,6 +1281,7 @@ async function fetchAdminUsers(key) {
   }
 
   function animateCompletedSection(cells, emojiSet) {
+    playSectionCompleteSound();
     cells.forEach((cell, idx) => {
       setTimeout(() => {
         cell.classList.add('completed-flash');
@@ -1411,17 +1291,7 @@ async function fetchAdminUsers(key) {
     });
   }
 
-  function triggerPlayerEliminated(message) {
-    isEliminated = true;
-    if (quitBtn) quitBtn.disabled = true;
-    if (eliminatedBanner) {
-      eliminatedBanner.textContent = message;
-      eliminatedBanner.classList.remove('hidden');
-    }
-    if (selectedCell) selectedCell.classList.remove('selected');
-  }
-
-  socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, totalBlanks }) => {
+  socket.on('progressUpdate', ({ playerId, score, mistakes, eliminated, completed, abandoned, totalBlanks }) => {
     const bar = document.getElementById(`bar-${playerId}`);
     const scoreSpan = document.getElementById(`score-${playerId}`);
     const mistakesSpan = document.getElementById(`mistakes-${playerId}`);
@@ -1430,69 +1300,56 @@ async function fetchAdminUsers(key) {
     if (bar && scoreSpan && mistakesSpan) {
       const pct = Math.min(100, Math.round((score / totalBlanks) * 100));
       bar.style.width = `${pct}%`;
-      scoreSpan.textContent = `${score} / ${totalBlanks}`;
+      scoreSpan.textContent = completed ? '🏁 FINISHED' : `${score} / ${totalBlanks}`;
 
-      const livesLeft = Math.max(0, 3 - mistakes);
-      mistakesSpan.textContent = eliminated ? '💀 OUT' : `❤️ ${livesLeft}`;
-      if (eliminated && card) card.classList.add('eliminated');
+      if (abandoned) mistakesSpan.textContent = '🏳️ DNF';
+      else if (eliminated) mistakesSpan.textContent = '💀 OUT';
+      else mistakesSpan.textContent = `❤️ ${Math.max(0, 3 - mistakes)}`;
+
+      if (card) {
+        if (completed) card.classList.add('completed');
+        if (eliminated || abandoned) card.classList.add('eliminated');
+      }
     }
   });
 
-  socket.on('gameOver', ({ reason, leaderboard, outcome }) => {
+  // When this individual player personally finishes their board
+  socket.on('playerPersonalFinished', ({ rank }) => {
+    isCompleted = true;
+    playDramaticVictory();
+    if (eliminatedBanner) {
+      eliminatedBanner.textContent = `🎉 You completed the board! Rank: #${rank}. Waiting for others or return to lobby.`;
+      eliminatedBanner.classList.remove('hidden');
+    }
+  });
+
+  // When the whole match finishes (all done or timer expired)
+  socket.on('matchEndedFinal', ({ reason, leaderboard }) => {
     gameView?.classList.add('game-locked');
     if (quitBtn) quitBtn.disabled = true;
-    returnLobbyBtn?.classList.remove('hidden');
 
-    // Refresh top-bar stats after match completion
-    if (currentUser) {
-      fetch(`/api/user/profile/${encodeURIComponent(currentUser.username)}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.success && data.profile) {
-            currentUser.pvpWon = data.profile.pvpWon;
-            currentUser.pvpPlayed = data.profile.pvpPlayed;
-            currentUser.botWon = data.profile.botWon;
-            currentUser.botPlayed = data.profile.botPlayed;
-            localStorage.setItem('sudoku_active_user', JSON.stringify(currentUser));
-            updateAuthUI();
-          }
-        })
-        .catch(() => {});
-    }
-
-    const isMeWinner = leaderboard.length > 0 && leaderboard[0].id === myId;
-    // ... rest of the existing gameOver code continues below
-
-    if (outcome === 'resign' && isMeEliminated) {
-      if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen flash-resign';
-      if (winnerTitle) winnerTitle.textContent = '🏳️ RESIGNED';
-      playResignSound();
-    } else if (isMeWinner) {
-      if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen flash-win';
-      if (winnerTitle) winnerTitle.textContent = '🏆 VICTORY!';
-      playDramaticVictory();
-    } else if (isMeEliminated || outcome === 'loss') {
-      if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen flash-loss';
-      if (winnerTitle) winnerTitle.textContent = '💀 DEFEAT';
-      playDramaticLoss();
-    } else {
-      if (resultFlashScreen) resultFlashScreen.className = 'result-flash-screen flash-draw';
-      if (winnerTitle) winnerTitle.textContent = '⚖️ MATCH DRAW';
-      playDrawSound();
-    }
-
+    if (winnerTitle) winnerTitle.textContent = '🏁 Match Finished';
     if (winnerReason) winnerReason.textContent = reason;
+
     if (leaderboardBody) {
       leaderboardBody.innerHTML = '';
       leaderboard.forEach((player, idx) => {
         const tr = document.createElement('tr');
         const medal = idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : `#${idx + 1} `;
+        const statusText = player.abandoned 
+          ? '🏳️ Abandoned (Last)' 
+          : player.completed 
+            ? '🏁 Finished' 
+            : player.eliminated 
+              ? '💀 Struck Out' 
+              : '⏳ Incomplete';
+
         tr.innerHTML = `
           <td>${medal}</td>
           <td>${player.name} ${player.id === myId ? '(You)' : ''}</td>
           <td>${player.score}</td>
           <td>${player.mistakes}/3</td>
-          <td>${player.eliminated ? '❌ Eliminated' : '✅ Survived'}</td>
+          <td>${statusText}</td>
         `;
         leaderboardBody.appendChild(tr);
       });
@@ -1500,7 +1357,4 @@ async function fetchAdminUsers(key) {
 
     winnerModal?.classList.remove('hidden');
   });
-});
-returnLobbyBtn?.addEventListener('click', () => {
-  location.reload();
 });

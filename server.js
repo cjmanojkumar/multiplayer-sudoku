@@ -18,7 +18,7 @@ function loadDB() {
   if (!fs.existsSync(DB_FILE)) {
     const initialData = {
       users: [],
-      adminSecretKey: '22Harinishree C  J Pallavishree15'
+      adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026'
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
     return initialData;
@@ -26,7 +26,7 @@ function loadDB() {
   try {
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
   } catch (err) {
-    return { users: [], adminSecretKey: '22Harinishree C  J Pallavishree15' };
+    return { users: [], adminSecretKey: 'SUDOKU_SUPER_ADMIN_2026' };
   }
 }
 
@@ -58,7 +58,6 @@ app.post('/api/register', async (req, res) => {
     username: cleanUser,
     passwordHash,
     role: cleanUser.toLowerCase() === 'admin' ? 'admin' : 'player',
-    // Split PvP vs Bot Statistics
     pvpPlayed: 0,
     pvpWon: 0,
     botPlayed: 0,
@@ -126,7 +125,6 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
-// --- PROFILE & SEPARATE STATS API ---
 app.get('/api/user/profile/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
@@ -145,11 +143,9 @@ app.get('/api/user/profile/:username', (req, res) => {
     profile: {
       username: user.username,
       role: user.role,
-      // Granular PvP Stats
       pvpPlayed,
       pvpWon,
       pvpWinRate: `${pvpWinRate}%`,
-      // Granular Bot Stats
       botPlayed,
       botWon,
       botWinRate: `${botWinRate}%`,
@@ -161,32 +157,41 @@ app.get('/api/user/profile/:username', (req, res) => {
   });
 });
 
-// --- STATS RECORDING ENGINE (SEPARATES PVP FROM BOT) ---
-function recordMatchStats(leaderboard, outcome, room) {
+// --- RECORDING STATS ACCORDING TO RANK & ABANDON STATUS ---
+function recordMatchStats(leaderboard, room) {
   const db = loadDB();
   const isBotGame = !!room.isBotGame;
 
   leaderboard.forEach((p, idx) => {
-    // Only update registered human players
     if (p.id === 'bot_ai') return;
 
     const user = db.users.find(u => u.username.toLowerCase() === p.name.toLowerCase());
     if (user) {
-      const won = idx === 0 && outcome === 'win' && !p.eliminated;
+      const isWinner = idx === 0 && p.completed && !p.eliminated && !p.abandoned;
       user.totalScore = (user.totalScore || 0) + p.score;
 
       if (isBotGame) {
         user.botPlayed = (user.botPlayed || 0) + 1;
-        if (won) user.botWon = (user.botWon || 0) + 1;
+        if (isWinner) user.botWon = (user.botWon || 0) + 1;
       } else {
         user.pvpPlayed = (user.pvpPlayed || 0) + 1;
-        if (won) user.pvpWon = (user.pvpWon || 0) + 1;
+        if (isWinner) user.pvpWon = (user.pvpWon || 0) + 1;
       }
+
+      const outcomeText = p.abandoned 
+        ? 'Abandoned' 
+        : isWinner 
+          ? 'Won (1st)' 
+          : p.completed 
+            ? `Finished (${idx + 1}${getOrdinal(idx + 1)})` 
+            : p.eliminated 
+              ? 'Eliminated' 
+              : 'Timeout';
 
       if (!user.history) user.history = [];
       user.history.unshift({
         date: new Date().toISOString(),
-        outcome: won ? 'Won' : p.eliminated ? 'Eliminated' : outcome === 'draw' ? 'Draw' : 'Finished',
+        outcome: outcomeText,
         score: p.score,
         totalBlanks: room.totalBlanks,
         mistakes: p.mistakes,
@@ -200,77 +205,62 @@ function recordMatchStats(leaderboard, outcome, room) {
   saveDB(db);
 }
 
+function getOrdinal(n) {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+}
+
 // --- DATA DELETION ENDPOINTS ---
 app.post('/api/user/delete-account', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password confirmation required.' });
+    return res.status(400).json({ error: 'Username and password required.' });
   }
 
   const db = loadDB();
   const userIndex = db.users.findIndex(u => u.username.toLowerCase() === username.trim().toLowerCase());
 
-  if (userIndex === -1) {
-    return res.status(404).json({ error: 'User does not exist.' });
-  }
+  if (userIndex === -1) return res.status(404).json({ error: 'User does not exist.' });
 
   const user = db.users[userIndex];
   const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) {
-    return res.status(403).json({ error: 'Incorrect password. Cannot delete account.' });
-  }
+  if (!valid) return res.status(403).json({ error: 'Incorrect password.' });
 
   const targetName = user.username.toLowerCase();
-
   db.users.forEach(otherUser => {
-    if (otherUser.friends) {
-      otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
-    }
-    if (otherUser.friendRequests) {
-      otherUser.friendRequests = otherUser.friendRequests.filter(f => f.toLowerCase() !== targetName);
-    }
+    if (otherUser.friends) otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
+    if (otherUser.friendRequests) otherUser.friendRequests = otherUser.friendRequests.filter(f => f.toLowerCase() !== targetName);
   });
 
   db.users.splice(userIndex, 1);
   saveDB(db);
-
   onlineUsers.delete(targetName);
-  res.json({ success: true, message: 'Your account and all associated match data were permanently deleted.' });
+
+  res.json({ success: true, message: 'Account permanently deleted.' });
 });
 
 app.post('/api/admin/delete-user', (req, res) => {
   const { adminKey, targetUsername } = req.body;
   const db = loadDB();
 
-  if (adminKey !== db.adminSecretKey) {
-    return res.status(403).json({ error: 'Access denied: Invalid Admin Key.' });
-  }
-
-  if (!targetUsername) {
-    return res.status(400).json({ error: 'Target username is required.' });
-  }
+  if (adminKey !== db.adminSecretKey) return res.status(403).json({ error: 'Invalid Admin Key.' });
+  if (!targetUsername) return res.status(400).json({ error: 'Target username required.' });
 
   const targetName = targetUsername.trim().toLowerCase();
   const userIndex = db.users.findIndex(u => u.username.toLowerCase() === targetName);
-
-  if (userIndex === -1) {
-    return res.status(404).json({ error: 'User not found.' });
-  }
+  if (userIndex === -1) return res.status(404).json({ error: 'User not found.' });
 
   db.users.forEach(otherUser => {
-    if (otherUser.friends) {
-      otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
-    }
-    if (otherUser.friendRequests) {
-      otherUser.friendRequests = otherUser.friendRequests.filter(f => f.toLowerCase() !== targetName);
-    }
+    if (otherUser.friends) otherUser.friends = otherUser.friends.filter(f => f.toLowerCase() !== targetName);
+    if (otherUser.friendRequests) otherUser.friendRequests = otherUser.friendRequests.filter(f => f.toLowerCase() !== targetName);
   });
 
   db.users.splice(userIndex, 1);
   saveDB(db);
-
   onlineUsers.delete(targetName);
-  res.json({ success: true, message: `User ${targetUsername} has been permanently deleted.` });
+
+  res.json({ success: true, message: `User ${targetUsername} deleted.` });
 });
 
 // --- FRIENDS API ---
@@ -285,28 +275,19 @@ app.post('/api/friends/send-request', (req, res) => {
   const sender = db.users.find(u => u.username.toLowerCase() === fromUser.trim().toLowerCase());
 
   if (!target || !sender) return res.status(404).json({ error: 'User does not exist.' });
-
   if (!target.friendRequests) target.friendRequests = [];
   if (!target.friends) target.friends = [];
-  if (!sender.friends) sender.friends = [];
 
-  if (target.friends.includes(sender.username)) {
-    return res.status(400).json({ error: 'You are already friends with this player.' });
-  }
-
-  if (target.friendRequests.includes(sender.username)) {
-    return res.status(400).json({ error: 'Friend request already pending.' });
-  }
+  if (target.friends.includes(sender.username)) return res.status(400).json({ error: 'Already friends.' });
+  if (target.friendRequests.includes(sender.username)) return res.status(400).json({ error: 'Request pending.' });
 
   target.friendRequests.push(sender.username);
   saveDB(db);
 
   const targetSocketId = onlineUsers.get(target.username.toLowerCase());
-  if (targetSocketId) {
-    io.to(targetSocketId).emit('friendRequestReceived', { from: sender.username });
-  }
+  if (targetSocketId) io.to(targetSocketId).emit('friendRequestReceived', { from: sender.username });
 
-  res.json({ success: true, message: `Friend request sent to ${target.username}!` });
+  res.json({ success: true, message: `Request sent to ${target.username}!` });
 });
 
 app.post('/api/friends/respond-request', (req, res) => {
@@ -322,7 +303,6 @@ app.post('/api/friends/respond-request', (req, res) => {
   if (action === 'accept') {
     if (!user.friends) user.friends = [];
     if (!requester.friends) requester.friends = [];
-
     if (!user.friends.includes(requester.username)) user.friends.push(requester.username);
     if (!requester.friends.includes(user.username)) requester.friends.push(user.username);
   }
@@ -331,19 +311,34 @@ app.post('/api/friends/respond-request', (req, res) => {
   res.json({ success: true, friends: user.friends, friendRequests: user.friendRequests });
 });
 
+app.post('/api/friends/remove', (req, res) => {
+  const { username, targetFriend } = req.body;
+  if (!username || !targetFriend) return res.status(400).json({ error: 'Missing details.' });
+
+  const db = loadDB();
+  const user = db.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+  const friend = db.users.find(u => u.username.toLowerCase() === targetFriend.trim().toLowerCase());
+
+  if (!user) return res.status(404).json({ error: 'User not found.' });
+
+  if (user.friends) user.friends = user.friends.filter(f => f.toLowerCase() !== targetFriend.trim().toLowerCase());
+  if (friend && friend.friends) friend.friends = friend.friends.filter(f => f.toLowerCase() !== username.trim().toLowerCase());
+
+  saveDB(db);
+  const friendSocketId = onlineUsers.get(targetFriend.trim().toLowerCase());
+  if (friendSocketId) io.to(friendSocketId).emit('friendStatusChanged');
+
+  res.json({ success: true, message: `Removed ${targetFriend}.` });
+});
+
 app.get('/api/friends/list/:username', (req, res) => {
   const db = loadDB();
   const user = db.users.find(u => u.username.toLowerCase() === req.params.username.toLowerCase());
   if (!user) return res.status(404).json({ error: 'User not found.' });
 
-  const friendsList = (user.friends || []).map(friendName => ({
-    username: friendName,
-    online: onlineUsers.has(friendName.toLowerCase())
-  }));
-
   res.json({
     success: true,
-    friends: friendsList,
+    friends: (user.friends || []).map(f => ({ username: f, online: onlineUsers.has(f.toLowerCase()) })),
     requests: user.friendRequests || []
   });
 });
@@ -358,13 +353,9 @@ app.get('/api/user/history/:username', (req, res) => {
 app.post('/api/admin/users', (req, res) => {
   const { adminKey } = req.body;
   const db = loadDB();
+  if (adminKey !== db.adminSecretKey) return res.status(403).json({ error: 'Access denied.' });
 
-  if (adminKey !== db.adminSecretKey) {
-    return res.status(403).json({ error: 'Access denied: Invalid Admin Key.' });
-  }
-
-  const safeUsers = db.users.map(({ passwordHash, ...rest }) => rest);
-  res.json({ success: true, users: safeUsers });
+  res.json({ success: true, users: db.users.map(({ passwordHash, ...rest }) => rest) });
 });
 
 function getBlanksForLevel(level) {
@@ -410,8 +401,8 @@ function generatePuzzle(level = 4) {
   const board = Array.from({ length: 9 }, () => Array(9).fill(0));
   solveSudoku(board);
   const solution = board.map(row => [...row]);
-
   const puzzle = board.map(row => [...row]);
+
   let removed = 0;
   while (removed < blanks) {
     const r = Math.floor(Math.random() * 9);
@@ -426,8 +417,14 @@ function generatePuzzle(level = 4) {
 
 const rooms = {};
 
+// Rank logic: Finishers first (by finish order), then active by score, then eliminated, then abandoned last
 function getLeaderboard(room) {
   return [...room.players].sort((a, b) => {
+    if (a.abandoned && !b.abandoned) return 1;
+    if (!a.abandoned && b.abandoned) return -1;
+    if (a.completed && b.completed) return (a.finishOrder || 99) - (b.finishOrder || 99);
+    if (a.completed && !b.completed) return -1;
+    if (!a.completed && b.completed) return 1;
     if (!a.eliminated && b.eliminated) return -1;
     if (a.eliminated && !b.eliminated) return 1;
     if (b.score !== a.score) return b.score - a.score;
@@ -435,17 +432,34 @@ function getLeaderboard(room) {
   });
 }
 
-function terminateMatch(code, reason, matchOutcome = 'draw') {
+function checkRoomCompletion(code) {
   const room = rooms[code];
   if (!room || !room.started) return;
+
+  // The match continues until every human player is finished, eliminated, or abandoned
+  const humanPlayers = room.players.filter(p => p.id !== 'bot_ai');
+  const allHumansDone = humanPlayers.every(p => p.completed || p.eliminated || p.abandoned);
+
+  if (allHumansDone) {
+    terminateMatch(code, '🏁 All players have completed or finished their matches!');
+  }
+}
+
+function terminateMatch(code, reason) {
+  const room = rooms[code];
+  if (!room || !room.started) return;
+
   if (room.timerInterval) clearInterval(room.timerInterval);
   if (room.botInterval) clearInterval(room.botInterval);
   room.started = false;
 
   const leaderboard = getLeaderboard(room);
-  recordMatchStats(leaderboard, matchOutcome, room);
+  recordMatchStats(leaderboard, room);
 
-  io.to(code).emit('gameOver', { reason, leaderboard, outcome: matchOutcome });
+  io.to(code).emit('matchEndedFinal', {
+    reason,
+    leaderboard
+  });
 }
 
 io.on('connection', (socket) => {
@@ -463,10 +477,8 @@ io.on('connection', (socket) => {
     if (!room) return;
 
     const player = room.players.find(p => p.id === socket.id);
-    const senderName = player ? player.name : 'Player';
-
     io.to(code).emit('newChatMessage', {
-      sender: senderName,
+      sender: player ? player.name : 'Player',
       senderId: socket.id,
       text: text.trim().substring(0, 150),
       timestamp: new Date().toISOString()
@@ -477,7 +489,6 @@ io.on('connection', (socket) => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     const lvl = parseInt(difficultyLevel, 10) || 4;
     const { puzzle, solution, totalBlanks } = generatePuzzle(lvl);
-
     const validMinutes = Math.max(1, Math.min(60, parseInt(durationMinutes, 10) || 10));
     const totalSeconds = validMinutes * 60;
 
@@ -488,7 +499,10 @@ io.on('connection', (socket) => {
         name: username || 'Player 1',
         score: 0,
         mistakes: 0,
-        eliminated: false
+        eliminated: false,
+        completed: false,
+        abandoned: false,
+        finishOrder: null
       }],
       puzzle,
       solution,
@@ -499,7 +513,8 @@ io.on('connection', (socket) => {
       duration: totalSeconds,
       timeLeft: totalSeconds,
       timerInterval: null,
-      started: false
+      started: false,
+      finishCounter: 0
     };
 
     socket.join(roomCode);
@@ -517,12 +532,30 @@ io.on('connection', (socket) => {
     const roomCode = 'BOT-' + Math.random().toString(36).substring(2, 6).toUpperCase();
     const lvl = parseInt(difficultyLevel, 10) || 4;
     const { puzzle, solution, totalBlanks } = generatePuzzle(lvl);
-
     const validMinutes = Math.max(1, Math.min(60, parseInt(durationMinutes, 10) || 10));
     const totalSeconds = validMinutes * 60;
 
-    const botPlayer = { id: 'bot_ai', name: '🤖 AI Bot', score: 0, mistakes: 0, eliminated: false };
-    const humanPlayer = { id: socket.id, name: username || 'Player 1', score: 0, mistakes: 0, eliminated: false };
+    const humanPlayer = { 
+      id: socket.id, 
+      name: username || 'Player 1', 
+      score: 0, 
+      mistakes: 0, 
+      eliminated: false,
+      completed: false,
+      abandoned: false,
+      finishOrder: null
+    };
+
+    const botPlayer = { 
+      id: 'bot_ai', 
+      name: '🤖 AI Bot', 
+      score: 0, 
+      mistakes: 0, 
+      eliminated: false,
+      completed: false,
+      abandoned: false,
+      finishOrder: null
+    };
 
     rooms[roomCode] = {
       isBotGame: true,
@@ -538,7 +571,8 @@ io.on('connection', (socket) => {
       timeLeft: totalSeconds,
       timerInterval: null,
       botInterval: null,
-      started: true
+      started: true,
+      finishCounter: 0
     };
 
     socket.join(roomCode);
@@ -555,7 +589,7 @@ io.on('connection', (socket) => {
       rooms[roomCode].timeLeft -= 1;
       io.to(roomCode).emit('timerTick', { timeLeft: rooms[roomCode].timeLeft });
       if (rooms[roomCode].timeLeft <= 0) {
-        terminateMatch(roomCode, '⏰ Time ran out!', 'draw');
+        terminateMatch(roomCode, '⏰ Time ran out!');
       }
     }, 1000);
 
@@ -567,7 +601,7 @@ io.on('connection', (socket) => {
       if (!room || !room.started) return;
 
       const bot = room.players.find(p => p.id === 'bot_ai');
-      if (!bot || bot.eliminated) return;
+      if (!bot || bot.eliminated || bot.completed) return;
 
       if (Math.random() < 0.08) {
         bot.mistakes += 1;
@@ -578,13 +612,26 @@ io.on('connection', (socket) => {
             score: bot.score,
             mistakes: bot.mistakes,
             eliminated: true,
+            completed: false,
+            abandoned: false,
             totalBlanks: room.totalBlanks
           });
-          terminateMatch(roomCode, '🤖 AI Bot struck out! You win!', 'win');
+          io.to(roomCode).emit('playerAnnouncement', {
+            message: '🤖 AI Bot struck out (3 mistakes)!'
+          });
+          checkRoomCompletion(roomCode);
           return;
         }
       } else {
         bot.score += 1;
+      }
+
+      const botFinished = bot.score >= room.totalBlanks;
+      if (botFinished) {
+        bot.completed = true;
+        room.finishCounter += 1;
+        bot.finishOrder = room.finishCounter;
+        clearInterval(room.botInterval);
       }
 
       io.to(roomCode).emit('progressUpdate', {
@@ -592,11 +639,17 @@ io.on('connection', (socket) => {
         score: bot.score,
         mistakes: bot.mistakes,
         eliminated: bot.eliminated,
+        completed: bot.completed,
+        abandoned: false,
         totalBlanks: room.totalBlanks
       });
 
-      if (bot.score >= room.totalBlanks) {
-        terminateMatch(roomCode, '🤖 AI Bot finished the board first!', 'loss');
+      if (botFinished) {
+        // Announce AI completion without shutting down the human player's board
+        io.to(roomCode).emit('playerAnnouncement', {
+          message: '🤖 AI Bot finished the puzzle! Keep going to finish yours!'
+        });
+        checkRoomCompletion(roomCode);
       }
     }, baseInterval);
   });
@@ -607,14 +660,17 @@ io.on('connection', (socket) => {
 
     if (!room) return socket.emit('errorMessage', 'Room code not found.');
     if (room.started) return socket.emit('errorMessage', 'Match is already in progress.');
-    if (room.players.length >= room.maxPlayers) return socket.emit('errorMessage', `Room is full.`);
+    if (room.players.length >= room.maxPlayers) return socket.emit('errorMessage', 'Room is full.');
 
     room.players.push({ 
       id: socket.id, 
       name: username || `Player ${room.players.length + 1}`, 
       score: 0,
       mistakes: 0,
-      eliminated: false
+      eliminated: false,
+      completed: false,
+      abandoned: false,
+      finishOrder: null
     });
 
     socket.join(code);
@@ -635,7 +691,7 @@ io.on('connection', (socket) => {
       room.timerInterval = setInterval(() => {
         room.timeLeft -= 1;
         io.to(code).emit('timerTick', { timeLeft: room.timeLeft });
-        if (room.timeLeft <= 0) terminateMatch(code, '⏰ Time ran out!', 'draw');
+        if (room.timeLeft <= 0) terminateMatch(code, '⏰ Time ran out!');
       }, 1000);
     }
   });
@@ -646,24 +702,43 @@ io.on('connection', (socket) => {
     if (!room || !room.started) return;
 
     const player = room.players.find(p => p.id === socket.id);
-    if (!player || player.eliminated) return;
+    if (!player || player.eliminated || player.completed || player.abandoned) return;
 
     const isCorrect = room.solution[row][col] === parseInt(value, 10);
 
     if (isCorrect) {
       player.score += 1;
+      const justFinished = player.score >= room.totalBlanks;
+
+      if (justFinished) {
+        player.completed = true;
+        room.finishCounter += 1;
+        player.finishOrder = room.finishCounter;
+      }
+
       io.to(code).emit('progressUpdate', {
         playerId: socket.id,
         score: player.score,
         mistakes: player.mistakes,
         eliminated: player.eliminated,
+        completed: player.completed,
+        abandoned: player.abandoned,
         totalBlanks: room.totalBlanks
       });
 
       socket.emit('moveResult', { row, col, value, correct: true });
 
-      if (player.score >= room.totalBlanks) {
-        terminateMatch(code, `🎉 ${player.name} completed the board!`, 'win');
+      if (justFinished) {
+        socket.emit('playerPersonalFinished', {
+          rank: player.finishOrder,
+          leaderboard: getLeaderboard(room)
+        });
+
+        io.to(code).emit('playerAnnouncement', {
+          message: `🎉 ${player.name} finished the board (${player.finishOrder}${getOrdinal(player.finishOrder)} place)!`
+        });
+
+        checkRoomCompletion(code);
       }
     } else {
       player.mistakes += 1;
@@ -674,6 +749,8 @@ io.on('connection', (socket) => {
         score: player.score,
         mistakes: player.mistakes,
         eliminated: player.eliminated,
+        completed: player.completed,
+        abandoned: player.abandoned,
         totalBlanks: room.totalBlanks
       });
 
@@ -686,38 +763,46 @@ io.on('connection', (socket) => {
         eliminated: player.eliminated
       });
 
-      const alivePlayers = room.players.filter(p => !p.eliminated);
-      if (alivePlayers.length === 0) {
-        terminateMatch(code, '💀 All players lost their lives!', 'loss');
-      } else if (room.players.length > 1 && alivePlayers.length === 1) {
-        terminateMatch(code, `👑 ${alivePlayers[0].name} wins!`, 'win');
+      if (player.eliminated) {
+        io.to(code).emit('playerAnnouncement', {
+          message: `💀 ${player.name} struck out (3 mistakes)!`
+        });
+        checkRoomCompletion(code);
       }
     }
   });
 
+  // --- PLAYER RESIGNS / ABANDONS MATCH ---
   socket.on('quitGame', ({ roomCode }) => {
-    const code = roomCode.toUpperCase();
-    const room = rooms[code];
+    const code = roomCode ? roomCode.toUpperCase() : null;
+    const room = code ? rooms[code] : null;
     if (!room || !room.started) return;
 
     const player = room.players.find(p => p.id === socket.id);
-    if (!player || player.eliminated) return;
+    if (!player || player.abandoned) return;
 
+    player.abandoned = true;
     player.eliminated = true;
+
     io.to(code).emit('progressUpdate', {
       playerId: socket.id,
       score: player.score,
       mistakes: player.mistakes,
       eliminated: true,
+      completed: player.completed,
+      abandoned: true,
       totalBlanks: room.totalBlanks
     });
 
-    const alivePlayers = room.players.filter(p => !p.eliminated);
-    if (alivePlayers.length === 0) {
-      terminateMatch(code, `${player.name} resigned.`, 'resign');
-    } else if (room.players.length > 1 && alivePlayers.length === 1) {
-      terminateMatch(code, `🏳️ ${player.name} resigned. ${alivePlayers[0].name} wins!`, 'win');
-    }
+    io.to(code).emit('playerAnnouncement', {
+      message: `🏳️ ${player.name} abandoned the match.`
+    });
+
+    socket.emit('abandonAcknowledged', {
+      message: 'You abandoned the match. Ranked last.'
+    });
+
+    checkRoomCompletion(code);
   });
 
   socket.on('disconnect', () => {
@@ -734,20 +819,19 @@ io.on('connection', (socket) => {
       const index = room.players.findIndex(p => p.id === socket.id);
       if (index !== -1) {
         const leaving = room.players[index];
-        room.players.splice(index, 1);
+        leaving.abandoned = true;
+        leaving.eliminated = true;
+
         io.to(code).emit('playerDisconnected', { name: leaving.name });
         io.to(code).emit('playerListUpdate', room.players);
 
         if (room.started) {
-          const alivePlayers = room.players.filter(p => !p.eliminated);
-          if (alivePlayers.length === 0 || room.players.length === 0) {
-            terminateMatch(code, 'Match ended.', 'resign');
-          } else if (alivePlayers.length === 1) {
-            terminateMatch(code, `${alivePlayers[0].name} won!`, 'win');
-          }
+          checkRoomCompletion(code);
+        } else {
+          room.players.splice(index, 1);
         }
 
-        if (room.players.length === 0 || (room.isBotGame && room.players.length <= 1)) {
+        if (room.players.length === 0 || (room.isBotGame && !room.started)) {
           if (room.timerInterval) clearInterval(room.timerInterval);
           if (room.botInterval) clearInterval(room.botInterval);
           delete rooms[code];
