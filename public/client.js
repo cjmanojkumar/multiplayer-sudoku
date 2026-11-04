@@ -41,9 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Mystical Celtic/Fantasy Instrumental Harp & Ambient Strings
-  const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/11/06/audio_2c2d28f73b.mp3');
-  bgAudio.loop = true;
-  bgAudio.volume = 0.22;
+  const bgAudio = new Audio('/mystical.mp3');
+bgAudio.loop = true;
+bgAudio.volume = 0.22;
 
   let hasUserInteracted = false;
   function triggerAudioUnlock() {
